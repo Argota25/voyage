@@ -1,0 +1,14 @@
+# keys: never commit (the host reads them from environment variables)
+secrets.json
+.env
+
+# local-only working notes and tooling output
+docs/
+SECURITY.md
+graphify-out/
+data-backup-*/
+
+node_modules/
+__pycache__/
+*.pyc
+*.log

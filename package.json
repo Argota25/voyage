@@ -1,0 +1,13 @@
+{
+  "name": "voyage",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plan a trip by car, plane, or boat on one map.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

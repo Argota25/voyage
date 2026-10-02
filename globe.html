@@ -1,0 +1,2427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voyage: trip planning made easy</title>
+<meta name="description" content="Plan a trip you drive, fly, or boat. List your stops and Voyage maps the route and gathers stays, things to do, events, and videos for every stop along the way.">
+<link rel="stylesheet" href="vendor/leaflet-1.9.4.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap">
+<style>
+:root{
+  --bg:#000000; --bg-2:#0c0c0c; --panel:#141414; --secondary:#212121;
+  --rule:#232323; --rule-2:#2c2c2c; --text:#ffffff; --text-2:#cfd2d6;
+  --muted:#8a8f96; --gold:#3fe08c; --gold-deep:#d99e1c; --warn:#e9663b;
+  --heading:"Space Grotesk",system-ui,sans-serif; --body:"Manrope",system-ui,sans-serif;
+  --serif:"Fraunces",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace; --radius:3px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--body);overflow:hidden}
+::selection{background:var(--gold);color:#000}
+#globe{position:fixed;inset:0;z-index:0}
+#globe canvas.wgl{position:absolute;inset:0;width:100%;height:100%;display:block}
+#gpins{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+#gpins .gpin{position:absolute}
+.ui{position:fixed;z-index:10;pointer-events:none}
+.ui *{pointer-events:auto}
+/* brand bar */
+.brand{top:20px;left:24px}
+.brand .logo{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.34em;text-transform:uppercase;color:var(--text);text-shadow:0 1px 8px #000}
+.brand .logo span{color:var(--gold)}
+.brand .name{font-family:var(--heading);font-weight:800;font-size:21px;letter-spacing:-.02em;margin-top:4px}
+.brand .name i{font-family:var(--serif);font-style:italic;font-weight:500;color:var(--gold)}
+/* search */
+.search{top:20px;left:50%;transform:translateX(-50%);width:min(560px,calc(100vw - 48px));text-align:center}
+.search .field{display:flex;gap:0;background:rgba(10,10,10,.82);border:1px solid var(--rule-2);border-radius:var(--radius);backdrop-filter:blur(8px);box-shadow:0 18px 50px rgba(0,0,0,.7)}
+.search input{flex:1;background:none;border:0;color:var(--text);font-family:var(--body);font-size:16px;padding:14px 16px}
+.search input::placeholder{color:var(--muted)}
+.search input:focus{outline:none}
+.search .field:focus-within{border-color:var(--gold)}
+.search button{font-family:var(--heading);font-weight:700;font-size:13px;background:var(--gold);color:#000;border:0;border-radius:0 var(--radius) var(--radius) 0;padding:0 22px;cursor:pointer;transition:background .2s}
+.search .locbtn{flex:none;background:none;border:0;border-radius:0;color:var(--muted);cursor:pointer;padding:0 10px;display:flex;align-items:center;min-width:44px;min-height:44px;justify-content:center}
+.search .locbtn:hover{color:var(--gold);background:none}
+.search .locbtn svg{width:17px;height:17px}
+.search button:hover{background:var(--gold-deep)}
+.search .hint{margin-top:8px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-shadow:0 1px 6px #000}
+.search .hint.err{color:var(--warn)}
+/* panel */
+.panel{top:0;right:0;height:100vh;height:100dvh;width:min(380px,90vw);background:linear-gradient(270deg,rgba(8,8,8,.94),rgba(8,8,8,.82));border-left:1px solid var(--rule);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .5s cubic-bezier(.5,0,.2,1)}
+.panel.open{transform:translateX(0)}
+.panel .ph{padding:74px 24px 16px;border-bottom:1px solid var(--rule)}
+.panel .badge{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:4px 8px;border-radius:var(--radius);margin-bottom:12px}
+.badge.real{background:rgba(63,224,140,.14);color:var(--gold);border:1px solid rgba(63,224,140,.4)}
+.badge.sample{background:rgba(233,102,59,.14);color:var(--warn);border:1px solid rgba(233,102,59,.5)}
+.panel .ph h2{font-family:var(--heading);font-weight:800;font-size:23px;letter-spacing:-.02em;line-height:1.1}
+.panel .ph .meta{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:14px;margin-top:4px}
+.panel .ph .count{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-2);margin-top:10px}
+.panel .rows{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--rule-2) transparent}
+.row{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;padding:13px 24px;border-bottom:1px solid var(--rule);cursor:pointer;transition:background .18s}
+.row:hover{background:var(--panel)}
+.row.sel{background:var(--panel);box-shadow:inset 2px 0 0 var(--gold)}
+.row .rk{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--gold)}
+.row .nm{font-weight:600;font-size:13.5px;line-height:1.3}
+.row .ct{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:12px}
+.row .cr{font-family:var(--heading);font-weight:800;font-size:16px;text-align:right}
+.row .cr span{display:block;font-family:var(--mono);font-weight:500;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.panel .pf{padding:14px 24px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;color:var(--muted);line-height:1.5}
+.panel .pf a{color:var(--gold);font-weight:600;text-decoration:none}
+/* reset btn */
+.stchip{position:fixed;bottom:70px;left:24px;z-index:12;display:none;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:var(--muted);background:rgba(10,10,10,.72);border:1px solid var(--rule-2);border-radius:var(--radius);padding:8px 12px;backdrop-filter:blur(6px);max-width:min(320px,70vw);line-height:1.5}
+.stchip.show{display:block}
+.row:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+.card:focus-visible,.locbtn:focus-visible,.search button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.reset{pointer-events:auto;bottom:22px;left:24px;display:none;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--text-2);background:rgba(10,10,10,.7);border:1px solid var(--rule-2);border-radius:var(--radius);padding:10px 16px;cursor:pointer;backdrop-filter:blur(6px)}
+.reset:hover{color:var(--gold);border-color:var(--gold)}
+.reset.show{display:flex}
+/* footer disclaimer */
+.disc{bottom:18px;left:50%;transform:translateX(-50%);max-width:680px;width:calc(100vw - 48px);text-align:center;font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;color:var(--muted);text-shadow:0 1px 6px #000;line-height:1.6}
+.disc a{color:var(--gold);font-weight:600;text-decoration:none}
+.disc.hide{display:none}
+/* intent gate */
+.gate{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;padding:32px 24px calc(32px + env(safe-area-inset-bottom));background:radial-gradient(120% 90% at 50% 28%,rgba(0,0,0,.5),rgba(0,0,0,.88));transition:opacity .55s ease;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+/* overflow-x stays hidden: an auto x-scroll context lets the h1 size to
+   max-content instead of wrapping, clipping the headline on phones */
+/* scrollable centering: centered when it fits, scrolls from the top when it does not
+   (justify-content:center would clip the top card off small phones) */
+.gate>:first-child{margin-top:auto}
+.gate>:last-child{margin-bottom:auto}
+body.chosen .gate{opacity:0;pointer-events:none}
+.gate .glogo{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:var(--text);margin-bottom:20px;text-shadow:0 1px 8px #000}
+.gate .glogo span{color:var(--gold)}
+.gate h1{font-family:var(--heading);font-weight:800;font-size:clamp(26px,4vw,44px);letter-spacing:-.025em;text-align:center;line-height:1.08;max-width:760px}
+.gate h1 i{font-family:var(--serif);font-style:italic;font-weight:500;color:var(--gold)}
+.gate .lead{color:var(--text-2);font-size:16px;margin:14px 0 38px;text-align:center;max-width:540px}
+.cards{display:flex;gap:22px;flex-wrap:wrap;justify-content:center}
+.card{width:310px;max-width:88vw;background:linear-gradient(180deg,rgba(22,22,22,.92),rgba(9,9,9,.94));border:1px solid var(--rule-2);border-radius:6px;padding:30px 26px 26px;cursor:pointer;text-align:left;color:var(--text);transition:transform .25s,border-color .25s,box-shadow .25s}
+.card:hover{transform:translateY(-6px)}
+.card:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+.card .ico{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--gold);color:var(--gold);font-size:22px;margin-bottom:18px}
+.card h3{font-family:var(--heading);font-weight:800;font-size:21px;letter-spacing:-.01em;margin-bottom:8px}
+.card p{color:var(--text-2);font-size:13.5px;line-height:1.55}
+.card .go{margin-top:18px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.card.commute:hover{border-color:var(--gold);box-shadow:0 26px 60px -20px rgba(63,224,140,.5)}
+.card.accident:hover{border-color:var(--warn);box-shadow:0 26px 60px -20px rgba(233,102,59,.5)}
+.card.accident .ico{border-color:var(--warn);color:var(--warn)}
+.card.accident .go{color:var(--warn)}
+.card.roadtrip:hover{border-color:var(--gold);box-shadow:0 26px 60px -20px rgba(40,205,135,.5)}
+/* road-trip stops editor */
+.trip{display:none;margin-top:2px}
+.search.roadtrip .field{display:none}
+.search.roadtrip #ac{display:none!important}
+.search.roadtrip .trip{display:block}
+.search.roadtrip{width:min(520px,calc(100vw - 48px))}
+.stops{display:flex;flex-direction:column;gap:7px}
+.stoprow{display:flex;align-items:center;gap:9px;background:rgba(8,42,30,.72);border:1px solid var(--rule-2);border-radius:var(--radius);padding:3px 8px;backdrop-filter:blur(8px)}
+.sdot{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);flex:none}
+.stopin{flex:1;background:none;border:0;color:var(--text);font:16px/1.4 var(--body);padding:10px 2px}
+.stopin:focus{outline:none}
+.srem{background:none;border:0;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;padding:0 4px;flex:none}
+.srem:hover{color:var(--warn)}
+.triprow{display:flex;gap:8px;margin-top:8px}
+#addStop{flex:none;background:none;border:1px dashed var(--rule-2);color:var(--text-2);border-radius:var(--radius);padding:14px 16px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+#addStop:hover{border-color:var(--gold);color:var(--gold)}
+.btnp{flex:1;background:var(--gold);color:#04231a;border:0;border-radius:var(--radius);font-family:var(--heading);font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 0 22px rgba(63,224,140,.45)}
+.btnp:hover{background:var(--gold-deep)}
+/* mode search */
+.field.two{flex-wrap:wrap}
+.field.two input{flex:1 1 44%;min-width:0}
+/* single-input modes keep one row; only the commute from/to pair stacks */
+.search:not(.commute) .field.two{flex-wrap:nowrap}
+#q2{display:none;border-left:1px solid var(--rule-2)}
+.search.commute #q2{display:block}
+/* panel extra */
+.extra{padding:16px 24px;border-top:1px solid var(--rule);background:rgba(20,20,20,.45)}
+.extra .lbl{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.extra p{font-size:13px;color:var(--text-2);line-height:1.5}
+.extra .firm{font-family:var(--heading);font-weight:700;color:var(--text);font-size:14px;margin-bottom:4px}
+.extra .call{display:inline-block;margin-top:11px;font-family:var(--heading);font-weight:700;font-size:12.5px;background:var(--gold);color:#000;border-radius:var(--radius);padding:9px 15px;text-decoration:none}
+.extra .call:hover{background:var(--gold-deep)}
+.extra.avoid{background:rgba(233,102,59,.08);border-top:1px solid rgba(233,102,59,.3)}
+.extra.avoid .lbl{color:var(--warn)}
+/* street stage (Leaflet satellite) */
+#stage{position:fixed;inset:0;z-index:5;opacity:0;pointer-events:none;transition:opacity .8s ease}
+#stage.show{opacity:1;pointer-events:auto}
+#smap{position:absolute;inset:0;background:#DDE5E1}
+.leaflet-tile-pane{filter:brightness(.82) sepia(.6) hue-rotate(95deg) saturate(2.3) contrast(1.08)}
+#smapfx{position:absolute;inset:0;pointer-events:none;z-index:5;background:radial-gradient(120% 90% at 50% 50%,transparent 52%,rgba(2,9,20,.72) 100%),linear-gradient(rgba(150,245,190,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(150,245,190,.05) 1px,transparent 1px);background-size:100% 100%,44px 44px,44px 44px}
+#smapfx::before,#smapfx::after{content:"";position:absolute;width:26px;height:26px;border:2px solid var(--gold);opacity:.6}
+#smapfx::before{top:14px;left:14px;border-right:0;border-bottom:0}
+#smapfx::after{bottom:14px;right:14px;border-left:0;border-top:0}
+.leaflet-control-zoom{box-shadow:0 0 18px var(--accent-soft);border-radius:4px;overflow:hidden}
+.leaflet-bar a{background:rgba(10,52,38,.85)!important;color:var(--text)!important;border-bottom:1px solid var(--rule-2)!important}
+.leaflet-bar a:hover{background:rgba(22,84,56,.95)!important;color:var(--gold)!important}
+.leaflet-container{background:#DDE5E1;font-family:var(--body)}
+.leaflet-control-attribution{background:rgba(0,0,0,.6)!important;color:var(--muted)!important;font-size:9px}
+.leaflet-control-attribution a{color:var(--muted)!important}
+.leaflet-bar a{background:var(--panel)!important;color:var(--text)!important;border-color:var(--rule-2)!important}
+.leaflet-tooltip{background:#141414;border:1px solid #2c2c2c;color:#fff;font-family:var(--mono);font-size:10px}
+.leaflet-tooltip-top:before{border-top-color:#2c2c2c}
+.note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:8px}
+/* vehicle selector */
+.veh{display:flex;gap:6px;margin-top:6px}
+.veh button{flex:1;background:var(--panel);border:1px solid var(--rule-2);color:var(--text-2);border-radius:var(--radius);padding:9px 4px;cursor:pointer;font-family:var(--mono);font-size:8.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;transition:all .18s}
+.veh button .vi{font-size:17px;display:block;margin-bottom:3px}
+.veh button.on{border-color:var(--gold);color:var(--gold);background:rgba(63,224,140,.09)}
+/* route cards */
+.routes{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.route{display:flex;align-items:center;gap:11px;padding:11px 12px;border:1px solid var(--rule-2);border-radius:var(--radius);cursor:pointer;background:var(--panel);transition:border-color .18s}
+.route:hover,.route.on{border-color:var(--gold)}
+.route .badge2{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:2px;flex:none;background:var(--secondary);color:var(--muted)}
+.route.safe .badge2{background:rgba(120,200,120,.16);color:#7fd07f}
+.route .rmeta b{font-family:var(--heading);font-weight:800;font-size:15px;display:block;line-height:1}
+.route .rmeta span{font-family:var(--mono);font-size:8.5px;color:var(--muted);letter-spacing:.05em}
+.route .danger{margin-left:auto;text-align:right;font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.05em}
+.route .danger b{font-family:var(--heading);font-size:15px;display:block;color:var(--warn);line-height:1}
+/* attorney cards */
+.atts{display:flex;flex-direction:column;gap:9px;margin-top:10px}
+/* media links */
+.media{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
+.media a{display:flex;align-items:center;gap:6px;padding:9px 10px;border:1px solid var(--rule-2);border-radius:var(--radius);background:var(--panel);color:var(--text-2);font-family:var(--mono);font-size:10px;font-weight:600;text-decoration:none;transition:border-color .18s,color .18s}
+.media a:hover{border-color:var(--gold);color:var(--gold)}
+/* custom search autocomplete */
+#ac{position:absolute;top:52px;left:0;right:0;background:rgba(12,12,12,.97);border:1px solid var(--rule-2);border-radius:var(--radius);box-shadow:0 18px 50px rgba(0,0,0,.7);overflow:hidden;display:none;text-align:left;max-height:232px;overflow-y:auto;backdrop-filter:blur(8px)}
+#ac.show{display:block}
+#ac .opt{padding:11px 16px;font-size:14px;color:var(--text-2);cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--rule)}
+#ac .opt:last-child{border-bottom:0}
+#ac .opt:hover{background:var(--panel);color:var(--gold)}
+#ac .opt .ab{font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:auto;letter-spacing:.12em}
+/* switch intent */
+.switch{position:fixed;top:20px;left:24px;z-index:12;display:none;align-items:center;gap:9px;font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text-2);background:rgba(10,10,10,.72);border:1px solid var(--rule-2);border-radius:var(--radius);padding:13px 20px;cursor:pointer;backdrop-filter:blur(6px)}
+body.chosen .switch{display:flex}
+body.chosen .brand{display:none}
+/* pre-choice, the gate overlay carries its own logo and footer: the app's
+   fixed brand and disclaimer bleeding through the translucent gate read as
+   doubled, garbled text (worst on phones, where gate content scrolls over them) */
+body:not(.chosen) .brand,body:not(.chosen) .disc{visibility:hidden}
+.switch:hover{color:var(--gold);border-color:var(--gold)}
+/* public beta: feedback pill, top-right, every screen */
+.betafb{position:fixed;top:20px;right:24px;z-index:35;display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#E9EBED;background:rgba(10,18,14,.78);border:1px solid rgba(233,235,237,.22);border-radius:999px;padding:9px 14px;text-decoration:none;backdrop-filter:blur(6px)}
+.betafb b{color:#0b1f17;background:var(--accent-hi,#A2E494);border-radius:999px;padding:2px 7px;font-size:9px;letter-spacing:.1em}
+.betafb:hover,.betafb:focus-visible{color:#A2E494;border-color:#A2E494}
+/* planner view: the trip-type switch owns the top row, so the pill sits under it */
+body.chosen .betafb{top:76px}
+@media (max-width:640px){.betafb{top:10px;right:10px;padding:7px 10px;font-size:9px;gap:6px}.betafb .fbw{display:none}body.chosen .betafb{top:72px}}
+/* dark leaflet popup */
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#141414;color:#fff;border:1px solid #2c2c2c}
+.leaflet-popup-content{font-family:var(--body);font-size:12px;line-height:1.5;margin:12px 14px}
+.leaflet-popup-close-button{color:var(--muted)!important}
+/* social feed */
+.feed{margin-top:8px}
+.feed .demoTag{display:inline-block;margin-bottom:8px}
+.platrow{display:flex;gap:7px;margin-top:12px}
+.platrow a{flex:1;text-align:center;padding:9px 4px;border:1px solid var(--rule-2);border-radius:var(--radius);font-family:var(--mono);font-size:9.5px;font-weight:600;color:var(--text-2);text-decoration:none}
+.platrow a:hover{border-color:var(--gold);color:var(--gold)}
+/* ===================== FF7R sleek glass theme ===================== */
+:root{
+  --bg-2:#06223a;--panel:rgba(12,60,44,.52);--secondary:rgba(22,86,58,.6);
+  --rule:rgba(96,210,150,.22);--rule-2:rgba(150,245,190,.42);
+  --text:#eaf7ff;--text-2:#bcdcec;--muted:#7196ab;--gold-deep:#1f9a6a;
+}
+body{background:
+  radial-gradient(1300px 1000px at 74% 15%, rgba(46,200,120,.16), transparent 60%),
+  radial-gradient(1000px 820px at 18% 84%, rgba(80,180,120,.13), transparent 60%),
+  radial-gradient(1500px 1200px at 50% 44%, rgba(12,90,58,.4), transparent 66%),
+  radial-gradient(150% 130% at 50% 38%, #04231a 0%, #03140e 46%, #010805 100%);
+  background-attachment:fixed}
+#stars{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#stars div{position:absolute;top:0;left:0;border-radius:50%;background:#fff}
+#stars .tw{animation:twk 6s ease-in-out infinite}
+@keyframes twk{0%,100%{opacity:.5}50%{opacity:1}}
+/* intent tint classes live in the PREMIUM REDESIGN block below */
+
+/* ==================================================================
+   PREMIUM REDESIGN — expensive · elegant · futuristic
+   Appended last; refines the base system via token overrides + a few
+   targeted upgrades. Every class/ID the JS relies on is preserved.
+   ================================================================== */
+:root{
+  /* ALGAE PALETTE on the 60/30/10 rule.
+     60: deep algae-black grounds (body mesh below).
+     30: #13714C surface family (panels, secondary fills, deep accent pair).
+     10: #3AB67D accent, #A2E494 highlight tier, kept scarce.
+     Neutral: #E9EBED carries text and hairlines.
+     Every accent tone derives from --accent, so overriding just --accent
+     per intent recolors the whole app. */
+  --accent:#3AB67D; --accent-2:#13714C; --accent-hi:#A2E494;
+  --accent-soft:color-mix(in srgb, var(--accent) 16%, transparent);
+  --accent-dim:color-mix(in srgb, var(--accent) 9%, transparent);
+  --accent-line:color-mix(in srgb, var(--accent) 38%, transparent);
+  --gold:var(--accent); --gold-deep:var(--accent-2);
+  --ink:#E9EBED; --text:#E9EBED; --text-2:#c3cdc8; --muted:#7e8a84;
+  --rule:rgba(233,235,237,.10); --rule-2:rgba(233,235,237,.22);
+  --hair:rgba(233,235,237,.13); --hair-2:rgba(233,235,237,.32);
+  --panel:rgba(11,31,23,.58); --secondary:rgba(19,56,40,.5);
+  --lux:var(--accent-hi); --radius:8px;
+  --shadow:0 34px 90px -30px rgba(1,10,6,.88), 0 10px 30px -14px rgba(1,10,6,.62), 0 2px 8px -2px rgba(1,10,6,.5);
+}
+/* press an intent -> the entire app tints to that intent's color
+   (reds/blues stay semantic, recalibrated to sit with the algae ground;
+   the road-trip intent IS the brand accent) */
+/* travel modes all share the single algae accent (per-mode tinting retired) */
+/* Derived tokens must recompute on BODY: a custom property that contains
+   var() resolves where it is DEFINED, so :root-level derivations freeze
+   against html's accent and mode overrides on body never reach them
+   (ranks stayed brand-green in accident mode until this block). */
+body{
+  --accent-soft:color-mix(in srgb, var(--accent) 16%, transparent);
+  --accent-dim:color-mix(in srgb, var(--accent) 9%, transparent);
+  --accent-line:color-mix(in srgb, var(--accent) 38%, transparent);
+  --gold:var(--accent); --gold-deep:var(--accent-2);
+}
+/* layered mesh + fine film grain for an expensive matte surface */
+body{
+  background:
+    radial-gradient(1500px 1200px at 50% 42%, rgba(19,113,76,.14), transparent 64%),
+    radial-gradient(1100px 900px at 78% 10%, rgba(19,113,76,.10), transparent 58%),
+    radial-gradient(160% 140% at 50% 32%, #0a1611 0%, #050b08 46%, #020504 100%);
+  background-attachment:fixed;
+}
+/* full-screen aura — recolors with the chosen intent (white by default) */
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;transition:background .6s ease;
+  background:
+    radial-gradient(1150px 840px at 78% 12%, var(--accent-soft), transparent 56%),
+    radial-gradient(940px 760px at 16% 86%, var(--accent-dim), transparent 60%);
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* ---- brand ---- */
+.brand .name{font-weight:700;letter-spacing:-.03em;font-size:22px}
+.brand .logo{letter-spacing:.4em}
+/* ---- search field: glass pill with focus aura ---- */
+.search .field{
+  gap:5px;padding:5px 5px 5px 6px;border-radius:16px;
+  background:linear-gradient(180deg,rgba(16,30,26,.66),rgba(8,17,15,.8));
+  border:1px solid var(--hair);backdrop-filter:blur(20px) saturate(1.3);
+  box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.06);
+}
+.search input{font-family:var(--body);font-weight:500;font-size:16px;padding:15px 16px}
+.search .field:focus-within{
+  border-color:var(--hair-2);
+  box-shadow:var(--shadow),0 0 0 1px var(--accent-soft),0 0 44px -8px var(--accent-soft),inset 0 1px 0 rgba(255,255,255,.08);
+}
+#q2{border-left:1px solid var(--hair)}
+.search button,.btnp,.extra .call{
+  border-radius:12px;color:#03241a;
+  background:linear-gradient(180deg,var(--accent),var(--accent-2));
+  box-shadow:0 8px 24px -10px var(--accent-soft),inset 0 1px 0 rgba(255,255,255,.28);
+  transition:filter .2s,box-shadow .2s;
+}
+.search button{padding:0 24px;align-self:stretch}
+.search button:hover,.btnp:hover,.extra .call:hover{filter:brightness(1.07);box-shadow:0 12px 32px -8px var(--accent-soft),inset 0 1px 0 rgba(255,255,255,.34)}
+.search button:active,.btnp:active,.extra .call:active{transform:translateY(1px)}
+.search .hint{letter-spacing:.2em}
+/* the search/trip editor belongs to a chosen intent — hide it while the gate (main menu) is open */
+body:not(.chosen) .search{display:none}
+/* and hide it while results are on screen — Back to globe or Change intent brings it back */
+body.inarea .search{display:none}
+/* ---- side panel: deep glass with luminous edge ---- */
+.panel{
+  width:min(404px,92vw);
+  background:linear-gradient(255deg,rgba(9,17,15,.86),rgba(6,12,11,.74));
+  border-left:1px solid var(--hair);backdrop-filter:blur(26px) saturate(1.25);
+  box-shadow:-34px 0 90px -34px rgba(0,0,0,.82);
+}
+.panel::before{content:"";position:absolute;top:0;bottom:0;left:0;width:1px;background:linear-gradient(180deg,transparent,var(--accent),transparent);opacity:.55;pointer-events:none}
+.panel .ph{padding:72px 26px 18px}
+.panel .ph h2{font-weight:700;font-size:25px;letter-spacing:-.025em}
+.panel .ph .meta{font-family:var(--serif);font-style:italic;font-size:15px}
+.badge{border-radius:999px;padding:5px 11px;letter-spacing:.16em;backdrop-filter:blur(4px)}
+.badge.real{background:linear-gradient(180deg,var(--accent-soft),var(--accent-dim));color:var(--accent);border:1px solid var(--accent-line);box-shadow:0 0 22px -8px var(--accent-soft)}
+/* scroll container (was unstyled — panel now scrolls properly) */
+.panel .scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--hair-2) transparent}
+.panel .rows{flex:none;overflow:visible}
+.panel .scroll::-webkit-scrollbar{width:8px}
+.panel .scroll::-webkit-scrollbar-thumb{background:var(--hair-2);border-radius:8px}
+.panel .scroll::-webkit-scrollbar-track{background:transparent}
+.row{padding:15px 26px;transition:background .2s,box-shadow .2s}
+.row:hover{background:linear-gradient(90deg,var(--accent-dim),transparent)}
+.row.sel{background:linear-gradient(90deg,var(--accent-soft),transparent);box-shadow:inset 3px 0 0 var(--accent)}
+.row .cr{font-variant-numeric:tabular-nums}
+.panel .pf{font-size:10px;letter-spacing:.03em}
+/* ---- floating glass chips: reset / switch / disclaimer ---- */
+.reset,.switch{border-radius:999px;background:rgba(8,16,14,.6);border:1px solid var(--hair);backdrop-filter:blur(14px) saturate(1.2);box-shadow:0 10px 30px -14px rgba(0,0,0,.7)}
+.reset:hover,.switch:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 12px 32px -12px var(--accent-soft)}
+.disc{letter-spacing:.04em}
+/* ---- intent gate: hero glass tiles ---- */
+.gate{background:radial-gradient(130% 100% at 50% 18%,rgba(8,30,22,.44),rgba(2,7,5,.93))}
+.gate .glogo{letter-spacing:.4em}
+.gate h1{font-weight:700;font-size:clamp(30px,4.5vw,50px);letter-spacing:-.035em;animation:lift .8s cubic-bezier(.2,.8,.2,1) both}
+.gate .lead{font-size:16.5px;animation:lift .8s cubic-bezier(.2,.8,.2,1) .06s both}
+.cards{gap:24px}
+.card{
+  width:320px;padding:34px 30px 30px;border-radius:20px;position:relative;overflow:hidden;
+  background:linear-gradient(180deg,rgba(15,40,29,.74),rgba(6,16,12,.84));
+  border:1px solid var(--hair);backdrop-filter:blur(22px) saturate(1.2);
+  box-shadow:0 28px 80px -34px rgba(1,10,6,.85),inset 0 1px 0 rgba(233,235,237,.08);
+  transition:transform .45s cubic-bezier(.2,.8,.2,1),border-color .45s,box-shadow .45s,filter .45s;
+  animation:lift .7s cubic-bezier(.2,.8,.2,1) both;
+}
+.cards .card:nth-child(2){animation-delay:.08s}
+.cards .card:nth-child(3){animation-delay:.16s}
+.card::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .45s;background:radial-gradient(120% 65% at 50% -12%,var(--accent-soft),transparent 60%)}
+.card:hover{transform:translateY(-8px);filter:brightness(1.05)}
+.card:hover::before{opacity:1}
+.card .go{transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.card:hover .go{transform:translateX(4px)}
+.card h3{font-weight:700;font-size:21px;letter-spacing:-.02em}
+/* structural symmetry: equal heights, icons identical, CTAs pinned to the same baseline */
+.card{display:flex;flex-direction:column}
+.cards{align-items:stretch}
+.card .go{margin-top:auto;padding-top:20px}
+.card .ico{width:64px;height:64px;border:0;font-size:23px;flex:none;transition:transform .3s,box-shadow .3s}
+.card .ico svg{width:30px;height:30px;display:block;stroke-width:1.9;filter:drop-shadow(0 2px 4px rgba(8,42,28,.55))}
+.card.accident .ico{color:#e0574a;background:linear-gradient(180deg,rgba(224,87,74,.15),transparent);box-shadow:inset 0 0 0 1.5px rgba(224,87,74,.48),0 0 30px -8px rgba(224,87,74,.24)}
+.card.commute  .ico{color:#4e9fdd;background:linear-gradient(180deg,rgba(78,159,221,.15),transparent);box-shadow:inset 0 0 0 1.5px rgba(78,159,221,.48),0 0 30px -8px rgba(78,159,221,.24)}
+.card.roadtrip .ico{color:#3AB67D;background:linear-gradient(180deg,rgba(58,182,125,.15),transparent);box-shadow:inset 0 0 0 1.5px rgba(58,182,125,.48),0 0 30px -8px rgba(58,182,125,.24)}
+.card.accident::before{background:radial-gradient(120% 65% at 50% -12%,rgba(224,87,74,.16),transparent 60%)}
+.card.commute::before{background:radial-gradient(120% 65% at 50% -12%,rgba(78,159,221,.16),transparent 60%)}
+.card.roadtrip::before{background:radial-gradient(120% 65% at 50% -12%,rgba(58,182,125,.16),transparent 60%)}
+.card.accident:hover{border-color:rgba(224,87,74,.4);box-shadow:0 36px 90px -36px rgba(224,87,74,.38),0 28px 80px -34px rgba(1,10,6,.85)}
+.card.commute:hover{border-color:rgba(78,159,221,.4);box-shadow:0 36px 90px -36px rgba(78,159,221,.38),0 28px 80px -34px rgba(1,10,6,.85)}
+.card.roadtrip:hover{border-color:rgba(58,182,125,.4);box-shadow:0 36px 90px -36px rgba(58,182,125,.38),0 28px 80px -34px rgba(1,10,6,.85)}
+.card.accident .go{color:#e0574a}
+.card.commute .go{color:#4e9fdd}
+.card.roadtrip .go{color:#3AB67D}
+@keyframes lift{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+/* ---- detail components: unified soft glass ---- */
+.veh button,.route,.media a{border-radius:11px}
+.veh button:hover,.media a:hover,.platrow a:hover{border-color:var(--accent);color:var(--accent)}
+.route:hover,.route.on{box-shadow:0 0 26px -12px var(--accent-soft)}
+.extra .firm{font-weight:700}
+.note{letter-spacing:.01em}
+/* ---- loading indicator (was unstyled) ---- */
+.loading{position:fixed;left:50%;bottom:34px;transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--text-2);transition:opacity .6s}
+.loading::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 14px var(--accent);animation:pulse 1.2s ease-in-out infinite}
+.loading.gone{opacity:0;pointer-events:none}
+@keyframes pulse{0%,100%{opacity:.3;transform:scale(.75)}50%{opacity:1;transform:scale(1.2)}}
+/* ---- globe road labels (were unstyled) ---- */
+.gpin{transform:translate(-50%,-50%);display:flex;align-items:center;gap:7px;white-space:nowrap;cursor:pointer;pointer-events:auto}
+.gpin .gdot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft),0 0 14px var(--accent);flex:none}
+.gpin .glabel{font-family:var(--mono);font-size:10px;color:var(--ink);background:rgba(6,14,12,.78);border:1px solid var(--hair);border-radius:8px;padding:5px 9px;backdrop-filter:blur(8px);box-shadow:0 8px 22px -10px rgba(0,0,0,.8);opacity:.92;transition:opacity .2s,border-color .2s,transform .2s}
+.gpin:hover .glabel{opacity:1;border-color:var(--hair-2);transform:scale(1.04)}
+.gpin .glabel b{color:var(--accent);font-weight:700;margin-right:3px}
+.gpin .glabel i{font-style:normal;color:var(--warn);margin-left:5px;font-weight:700}
+.gpin.smp .gdot{background:var(--warn);box-shadow:0 0 0 3px rgba(233,102,59,.16),0 0 14px var(--warn)}
+.gpin.smp .glabel b{color:var(--warn)}
+/* ---- "which one did you mean?" chooser modal (was unstyled) ---- */
+.chooser{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(2,8,7,.62);backdrop-filter:blur(10px)}
+.chooser.show{display:flex}
+.chbox{width:min(440px,92vw);padding:26px;border-radius:18px;border:1px solid var(--hair-2);background:linear-gradient(180deg,rgba(18,32,28,.94),rgba(8,16,14,.96));box-shadow:var(--shadow)}
+.chh{font-family:var(--heading);font-weight:700;font-size:20px;letter-spacing:-.015em}
+.chsub{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:14px;margin:4px 0 16px}
+.chlist{display:flex;flex-direction:column;gap:8px}
+.chopt{display:flex;flex-direction:column;gap:2px;text-align:left;padding:13px 15px;border:1px solid var(--hair);border-radius:12px;background:rgba(8,16,14,.5);color:var(--text-2);cursor:pointer;font-family:var(--body);transition:border-color .2s,background .2s,color .2s}
+.chopt:hover{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
+.chopt b{font-family:var(--heading);font-weight:600;font-size:14px;color:var(--ink)}
+.chlist{max-height:56vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--hair-2) transparent}
+.chfilter{width:100%;background:rgba(8,16,14,.5);border:1px solid var(--hair);color:var(--text);border-radius:11px;padding:11px 13px;font:14px var(--body);margin-bottom:4px}
+.chfilter::placeholder{color:var(--muted)}
+.chfilter:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent-soft)}
+.chstates{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:42vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--hair-2) transparent;padding-right:2px}
+.chstate{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;padding:10px 12px;border:1px solid var(--hair);border-radius:10px;background:rgba(8,16,14,.5);color:var(--ink);cursor:pointer;font:600 12.5px var(--heading);transition:border-color .18s,background .18s}
+.chstate:hover{border-color:var(--accent);background:var(--accent-soft)}
+.chstate span{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.1em}
+.chnone{grid-column:1/-1;color:var(--muted);font-size:12.5px;padding:10px 2px}
+.chstate.chfree{border-style:dashed;color:var(--accent)}
+/* live social / booking cards + connection status */
+.svcard{display:flex;gap:11px;align-items:center;border:1px solid var(--hair);border-radius:12px;padding:8px;background:var(--panel);margin-top:9px;text-decoration:none;color:var(--text);transition:border-color .18s}
+a.svcard:hover{border-color:var(--accent)}
+.svthumb{width:74px;height:46px;border-radius:8px;flex:none;object-fit:cover;background:#0c1a16}
+.svthumb.svglyph{display:flex;align-items:center;justify-content:center;font-size:18px}
+.svb{min-width:0}
+.svt{font-weight:600;font-size:12.5px;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.svm{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:4px}
+.connectbox{border:1px solid var(--hair);border-radius:12px;background:var(--panel);padding:12px 13px;margin-top:8px}
+.conrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--hair);font-size:12.5px}
+.conrow:last-of-type{border-bottom:0}
+.conrow b{font-weight:600}
+.con-on{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--accent);border:1px solid var(--accent-line);border-radius:999px;padding:3px 9px}
+.con-off{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.03em}
+/* "What people are saying" expandable community search */
+.wps{margin-top:16px;border:1px solid var(--hair);border-radius:13px;background:var(--panel);overflow:hidden}
+.wps summary{list-style:none;cursor:pointer;padding:13px 15px;font-family:var(--heading);font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:9px;transition:background .18s}
+.wps summary::-webkit-details-marker{display:none}
+.wps summary::before{content:"▸";color:var(--accent);font-size:11px;transition:transform .2s}
+.wps[open] summary::before{transform:rotate(90deg)}
+.wps summary:hover{background:var(--accent-dim)}
+.wpshint{margin-left:auto;font-family:var(--mono);font-size:8.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.wps>div,.wps>p{padding:0 15px}
+.wps[open]{padding-bottom:12px}
+.wpsin{display:flex;gap:7px;margin:2px 0 10px}
+.wpsin input{flex:1;background:rgba(8,16,14,.5);border:1px solid var(--hair);color:var(--text);border-radius:10px;padding:11px 12px;font:13.5px var(--body)}
+.wpsin input::placeholder{color:var(--muted)}
+.wpsin input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent-soft)}
+.wpsin button{flex:none;background:linear-gradient(180deg,var(--accent),var(--accent-2));color:#03241a;border:0;border-radius:10px;padding:0 16px;font-family:var(--heading);font-weight:700;font-size:12px;cursor:pointer}
+.wpsin button:hover{filter:brightness(1.07)}
+/* in-app browse sliders (stays / do / events / videos) */
+.hslider{display:flex;gap:9px;overflow-x:auto;padding:4px 0 8px;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:var(--hair-2) transparent}
+.hslide{flex:none;width:148px;scroll-snap-align:start;border:1px solid var(--hair);border-radius:12px;background:rgba(8,16,14,.5);padding:9px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--text);transition:border-color .18s;cursor:pointer;position:relative}
+.hslide:hover{border-color:var(--accent)}
+.hsimg{display:block;width:100%;height:74px;border-radius:8px;background:#0c1a16 center/cover no-repeat;flex:none}
+.hsimg.hsglyph,.hsglyph{display:flex;align-items:center;justify-content:center;font-size:22px}
+.hst{font-weight:600;font-size:11.5px;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.hsm{font-family:var(--mono);font-size:8.5px;color:var(--muted);margin-top:auto}
+.hsplay{position:absolute;top:31px;left:50%;transform:translateX(-50%);width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.55);border:1.5px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;pointer-events:none}
+.hsmore{align-items:center;justify-content:center;text-align:center;color:var(--accent);font-weight:700;font-size:12px;background:var(--accent-dim);border-style:dashed;width:110px}
+.hsmore .hsarr{font-size:15px}
+.hsinfo{width:188px;font-size:10.5px;color:var(--text-2);line-height:1.5;justify-content:center;cursor:default}
+.hsnote{font-family:var(--mono);font-size:9px;color:var(--muted);padding:8px 2px}
+.hsvidplay{width:238px;padding:0;overflow:hidden;border-color:var(--accent-line)}
+.hsvidplay iframe{width:238px;height:134px;border:0;display:block}
+.chx{margin-top:14px;width:100%;background:none;border:1px solid var(--hair);color:var(--muted);border-radius:12px;padding:11px;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:border-color .2s,color .2s}
+.chx:hover{border-color:var(--hair-2);color:var(--text-2)}
+/* ---- accent-following detail bits + neutral street stage ---- */
+.veh button.on{background:var(--accent-dim)}
+.att.real{border-color:var(--accent-line)}
+.leaflet-tile-pane{filter:brightness(.72) saturate(.55) contrast(1.06)}
+/* light ground while tiles load: slow tiles degrade gracefully on the light theme */
+#smap,.leaflet-container{background:#DDE5E1}
+#smapfx{background:radial-gradient(120% 90% at 50% 50%,transparent 52%,rgba(4,8,14,.74) 100%),linear-gradient(rgba(222,238,233,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(222,238,233,.05) 1px,transparent 1px);background-size:100% 100%,44px 44px,44px 44px}
+.leaflet-bar a{background:rgba(10,14,18,.85)!important}
+.leaflet-bar a:hover{color:var(--accent)!important}
+/* methodology + honest "coming soon" surfaces */
+.methodlink{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-line);cursor:pointer;white-space:nowrap}
+.methodlink:hover{border-bottom-color:var(--accent)}
+.methodbody{display:flex;flex-direction:column;gap:10px;max-height:58vh;overflow-y:auto;margin:2px 0 6px;scrollbar-width:thin;scrollbar-color:var(--hair-2) transparent}
+.methodbody p{font-size:13.5px;line-height:1.6;color:var(--text-2)}
+.methodbody b{color:var(--ink);font-weight:600}
+.comingsoon{font-size:13px;color:var(--text-2);line-height:1.55;background:var(--accent-dim);border:1px solid var(--hair);border-radius:10px;padding:13px 15px;margin-top:8px}
+/* road-trip preferences + recommended stops */
+.prefs{display:flex;flex-direction:column;gap:8px;margin-top:9px}
+.prefrow{display:flex;align-items:flex-start;gap:10px}
+.preflbl{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);width:46px;flex:none;padding-top:15px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;flex:1}
+.chip{background:rgba(8,16,14,.5);border:1px solid var(--hair);color:var(--text-2);border-radius:999px;padding:12px 12px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:border-color .18s,color .18s,background .18s}
+.chip:hover{border-color:var(--accent)}
+.chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.stopcard{border:1px solid var(--hair);border-radius:12px;padding:12px 13px;margin-top:9px;background:var(--panel)}
+.stopcard .sh{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.stopcard .sn{font-family:var(--heading);font-weight:700;font-size:14px}
+.stopcard .sm{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.04em;text-align:right}
+.stopcard .slbl{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:9px 0 5px}
+.tlinks{display:flex;flex-wrap:wrap;gap:6px}
+.tlink{flex:1 1 auto;text-align:center;padding:9px 8px;border:1px solid var(--hair);border-radius:9px;background:rgba(8,16,14,.4);color:var(--text-2);font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.02em;text-decoration:none;transition:border-color .18s,color .18s}
+.tlink:hover{border-color:var(--accent);color:var(--accent)}
+.tlink.pri{border-color:var(--accent-line);color:var(--accent);background:var(--accent-dim)}
+/* Snapchat-style story bubbles: real sights on the map + panel tray */
+.snapwrap{background:none!important;border:0!important}
+.snap{width:34px;height:34px;border-radius:50%;position:relative;cursor:pointer;padding:3px;background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 0 0 2px rgba(0,0,0,.55),0 6px 18px -6px rgba(0,0,0,.85),0 0 16px -2px var(--accent-soft);transition:transform .15s}
+.snap:hover{transform:scale(1.12)}
+.snap .snapimg{display:block;width:100%;height:100%;border-radius:50%;background:#0c1a16 center/cover no-repeat;border:2px solid #06090c}
+.snap .snapplay{position:absolute;right:-3px;bottom:-3px;width:15px;height:15px;border-radius:50%;background:#06090c;border:1px solid var(--accent);color:var(--accent);font-size:7px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.6)}
+.stories{display:flex;gap:11px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:thin;scrollbar-color:var(--hair-2) transparent}
+.story{flex:none;width:60px;text-align:center;text-decoration:none;color:var(--text-2)}
+.story .snap.mini{width:54px;height:54px;margin:0 auto}
+.story .cap{display:block;margin-top:5px;font-size:9.5px;line-height:1.25;color:var(--text-2);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.story:hover .cap{color:var(--accent)}
+/* ---- DEMO preview cards (panel) + hover-expand markers (map) ---- */
+.dmtag2{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.1em;color:#ffd16b;border:1px solid rgba(255,209,107,.4);border-radius:5px;padding:2px 6px;margin-left:7px;vertical-align:middle}
+.dmgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.dmlcard{border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:var(--panel)}
+.dmlimg{height:80px;position:relative}
+.dmltype{position:absolute;top:7px;left:7px;background:rgba(6,10,9,.8);border:1px solid var(--hair-2);border-radius:999px;padding:2px 7px;font-family:var(--mono);font-size:7.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.dmlbadge{position:absolute;bottom:7px;left:7px;background:#fff;color:#111;border-radius:999px;padding:2px 7px;font-size:8px;font-weight:700}
+.dmlb{padding:9px 10px}
+.dmln{font-family:var(--heading);font-weight:700;font-size:12px;line-height:1.25}
+.dmlr{font-family:var(--mono);font-size:9px;color:var(--text-2);margin-top:4px}
+.dmlr .dmst{color:#ffd16b}
+.dmlp{font-family:var(--heading);font-weight:800;font-size:13px;margin-top:6px}
+.dmlp span{font-family:var(--body);font-weight:500;font-size:9px;color:var(--muted)}
+.dmscard{display:flex;gap:10px;align-items:center;border:1px solid var(--hair);border-radius:12px;padding:8px;background:var(--panel);margin-top:9px}
+.dmsthumb{width:44px;height:54px;border-radius:9px;flex:none;position:relative;background-size:cover;background-position:center}
+.dmsthumb .dmspl{position:absolute;top:4px;left:4px;font-size:11px;filter:drop-shadow(0 1px 2px #000)}
+.dmsn{font-weight:600;font-size:12.5px;line-height:1.3}
+.dmsr{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:4px}
+.dmsr .dmv{color:#ff7a6b}
+.leaflet-marker-icon:hover{z-index:10000!important}
+.dmk{position:relative}
+.dmk .dmbub{display:block;width:26px;height:26px;border-radius:50%;padding:2px;cursor:pointer;position:relative;background:conic-gradient(from 0deg,#ff5a4d,#ffd16b,#3aa0ff,#46e8a4,#ff5a4d);box-shadow:0 2px 9px rgba(0,0,0,.6);transition:transform .15s}
+.dmk .dmbub-i{display:block;width:100%;height:100%;border-radius:50%;border:1.5px solid #06090c;background-size:cover;background-position:center}
+.dmk .dmbub-g{position:absolute;right:-3px;bottom:-3px;width:14px;height:14px;border-radius:50%;background:#06090c;font-size:7px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.3)}
+.dmk .dmpill{display:flex;align-items:center;gap:5px;width:max-content;background:#fff;color:#0c1210;border-radius:999px;padding:3px 9px;cursor:pointer;font-family:var(--heading);font-weight:800;font-size:11px;box-shadow:0 3px 11px -2px rgba(0,0,0,.65);transition:transform .15s}
+.dmk .dmpill-dot{width:6px;height:6px;border-radius:50%;flex:none}
+.dmk:hover .dmbub,.dmk:hover .dmpill{transform:scale(1.08)}
+.dmk .dmcard{position:absolute;left:50%;bottom:100%;transform:translateX(-50%) scale(.8);transform-origin:bottom center;width:184px;opacity:0;pointer-events:none;transition:opacity .16s ease,transform .22s cubic-bezier(.2,.9,.3,1.25);background:#0b1513;border:1px solid var(--hair-2);border-radius:14px;overflow:hidden;box-shadow:0 24px 60px -16px rgba(0,0,0,.9)}
+.dmk:hover .dmcard{opacity:1;transform:translateX(-50%) scale(1);pointer-events:auto}
+.dmk .dmci{height:92px;position:relative;background-size:cover;background-position:center}
+.dmk .dmtag{position:absolute;top:8px;left:8px;background:rgba(6,10,9,.82);border:1px solid var(--hair-2);border-radius:999px;padding:3px 8px;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink)}
+.dmk .dmviews{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.6);border-radius:999px;padding:2px 8px;font-family:var(--mono);font-size:9px;font-weight:700;color:#fff}
+.dmk .dmbadge{position:absolute;bottom:8px;left:8px;background:#fff;color:#111;border-radius:999px;padding:2px 8px;font-size:9px;font-weight:700}
+.dmk .dmdemo{position:absolute;top:8px;right:8px;background:rgba(255,209,107,.92);color:#3a2a00;border-radius:999px;padding:2px 7px;font-family:var(--mono);font-size:7.5px;font-weight:700;letter-spacing:.08em}
+.dmk .dmb{padding:10px 12px}
+.dmk .dmt{font-family:var(--heading);font-weight:700;font-size:13px;line-height:1.3;color:var(--ink)}
+.dmk .dmm{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:6px}
+.dmk .dmm .dmst{color:#ffd16b}
+.dmk .dmp{font-family:var(--heading);font-weight:800;font-size:14px;color:var(--ink);margin-top:7px}
+.dmk .dmp span{font-family:var(--body);font-weight:500;font-size:10px;color:var(--muted)}
+.dmt-airbnb{background:#ff5a6e}.dmt-hotel{background:#3aa0ff}.dmt-motel{background:#ffb13a}
+.dmk .dmpin{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;border:2px solid #06090c;box-shadow:0 2px 9px rgba(0,0,0,.6);transition:transform .15s}
+.dmk .dmpin.off{background:#46e8a4;color:#04231a}
+.dmk .dmpin.ev{background:#3aa0ff;color:#fff}
+.dmk:hover .dmpin{transform:scale(1.1)}
+.dmsthumb.dmglyph{display:flex;align-items:center;justify-content:center;font-size:18px}
+@media (prefers-reduced-motion:reduce){.card,.gate h1,.gate .lead,#stars .tw,.loading::before{animation:none}}
+/* phones: the Change-intent pill and the search bar both start at top:20px
+   and collide below ~700px; drop the search bar under the pill */
+/* ================================================================
+   ALGAE LIGHT INVERSION (owner 0822): the split flips.
+   60 = #E9EBED light ground. 30 = #13714C deep structure: the ink,
+   the deep-green card material, the dark globe riding the light
+   field. 10 = #3AB67D accent; on deep grounds the #A2E494 highlight
+   tier carries accent duty. Appended last: tokens first, then every
+   hardcoded dark surface.
+   ================================================================ */
+:root{
+  --ink:#123626; --text:#123626; --text-2:#3e5f4f; --muted:#5f7268;
+  --rule:rgba(19,113,76,.15); --rule-2:rgba(19,113,76,.30);
+  --hair:rgba(19,113,76,.16); --hair-2:rgba(19,113,76,.34);
+  --panel:rgba(255,255,255,.66); --secondary:rgba(19,113,76,.07);
+  --shadow:0 30px 70px -30px rgba(16,58,40,.28), 0 10px 26px -12px rgba(16,58,40,.16), 0 2px 8px -2px rgba(16,58,40,.12);
+}
+body{background:
+  radial-gradient(1200px 900px at 76% 8%, rgba(162,228,148,.24), transparent 58%),
+  radial-gradient(1000px 800px at 14% 90%, rgba(58,182,125,.12), transparent 60%),
+  linear-gradient(180deg,#EEF0F1 0%, #E9EBED 55%, #E2E6E5 100%);
+  background-attachment:fixed}
+body::after{opacity:.035}
+#stars{display:none}
+.brand .logo,.disc,.gate .glogo{text-shadow:none}
+/* the hint rides over the dark globe: type on a mixed ground needs a
+   backlight halo in the ground color */
+.search .hint{color:#123626;text-shadow:0 1px 6px rgba(233,235,237,.95),0 0 16px rgba(233,235,237,.8)}
+.search .field{
+  background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,255,255,.66));
+  border:1px solid var(--hair);
+  box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.85);
+}
+.panel{
+  background:linear-gradient(255deg,rgba(255,255,255,.92),rgba(244,247,246,.8));
+  border-left:1px solid var(--hair);
+  box-shadow:-34px 0 90px -34px rgba(16,58,40,.26);
+}
+.reset,.switch{background:rgba(255,255,255,.94);color:#123626;border-color:rgba(19,113,76,.3);box-shadow:0 14px 34px -14px rgba(16,58,40,.42)}
+.stchip{background:rgba(255,255,255,.8)}
+/* floating re-center control: one tap puts the route back in frame */
+.recenter{position:fixed;right:16px;bottom:180px;z-index:12;width:58px;height:58px;border-radius:50%;background:#13714C;border:2px solid rgba(255,255,255,.9);color:#FFFFFF;display:none;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 16px 36px -12px rgba(12,54,36,.6)}
+.recenter svg{width:26px;height:26px}
+.recenter:hover{background:#1E8A5F;box-shadow:0 18px 40px -12px rgba(12,54,36,.7)}
+.recenter:active{transform:translateY(1px)}
+body.inarea .recenter.show{display:flex}
+@media (min-width:701px){
+  .panel{right:auto;left:0;border-left:0;border-right:1px solid var(--hair);transform:translateX(-100%);
+    width:clamp(380px,34vw,500px);
+    box-shadow:6px 0 20px -16px rgba(12,54,36,.3),34px 0 90px -34px rgba(12,54,36,.32)}
+  .panel.open{transform:translateX(0)}
+  .panel::before{left:auto;right:0}
+  .switch{left:auto;right:24px}
+  .reset{left:calc(clamp(380px,34vw,500px) + 26px)}
+  .recenter{right:26px;bottom:26px}
+  .leaflet-bottom.leaflet-right .leaflet-control-zoom{margin-bottom:84px}
+}
+/* the globe shows CLEAR through the gate: no veil over the sphere, the
+   wash only gathers at the edges where the page fades out */
+.gate{background:radial-gradient(120% 105% at 50% 40%,rgba(238,240,241,0) 0%,rgba(238,240,241,.06) 45%,rgba(233,235,237,.55) 78%,rgba(233,235,237,.9) 100%)}
+/* the trio wears the deep material: 30 lives here */
+.card{
+  background:linear-gradient(180deg,rgba(20,88,61,.97),rgba(9,48,32,.98));
+  border:1px solid rgba(233,235,237,.14);
+  box-shadow:0 30px 70px -30px rgba(12,54,36,.5),inset 0 1px 0 rgba(233,235,237,.2);
+}
+.card h3{color:#F2F5F3}
+.card p{color:rgba(233,235,237,.8)}
+/* ALGAE-ONLY LAW (owner 0822): the four palette colors are the entire
+   system. No semantic reds or blues; every intent speaks the same
+   language, and #A2E494 carries accent duty on the deep material. */
+:root{--warn:#13714C}
+body.m-accident,body.m-commute,body.m-roadtrip{--accent:#3AB67D;--accent-2:#13714C}
+/* On light grounds the mid green fails as TEXT (about 2.2:1); text-accent
+   duty belongs to the deep tier while fills and buttons keep the mid. */
+body{--gold:var(--accent-2)}
+.badge.real{color:var(--accent-2)}
+.methodlink{color:var(--accent-2)}
+.gpin .glabel b{color:var(--accent-2)}
+.gate h1 i{color:#13714C}
+.gate .glogo span{color:#A2E494;text-shadow:0 1px 2px rgba(6,18,30,.9),0 2px 12px rgba(6,18,30,.4)}
+.card.accident .ico,.card.commute .ico,.card.roadtrip .ico,
+.card.accident .go,.card.commute .go,.card.roadtrip .go{color:#A2E494}
+.card.accident .ico,.card.commute .ico,.card.roadtrip .ico{box-shadow:inset 0 0 0 1.5px rgba(162,228,148,.55),0 0 30px -8px rgba(162,228,148,.3);background:linear-gradient(180deg,rgba(162,228,148,.14),transparent)}
+.card::before,.card.accident::before,.card.commute::before,.card.roadtrip::before{background:radial-gradient(120% 65% at 50% -12%,rgba(162,228,148,.16),transparent 60%)}
+.card:hover,.card.accident:hover,.card.commute:hover,.card.roadtrip:hover{border-color:rgba(162,228,148,.42);box-shadow:0 36px 90px -36px rgba(19,113,76,.5),0 30px 70px -30px rgba(12,54,36,.5)}
+.search button,.btnp,.extra .call{color:#0C2F20}
+.gpin.smp .gdot{background:#13714C;box-shadow:0 0 0 3px rgba(19,113,76,.16),0 0 14px #13714C}
+.gpin .glabel i{color:#13714C}
+.chooser{background:rgba(233,235,237,.6)}
+.chbox{background:linear-gradient(180deg,rgba(255,255,255,.97),rgba(246,249,248,.98));border:1px solid var(--hair-2)}
+.chopt,.chfilter,.chstate,.wpsin input,.hslide,.chip{background:rgba(255,255,255,.62)}
+.gpin .glabel{background:rgba(255,255,255,.88);box-shadow:0 8px 22px -10px rgba(16,58,40,.3)}
+.leaflet-tooltip{background:#ffffff;border:1px solid rgba(19,113,76,.25);color:#123626}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#ffffff;color:#123626;border:1px solid rgba(19,113,76,.25)}
+.leaflet-control-attribution{background:rgba(255,255,255,.7)!important;color:var(--muted)!important}
+.leaflet-bar a{background:rgba(255,255,255,.92)!important;color:#123626!important;border-bottom:1px solid var(--rule)!important}
+.leaflet-bar a:hover{background:#ffffff!important;color:var(--accent-2)!important}
+/* water-ink: a color matrix keyed on blue-minus-red sinks the water to
+   deep palette green while cream land and neutral roads/labels hold */
+.leaflet-tile-pane{filter:url(#waterink)}
+
+/* ================================================================
+   PREMIUM GLASS PASS (owner 0822b): no italics anywhere, larger
+   display type, Sora display face, frost-glass cards (clear at the
+   top, ink gathering at the floor so copy stays AA), tone-layered
+   shadows inside the palette, refined lockup.
+   ================================================================ */
+:root{
+  --heading:"Sora",system-ui,sans-serif;
+  --serif:"Sora",system-ui,sans-serif;
+  /* interim tones of the four palette colors, for depth layering */
+  --deep-2:#0C2F20; --mid-2:#1E8A5F; --tint:#D8E9DC;
+}
+i,em,.panel .ph .meta,.row .ct{font-style:normal}
+.panel .ph .meta,.row .ct{font-family:var(--body)}
+.gate h1{font-size:clamp(40px,5.2vw,58px);letter-spacing:-.04em;font-weight:800;text-wrap:balance;color:#F6F8F7;text-shadow:0 1px 10px rgba(8,42,28,.65),0 0 26px rgba(8,42,28,.4)}
+.gate h1 i{font-style:normal;font-weight:800;color:#A2E494}
+.gate .lead{font-size:clamp(19px,5vw,22px);color:#EDF2EF;text-shadow:0 1px 8px rgba(8,42,28,.6)}
+.card h3{font-size:24px;letter-spacing:-.02em}
+.card p{font-size:15px;line-height:1.6}
+.panel .ph h2{font-size:28px}
+.row .nm{font-size:15px}
+.row .ct{font-size:12.5px}
+/* frost glass trio: see-through up top, ink where the copy rides */
+.card{
+  border-radius:22px;
+  background:linear-gradient(180deg,rgba(19,113,76,.28) 0%,rgba(14,74,50,.55) 40%,rgba(8,42,28,.90) 100%);
+  border:1px solid rgba(233,235,237,.36);
+  backdrop-filter:blur(26px) saturate(1.35);
+  box-shadow:
+    0 2px 6px -2px rgba(12,54,36,.28),
+    0 14px 34px -18px rgba(12,54,36,.42),
+    0 44px 96px -40px rgba(12,54,36,.55),
+    inset 0 1px 0 rgba(233,235,237,.42),
+    inset 0 0 0 1px rgba(162,228,148,.10);
+}
+.card h3{color:#F4F7F5}
+.card p{color:rgba(238,242,240,.9)}
+.card:hover{border-color:rgba(162,228,148,.5);box-shadow:
+  0 3px 8px -2px rgba(12,54,36,.3),
+  0 20px 44px -18px rgba(12,54,36,.5),
+  0 56px 110px -40px rgba(30,138,95,.5),
+  inset 0 1px 0 rgba(233,235,237,.5),
+  inset 0 0 0 1px rgba(162,228,148,.16)}
+/* premium panel glass: layered light frost with a toned floor */
+.panel{
+  background:linear-gradient(255deg,rgba(255,255,255,.94) 0%,rgba(246,250,248,.86) 55%,rgba(216,233,220,.78) 100%);
+  backdrop-filter:blur(30px) saturate(1.2);
+  box-shadow:-6px 0 20px -16px rgba(12,54,36,.3),-34px 0 90px -34px rgba(12,54,36,.32);
+}
+.search .field{
+  background:linear-gradient(180deg,rgba(255,255,255,.92) 0%,rgba(246,250,248,.72) 100%);
+  box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px rgba(19,113,76,.06);
+}
+/* lockup: hairline flanks + accent point, tracking widened */
+.gate .glogo{font-size:clamp(15px,3.8vw,19px);letter-spacing:.4em;display:flex;align-items:center;gap:14px;color:#FFFFFF;text-shadow:0 1px 2px rgba(6,18,30,.9),0 2px 12px rgba(6,18,30,.35)}
+.gate .glogo span{color:#A2E494;text-shadow:0 1px 2px rgba(6,18,30,.9),0 2px 12px rgba(6,18,30,.4)}
+.gate .glogo::before,.gate .glogo::after{content:"";height:1px;width:46px;flex:none}
+.gate .glogo::before{background:linear-gradient(90deg,transparent,rgba(246,248,247,.75))}
+.gate .glogo::after{background:linear-gradient(270deg,transparent,rgba(246,248,247,.75))}
+.brand .logo{letter-spacing:.44em}
+.brand .name{font-weight:800;letter-spacing:-.035em;font-size:23px}
+
+/* ---- NEAR-CLEAR GLASS (owner 0822c): the background reads through.
+   Fill drops to a whisper, so type flips to deep ink with light
+   backlight halos; edges and bevels carry the "glass", not the fill. */
+.card{
+  background:linear-gradient(180deg,rgba(19,113,76,.20) 0%,rgba(16,86,58,.38) 45%,rgba(10,53,34,.62) 100%);
+  border:1px solid rgba(255,255,255,.5);
+  backdrop-filter:blur(13px) saturate(1.25);
+  box-shadow:
+    0 2px 6px -2px rgba(12,54,36,.18),
+    0 16px 38px -20px rgba(12,54,36,.28),
+    0 46px 100px -44px rgba(12,54,36,.34),
+    inset 0 1px 0 rgba(255,255,255,.6),
+    inset 0 0 0 1px rgba(162,228,148,.10);
+}
+.card h3{color:#F6F8F7;text-shadow:0 1px 8px rgba(8,42,28,.6),0 0 18px rgba(8,42,28,.35)}
+.card p{color:rgba(240,244,242,.95);text-shadow:0 1px 6px rgba(8,42,28,.55),0 0 14px rgba(8,42,28,.3)}
+.card.accident .ico,.card.commute .ico,.card.roadtrip .ico{
+  color:#CFF0D3;
+  background:radial-gradient(120% 120% at 30% 22%,rgba(162,228,148,.28),rgba(19,113,76,.32) 46%,rgba(12,47,32,.6) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(162,228,148,.7),
+    inset 0 14px 18px -12px rgba(255,255,255,.45),
+    0 0 0 5px rgba(162,228,148,.12),
+    0 14px 30px -14px rgba(8,42,28,.55),
+    0 0 34px -10px rgba(162,228,148,.38);
+}
+.card:hover .ico{transform:translateY(-2px);box-shadow:
+    inset 0 0 0 1px rgba(162,228,148,.9),
+    inset 0 14px 18px -12px rgba(255,255,255,.5),
+    0 0 0 6px rgba(162,228,148,.16),
+    0 18px 34px -14px rgba(8,42,28,.6),
+    0 0 40px -8px rgba(162,228,148,.5)}
+.card.accident .go,.card.commute .go,.card.roadtrip .go{color:#E9EBED;text-shadow:0 1px 6px rgba(8,42,28,.55)}
+.card:hover .go{color:#A2E494}
+.card:hover{border-color:rgba(19,113,76,.45);box-shadow:
+  0 3px 8px -2px rgba(12,54,36,.2),
+  0 22px 48px -20px rgba(12,54,36,.34),
+  0 58px 116px -44px rgba(30,138,95,.4),
+  inset 0 1px 0 rgba(255,255,255,.85),
+  inset 0 0 0 1px rgba(19,113,76,.14)}
+.card::before,.card.accident::before,.card.commute::before,.card.roadtrip::before{background:radial-gradient(120% 65% at 50% -12%,rgba(255,255,255,.5),transparent 60%)}
+/* desktop: the outer cards hang half off the sphere onto the white page,
+   where near-clear glass washes out. Raise the glass's own darkness floor
+   so type and icon rings hold on ANY ground; still translucent, the globe
+   texture still reads through. */
+@media (min-width:701px){
+  .card{background:linear-gradient(180deg,rgba(13,62,42,.58) 0%,rgba(11,55,36,.66) 45%,rgba(8,42,28,.8) 100%)}
+}
+/* panel + sheet: near-clear light frost, ink type already holds */
+.panel{
+  background:linear-gradient(255deg,rgba(236,246,239,.56) 0%,rgba(222,239,228,.48) 55%,rgba(203,231,211,.44) 100%);
+  backdrop-filter:blur(22px) saturate(1.25);
+  border-left:1px solid rgba(255,255,255,.6);
+}
+.search .field{background:linear-gradient(180deg,rgba(255,255,255,.6) 0%,rgba(246,250,248,.42) 100%)}
+
+/* ---- CREAM CONTROLS (owner 0822d): buttons, chips, and the trip editor
+   go light against the dark globe; deep ink type rides cream. */
+.search button,.btnp,.extra .call{
+  background:linear-gradient(180deg,#FFFFFF 0%,#E9EBED 100%);
+  color:#123626;border:1px solid rgba(19,113,76,.28);
+  box-shadow:0 10px 26px -12px rgba(12,54,36,.45),inset 0 1px 0 rgba(255,255,255,.95);
+}
+.search button:hover,.btnp:hover,.extra .call:hover{filter:brightness(1.02);border-color:rgba(19,113,76,.5);box-shadow:0 14px 32px -12px rgba(12,54,36,.55),inset 0 1px 0 #ffffff}
+/* one light glass surface holds the whole trip editor */
+.trip{background:linear-gradient(180deg,rgba(255,255,255,.74),rgba(246,250,248,.62));backdrop-filter:blur(18px) saturate(1.2);border:1px solid rgba(255,255,255,.68);border-radius:18px;padding:12px 12px 14px;box-shadow:0 24px 60px -30px rgba(12,54,36,.35),inset 0 1px 0 rgba(255,255,255,.85)}
+.stoprow{background:rgba(255,255,255,.85);border:1px solid rgba(19,113,76,.18)}
+.stopin{color:#123626}
+.stopin::placeholder{color:#5f7268}
+.srem{color:#5f7268}
+.srem:hover{color:#123626}
+.sdot{background:#3AB67D;box-shadow:0 0 8px rgba(58,182,125,.6)}
+.preflbl{color:#5f7268}
+/* chips sit on a grid, never a ragged wrap: 4 / 4 / 8 chips divide
+   evenly into 4 columns (2 on phones), so every row fills flush */
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.chip{background:rgba(255,255,255,.88);border:1px solid rgba(19,113,76,.22);color:#123626;width:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px 10px;min-height:44px}
+.chip:hover{border-color:rgba(19,113,76,.45);color:#123626}
+.chip.on{background:#13714C;border-color:#13714C;color:#E9EBED}
+#addStop{border:1px dashed rgba(19,113,76,.35);color:#3e5f4f;background:rgba(255,255,255,.5)}
+#addStop:hover{border-color:#13714C;color:#13714C}
+
+/* ---- SECTION SEPARATORS + CHIP MARKS (owner 0822e) ---- */
+.prefrow{border-top:1px solid rgba(19,113,76,.15);padding-top:12px;margin-top:6px}
+.prefrow:first-child{border-top:0;padding-top:2px;margin-top:0}
+.preflbl{color:#13714C;font-weight:700;letter-spacing:.22em}
+/* tiny contextual mark rides each chip's bottom-right corner, drawn in
+   the chip's own text color via mask (flips automatically when selected) */
+.chip{position:relative}
+.chip::after{content:"";position:absolute;right:9px;bottom:8px;width:13px;height:13px;background:currentColor;opacity:.5;
+  -webkit-mask:var(--chip-ico) center/contain no-repeat;mask:var(--chip-ico) center/contain no-repeat}
+.chip.on::after{opacity:.85}
+.chips[data-pref="hrs"] .chip[data-v="4"]{--chip-ico:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%228.5%22%2F%3E%3Cpath%20d%3D%22M12%2012L12%207.8%22%2F%3E%3Cpath%20d%3D%22M12%2012L16.3%2014.5%22%2F%3E%3C%2Fsvg%3E')}
+.chips[data-pref="hrs"] .chip[data-v="6"]{--chip-ico:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%228.5%22%2F%3E%3Cpath%20d%3D%22M12%2012L12%207.8%22%2F%3E%3Cpath%20d%3D%22M12%2012L12%2017.2%22%2F%3E%3C%2Fsvg%3E')}
+.chips[data-pref="hrs"] .chip[data-v="8"]{--chip-ico:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%228.5%22%2F%3E%3Cpath%20d%3D%22M12%2012L12%207.8%22%2F%3E%3Cpath%20d%3D%22M12%2012L7.7%2014.5%22%2F%3E%3C%2Fsvg%3E')}
+.chips[data-pref="hrs"] .chip[data-v="10"]{--chip-ico:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%228.5%22%2F%3E%3Cpath%20d%3D%22M12%2012L12%207.8%22%2F%3E%3Cpath%20d%3D%22M12%2012L7.7%209.5%22%2F%3E%3C%2Fsvg%3E')}
+.chips[data-pref="stay"] .chip[data-v="airbnb"]{--chip-ico:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2011L12%204l8%207%22%2F%3E%3Cpath%20d%3D%22M6.5%209.5V19h11V9.5%22%2F%3E%3C%2Fsvg%3E')}
+.chips[data-pref="stay"] .chip[data-v="hotel"]{--chip-ico:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%2020V5h12v15%22%2F%3E%3Cpath%20d%3D%22M9%208.5h1.6M13.4%208.5H15M9%2012h1.6M13.4%2012H15%22%2F%3E%3Cpath%20d%3D%22M10.3%2020v-3.6h3.4V20%22%2F%3E%3C%2Fsvg%3E')}
+.chips[data-pref="stay"] .chip[data-v="motel"]{--chip-ico:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2018v-7.5%22%2F%3E%3Cpath%20d%3D%22M3%2014.5h18%22%2F%3E%3Cpath%20d%3D%22M21%2018v-5a2%202%200%200%200-2-2H9.5%22%2F%3E%3Ccircle%20cx%3D%226%22%20cy%3D%2211%22%20r%3D%221.4%22%2F%3E%3C%2Fsvg%3E')}
+.chips[data-pref="stay"] .chip[data-v="any"]{--chip-ico:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%205v14%22%2F%3E%3Cpath%20d%3D%22M6.5%208.6l11%206.8%22%2F%3E%3Cpath%20d%3D%22M17.5%208.6l-11%206.8%22%2F%3E%3C%2Fsvg%3E')}
+.chips[data-pref="see"] .chip[data-v="food"]{--chip-ico:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6.5%204v5.5a2%202%200%200%200%204%200V4%22%2F%3E%3Cpath%20d%3D%22M8.5%2011.5V20%22%2F%3E%3Cpath%20d%3D%22M16%204c1.8%202.2%201.8%206%200%208%22%2F%3E%3Cpath%20d%3D%22M16%2012v8%22%2F%3E%3C%2Fsvg%3E')}
+.chips[data-pref="see"] .chip[data-v="nature"]{--chip-ico:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6.5%2019c0-8%205-12.5%2012.5-12.5%200%207.5-5%2012.5-12.5%2012.5z%22%2F%3E%3Cpath%20d%3D%22M6.5%2019c3-4.5%206.5-7.5%209.5-8.8%22%2F%3E%3C%2Fsvg%3E')}
+.chips[data-pref="see"] .chip[data-v="history"]{--chip-ico:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%2020h14%22%2F%3E%3Cpath%20d%3D%22M7.5%2020V9.5M12%2020V9.5M16.5%2020V9.5%22%2F%3E%3Cpath%20d%3D%22M4.5%208.5L12%204l7.5%204.5z%22%2F%3E%3C%2Fsvg%3E')}
+.chips[data-pref="see"] .chip[data-v="nightlife"]{--chip-ico:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%2014.2A8%208%200%201%201%2010.8%204%206.8%206.8%200%200%200%2020%2014.2z%22%2F%3E%3C%2Fsvg%3E')}
+.chips[data-pref="see"] .chip[data-v="family"]{--chip-ico:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%229%22%20cy%3D%228%22%20r%3D%222.8%22%2F%3E%3Cpath%20d%3D%22M4.2%2019a4.9%204.9%200%200%201%209.6%200%22%2F%3E%3Ccircle%20cx%3D%2216.6%22%20cy%3D%229.2%22%20r%3D%222.2%22%2F%3E%3Cpath%20d%3D%22M14.3%2019a4.2%204.2%200%200%201%206.5-3.4%22%2F%3E%3C%2Fsvg%3E')}
+.chips[data-pref="see"] .chip[data-v="music"]{--chip-ico:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%228.6%22%20cy%3D%2217.3%22%20r%3D%222.6%22%2F%3E%3Cpath%20d%3D%22M11.2%2017.3V5.5l7.6-2.3v11%22%2F%3E%3Ccircle%20cx%3D%2216.3%22%20cy%3D%2216.6%22%20r%3D%222.4%22%2F%3E%3C%2Fsvg%3E')}
+.chips[data-pref="see"] .chip[data-v="beaches"]{--chip-ico:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2217.2%22%20cy%3D%226.4%22%20r%3D%222.4%22%2F%3E%3Cpath%20d%3D%22M3%2015.2c2-2%204-2%206%200s4%202%206%200%204-2%206%200%22%2F%3E%3Cpath%20d%3D%22M3%2019c2-2%204-2%206%200s4%202%206%200%204-2%206%200%22%2F%3E%3C%2Fsvg%3E')}
+.chips[data-pref="see"] .chip[data-v="hikes"]{--chip-ico:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2019l6-11%204%207%203-4.5L21%2019z%22%2F%3E%3C%2Fsvg%3E')}
+/* ---- SOLID RESULTS PANEL (owner 0822f): the road-trip / results sheet
+   drops the glass entirely. Solid light ground, words first. The dark
+   band behind the stop cards was a legacy rgba(20,20,20) fill. */
+.panel{background:#F3F6F4;backdrop-filter:none;border-left:1px solid rgba(19,113,76,.16)}
+.extra{background:transparent;border-top:1px solid rgba(19,113,76,.14);padding:16px 20px 20px}
+.stopcard{background:#FFFFFF;border:1px solid rgba(19,113,76,.16);border-radius:14px;margin-top:10px;padding:14px;box-shadow:0 10px 24px -16px rgba(16,58,40,.2)}
+.stopcard .sn{font-size:16px;color:#123626}
+.stopcard .sm{font-size:10px}
+.hslide,.hsmore{background:#F6F9F7;border:1px solid rgba(19,113,76,.18)}
+/* no eyebrow pills anywhere in the app (owner law); provenance rides the
+   count line instead */
+.panel .badge{display:none}
+/* per-video actions: fly to the spot on the map, or jump to booking */
+.hsact{display:flex;gap:6px;margin-top:7px}
+.hsbtn{flex:1;font:700 9.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:8px 5px;border-radius:9px;border:1px solid rgba(19,113,76,.3);background:#FFFFFF;color:#13714C;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+.hsbtn:hover{background:#13714C;color:#E9EBED;border-color:#13714C}
+.hsexpand,.hscomm{cursor:pointer;font:600 12.5px var(--body);color:#13714C;align-items:center;justify-content:center;text-align:center}
+/* skeleton shimmer while live content lands: shape-matched, no spinners */
+.hskel{min-height:96px;border:0;background:linear-gradient(100deg,#E7EEE9 40%,#F4F8F5 50%,#E7EEE9 60%);background-size:200% 100%;animation:skel 1.2s linear infinite}
+.fskel{background:linear-gradient(100deg,#E7EEE9 40%,#F4F8F5 50%,#E7EEE9 60%);background-size:200% 100%;animation:skel 1.2s linear infinite}
+@keyframes skel{from{background-position:120% 0}to{background-position:-80% 0}}
+@media (prefers-reduced-motion:reduce){.hskel,.fskel{animation:none}}
+/* collapsible danger list: the worst zone previews, the rest fold away */
+.rows:not(.showall) .row.hzx{display:none}
+.hzreveal{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;padding:14px;background:transparent;border:0;border-bottom:1px solid rgba(19,113,76,.14);color:#13714C;font:700 10.5px var(--mono);letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:background .2s}
+.hzreveal:hover{background:rgba(19,113,76,.06)}
+.hzreveal .chev{width:9px;height:9px;border-right:2px solid #13714C;border-bottom:2px solid #13714C;transform:rotate(45deg) translateY(-2px);transition:transform .3s}
+.rows.showall .hzreveal .chev{transform:rotate(225deg) translateY(-2px)}
+/* landing-zone label on the map */
+.zonetip{background:#FFFFFF;border:1px solid rgba(19,113,76,.3);border-radius:999px;color:#13714C;font:700 9.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;box-shadow:0 8px 20px -10px rgba(16,58,40,.35)}
+.zonetip::before{display:none}
+/* map story bubble -> hover video card: expands above the bubble and
+   autoplays (muted) so the route feels alive */
+.snapwrap{overflow:visible!important}
+.snapwrap:hover{z-index:12000!important}
+.snap{position:relative}
+.snapvid{position:absolute;bottom:44px;left:50%;transform:translateX(-50%) scale(.88);opacity:0;pointer-events:none;
+  width:272px;background:#FFFFFF;border:1px solid rgba(19,113,76,.28);border-radius:14px;padding:7px;
+  box-shadow:0 18px 44px -16px rgba(12,54,36,.5),0 0 0 5px rgba(162,228,148,.14);
+  transition:opacity .22s,transform .22s cubic-bezier(.2,.8,.2,1)}
+.snap.on .snapvid{opacity:1;transform:translateX(-50%) scale(1);pointer-events:auto}
+.snapvid .svv{width:258px;height:145px;border-radius:9px;overflow:hidden;background:#0C2F20 center/cover no-repeat;display:block;position:relative}
+.snapvid .svv iframe{width:258px;height:145px;border:0;display:block}
+.snapvid .svt2{font:600 11.5px var(--body);color:#123626;padding:7px 4px 3px;line-height:1.35;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.snapvid::after{content:"";position:absolute;left:50%;bottom:-7px;width:14px;height:14px;background:#FFFFFF;
+  border-right:1px solid rgba(19,113,76,.28);border-bottom:1px solid rgba(19,113,76,.28);transform:translateX(-50%) rotate(45deg)}
+/* section labels inside the solid panel read clearly */
+.extra .lbl{color:#13714C;font-size:10px;letter-spacing:.22em}
+/* "Along the way" is a FULL-SCREEN vertical feed: scrolling to the
+   bottom of the sheet pays off with edge-to-edge sight slides that snap
+   one at a time, big type over the photo, tap opens the videos */
+.feedv{margin:10px -20px 0}
+.fslide{position:relative;display:block;height:min(64dvh,560px);overflow:hidden;margin-top:10px;text-decoration:none;background:#DCE9DF;scroll-snap-align:center}
+.fslide .fbg{position:absolute;inset:0;border:0;border-radius:0;background-color:#DCE9DF;background-size:cover;background-position:center;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.fslide:hover .fbg{transform:scale(1.03)}
+.fscrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,20,13,.14),transparent 30%,transparent 52%,rgba(4,20,13,.8))}
+.fmeta{position:absolute;left:20px;right:72px;bottom:18px}
+.fname{font:800 24px/1.15 var(--heading);color:#F6F8F7;letter-spacing:-.02em;text-shadow:0 1px 10px rgba(4,20,13,.65)}
+.fkind{margin-top:6px;font:600 10.5px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:#A2E494}
+.fplay{position:absolute;right:18px;bottom:22px;width:42px;height:42px;border-radius:50%;background:rgba(19,113,76,.85);border:1px solid rgba(255,255,255,.6);color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:13px;backdrop-filter:blur(4px)}
+.panel .scroll{scroll-snap-type:y proximity}
+.row .rk{display:flex;flex-direction:column;align-items:center;gap:3px}
+.hzmark{width:14px;height:14px;background:#13714C;opacity:.9;-webkit-mask:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M12%204%20L21.5%2020%20H2.5%20Z%22%20stroke%3D%22black%22%20stroke-width%3D%222.4%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%2010.2v3.6%22%20stroke%3D%22black%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2217%22%20r%3D%221.3%22%20fill%3D%22black%22%2F%3E%3C%2Fsvg%3E') center/contain no-repeat;mask:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M12%204%20L21.5%2020%20H2.5%20Z%22%20stroke%3D%22black%22%20stroke-width%3D%222.4%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%2010.2v3.6%22%20stroke%3D%22black%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2217%22%20r%3D%221.3%22%20fill%3D%22black%22%2F%3E%3C%2Fsvg%3E') center/contain no-repeat}
+/* map-side sight markers shed their dark-theme rings on the light map */
+.snap{box-shadow:0 0 0 2px rgba(255,255,255,.85),0 8px 20px -8px rgba(16,58,40,.45)}
+.snap .snapimg{border-color:#F3F6F4;background-color:#DCE9DF}
+.snap .snapplay{background:#13714C;border-color:#FFFFFF;color:#FFFFFF}
+
+/* the hint becomes a frost pill: legible on any ground, no halo games */
+.search .hint{display:inline-block;background:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.7);border-radius:999px;padding:7px 14px;color:#123626;text-shadow:none;backdrop-filter:blur(8px);letter-spacing:.14em}
+
+@media (max-width:700px){
+  .search{top:68px}
+  .search.commute .field.two input{flex:1 1 100%}   /* From/To stack on phones */
+  /* results panel becomes a bottom sheet: the map stays visible and usable.
+     Expanded by default after a search; tapping the header drops it to a
+     peek (badge + title + count) and back. */
+  .panel{top:auto;bottom:0;left:0;right:0;width:100%;height:min(72dvh,640px);border-left:0;border-top:1px solid var(--rule);border-radius:18px 18px 0 0;transform:translateY(102%)}
+  .panel.open{transform:translateY(0)}
+  .panel.open.peek{transform:translateY(calc(100% - 158px))}
+  .panel .ph{cursor:pointer;position:relative;padding:26px 24px 14px}
+  .panel .ph::before{content:"";position:absolute;top:10px;left:50%;transform:translateX(-50%);width:44px;height:4px;border-radius:2px;background:var(--rule-2)}
+  .reset{bottom:auto;top:20px;left:auto;right:24px}      /* stays reachable above the sheet */
+  .stchip{bottom:auto;top:150px}
+  .platrow a{min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+  .chip{min-height:44px}
+  .chips{grid-template-columns:repeat(2,1fr)}
+  /* the tall trip editor reaches the disclaimer's zone on phones */
+  body.m-roadtrip:not(.inarea) .disc{visibility:hidden}
+  .srem{min-width:44px;min-height:44px}
+  .search .hint{font-size:11px}
+}
+/* ===== Voyage: travel-mode cards + segmented control ===== */
+.card.drive .ico,.card.fly .ico,.card.boat .ico{
+  color:#CFF0D3;
+  background:radial-gradient(120% 120% at 30% 22%,rgba(162,228,148,.28),rgba(19,113,76,.32) 46%,rgba(12,47,32,.6) 100%);
+  box-shadow:inset 0 0 0 1px rgba(162,228,148,.7),inset 0 14px 18px -12px rgba(255,255,255,.45),0 0 0 5px rgba(162,228,148,.12),0 14px 30px -14px rgba(8,42,28,.55),0 0 34px -10px rgba(162,228,148,.38);
+}
+.card.drive .go,.card.fly .go,.card.boat .go{color:#E9EBED;text-shadow:0 1px 6px rgba(8,42,28,.55)}
+.tmseg{margin-bottom:10px}
+.search:not(.tm-drive) .prefrow.hrs{display:none}
+.daterow{display:flex;gap:8px;margin-bottom:8px}
+.datefield{flex:1;display:flex;flex-direction:column;gap:2px;background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(246,250,248,.78));border:1px solid rgba(19,113,76,.22);border-radius:12px;padding:7px 12px;cursor:pointer;box-shadow:0 2px 8px -5px rgba(12,54,36,.3)}
+.datefield span{font:600 9px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#5f7268}
+.datefield input[type=date]{border:0;background:transparent;font:600 16px var(--body);color:#123626;padding:0;width:100%;cursor:pointer;min-height:20px}
+.datefield input[type=date]::-webkit-calendar-picker-indicator{opacity:.55;cursor:pointer}
+/* ----- trip cost estimator ----- */
+.cot{margin:0 0 6px;border:1px solid rgba(19,113,76,.2);border-radius:14px;background:#fff;box-shadow:0 10px 30px -18px rgba(12,54,36,.3);overflow:hidden}
+.cot>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;font:800 15px var(--heading);color:#123626}
+.cot>summary::-webkit-details-marker{display:none}
+.cottot{font:800 20px var(--heading);color:#13714C;letter-spacing:-.01em}
+.cotbody{padding:2px 16px 14px;border-top:1px solid rgba(19,113,76,.12)}
+.cotrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(19,113,76,.08)}
+.cotl{flex:1;min-width:0}
+.cotl b{display:block;font:700 13.5px var(--body);color:#123626}
+.cotl span{font:500 11.5px var(--body);color:#5f7268}
+.cotv{font:800 14px var(--heading);color:#123626;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cotadd .cotl{font:600 12.5px var(--body);color:#3e5f4f}
+.cotpp{font:500 10.5px var(--mono);color:#7e8a84;margin-left:2px}
+.metaest{color:#13714C;font-weight:800}
+.fmore{display:block;width:100%;padding:16px;background:#F3F6F4;border:1px solid rgba(19,113,76,.18);border-radius:14px;font:700 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#13714C;cursor:pointer;margin-top:2px}
+.fmore:hover{background:#e9efec}
+/* edit-trip: change mode/dates/stops from the results view without going back to the gate */
+.ph{position:relative}
+.editbtn{position:absolute;top:14px;right:16px;z-index:3;font:700 10px var(--mono);letter-spacing:.13em;text-transform:uppercase;color:#13714C;background:rgba(255,255,255,.92);border:1px solid rgba(19,113,76,.28);border-radius:999px;padding:7px 13px;cursor:pointer;box-shadow:0 2px 8px -4px rgba(12,54,36,.3)}
+.editbtn:hover{background:#fff;border-color:#3AB67D}
+body:not(.inarea) .editbtn{display:none}
+body.inarea.editing .search{display:block}
+body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
+.cotx{flex:none;width:22px;height:22px;border-radius:50%;border:1px solid rgba(19,113,76,.25);background:#fff;color:#5f7268;font-size:13px;line-height:1;cursor:pointer;padding:0}
+.cotx:hover{border-color:#c0492e;color:#c0492e}
+.cotsub{font:700 9.5px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:#5f7268;margin:12px 0 2px}
+.cotadj{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 6px}
+.cotf{flex:1 1 44%;display:flex;flex-direction:column;gap:2px}
+.cotf span{font:600 9px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#5f7268}
+.cotf input{border:1px solid rgba(19,113,76,.22);border-radius:9px;background:#fff;font:600 16px var(--body);color:#123626;padding:6px 9px;width:100%}
+.cotf input:focus{outline:none;border-color:#3AB67D;box-shadow:0 0 0 2px rgba(58,182,125,.2)}
+.hslide{position:relative}
+.hsadd{position:absolute;top:7px;right:7px;width:24px;height:24px;border-radius:50%;background:#13714C;color:#fff;display:flex;align-items:center;justify-content:center;font:700 15px var(--body);line-height:1;cursor:pointer;box-shadow:0 3px 10px -3px rgba(12,54,36,.5);z-index:2}
+.hsadd.on{background:#3AB67D;font-size:9.5px;font-weight:700;letter-spacing:.04em}
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<div id="globe" aria-hidden="true"></div>
+<div id="stage"><div id="smap"></div><div id="smapfx"></div></div>
+<div class="loading" id="loading">Warming up your map…</div>
+<a class="betafb" id="betafb" href="https://form.jotform.com/262747271566062" target="_blank" rel="noopener"><b>Beta</b><span class="fbw">Send&nbsp;</span>feedback</a>
+
+<div class="gate" id="gate">
+  <div class="glogo">Voyage</div>
+  <h1>Plan the trip, <i>made easy.</i></h1>
+  <p class="lead">How are you getting there?</p>
+  <div class="cards">
+    <button class="card drive" data-mode="drive" type="button">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l1.6-4.6A2 2 0 0 1 6.5 7h11a2 2 0 0 1 1.9 1.4L21 13v5h-2.5"/><path d="M3 18v-5M5.5 18h3M15 18h3.5"/><circle cx="7" cy="18" r="1.9"/><circle cx="17" cy="18" r="1.9"/></svg></div>
+      <h3>Drive</h3>
+      <p>Map a road route with as many stops as you like. We pace your overnight stays and surface things to do along the way.</p>
+      <div class="go">Plan a drive &rarr;</div>
+    </button>
+    <button class="card fly" data-mode="fly" type="button">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L3 10.6l6.4 2.5L12 20l3-6.2z"/><path d="M9.4 13.1L21 3"/></svg></div>
+      <h3>Fly</h3>
+      <p>Line up the cities you want to hit. We draw the route between them and gather stays, food, events, and videos for each one.</p>
+      <div class="go">Plan a flight &rarr;</div>
+    </button>
+    <button class="card boat" data-mode="boat" type="button">
+      <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 14.5l1.5 4a1.5 1.5 0 0 0 1.4 1h11.8a1.5 1.5 0 0 0 1.4-1l1.5-4"/><path d="M5.2 14.5V9l6.8-2 6.8 2v5.5"/><path d="M12 3v4"/></svg></div>
+      <h3>Boat</h3>
+      <p>Chart your ports and coastal stops. We map the water route and pull together what to do at every landing.</p>
+      <div class="go">Plan a boat trip &rarr;</div>
+    </button>
+  </div>
+</div>
+
+<div class="ui brand">
+  <div class="logo">VOY<span>AGE</span></div>
+  <div class="name">Voyage</div>
+</div>
+<button class="switch" id="switch" type="button">&#8646; Change trip type</button>
+
+<form class="ui search" id="searchForm" autocomplete="off">
+  <div class="trip" id="trip">
+    <div class="veh tmseg" id="tmseg" role="group" aria-label="Travel mode">
+      <button type="button" data-tm="drive"><span class="vi">🚗</span>Drive</button>
+      <button type="button" data-tm="fly"><span class="vi">✈️</span>Fly</button>
+      <button type="button" data-tm="boat"><span class="vi">⛴️</span>Boat</button>
+    </div>
+    <div class="stops" id="stops"></div>
+    <div class="daterow" id="daterow">
+      <label class="datefield"><span>Leaving</span><input type="date" id="dStart" aria-label="Trip start date" autocomplete="off"></label>
+      <label class="datefield"><span>Returning</span><input type="date" id="dEnd" aria-label="Trip return date" autocomplete="off"></label>
+    </div>
+    <div class="prefs" id="prefs">
+      <div class="prefrow hrs"><span class="preflbl">Pace</span><div class="chips" data-pref="hrs"><button type="button" class="chip" data-v="4">4h/day</button><button type="button" class="chip" data-v="6">6h/day</button><button type="button" class="chip on" data-v="8">8h/day</button><button type="button" class="chip" data-v="10">10h/day</button></div></div>
+      <div class="prefrow"><span class="preflbl">Stay</span><div class="chips" data-pref="stay"><button type="button" class="chip" data-v="airbnb">Airbnb</button><button type="button" class="chip" data-v="hotel">Hotels</button><button type="button" class="chip" data-v="motel">Motels</button><button type="button" class="chip on" data-v="any">Any</button></div></div>
+      <div class="prefrow"><span class="preflbl">See</span><div class="chips" data-pref="see"><button type="button" class="chip" data-v="food">Food</button><button type="button" class="chip" data-v="nature">Nature</button><button type="button" class="chip" data-v="history">History</button><button type="button" class="chip" data-v="nightlife">Nightlife</button><button type="button" class="chip" data-v="family">Family</button><button type="button" class="chip" data-v="music">Music</button><button type="button" class="chip" data-v="beaches">Beaches</button><button type="button" class="chip" data-v="hikes">Hikes</button></div></div>
+    </div>
+    <div class="triprow">
+      <button type="button" id="addStop">+ Add stop</button>
+      <button type="submit" class="btnp" id="tripBtn">Plan the trip</button>
+    </div>
+  </div>
+  <div class="hint" id="hint" aria-live="polite">Pick your stops. We map the route and gather stays, food, and things to do.</div>
+</form>
+
+<aside class="ui panel" id="panel" aria-live="polite">
+  <div class="ph">
+    <button class="editbtn" id="editTrip" type="button">Edit trip</button>
+    <span class="badge" id="badge"></span>
+    <h2 id="pTitle"></h2>
+    <div class="meta" id="pMeta"></div>
+    <div class="count" id="pCount"></div>
+  </div>
+  <div class="scroll">
+    <div class="rows" id="rows"></div>
+    <div class="extra" id="extra"></div>
+  </div>
+  <div class="pf">
+    Routes, distances, and times are estimates from open map data, not live traffic, flights, or sailings. <a class="methodlink" href="#">How Voyage plans</a>
+  </div>
+</aside>
+
+<button class="ui reset" id="reset">&larr; Back to globe</button>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="waterink" color-interpolation-filters="sRGB"><feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -9 -1 10 0 -0.05" result="wmask"/><feColorMatrix in="SourceGraphic" type="saturate" values="0.12" result="sat"/><feColorMatrix in="sat" type="matrix" values="1 0 0 0 0.012  0 1 0 0 0.008  0 0 0.955 0 0  0 0 0 1 0" result="base"/><feFlood flood-color="#16382C" result="ink"/><feComposite in="ink" in2="wmask" operator="in" result="waterfill"/><feMerge><feMergeNode in="base"/><feMergeNode in="waterfill"/></feMerge></filter></svg>
+<div class="stchip" id="stChip" role="status" aria-live="polite"></div>
+<button class="recenter" id="recenter" type="button" title="Re-center the route" aria-label="Re-center the route"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg></button>
+<div class="ui disc" id="disc">
+  Routes and distances are estimates from open map data. Fly and boat trips are drawn as direct-line estimates, not booked routes. <a class="methodlink" href="#">How Voyage plans</a> &middot; <b>Voyage</b>
+</div>
+
+<div class="chooser" id="chooser"><div class="chbox">
+  <div class="chh" id="chh">Which one did you mean?</div>
+  <div class="chsub" id="chsub">That street exists in more than one place</div>
+  <div class="chlist" id="chlist"></div>
+  <button class="chx" id="chx" type="button">Cancel</button>
+</div></div>
+
+<div class="chooser" id="method"><div class="chbox">
+  <div class="chh">How Voyage plans</div>
+  <div class="chsub">What the map shows, and what it estimates.</div>
+  <div class="methodbody">
+    <p>Voyage plans a trip around the places you list, then gathers real things to do at each one.</p>
+    <p><b>Drive</b> trips use real road routing from open mapping data (OpenStreetMap), pace overnight stays by the hours-per-day you choose, and surface sights along the way. Distances and times are estimates, not live traffic.</p>
+    <p><b>Fly</b> and <b>Boat</b> trips draw a direct line between the places you list. That is a straight-line estimate for planning, not a booked airline route or a shipping lane, and it carries no time estimate.</p>
+    <p><b>Stays, things to do, events, and videos</b> at each stop come from connected platforms (hotels, Ticketmaster, YouTube) when their keys are set, and from open searches otherwise. Nothing is faked.</p>
+    <p>This is general trip-planning information. Book and confirm details with the real services before you travel.</p>
+  </div>
+  <button class="chx" id="methodx" type="button">Got it</button>
+</div></div>
+
+<!-- vendored locally: a CDN outage must never blank the app (vendor/ ships with the repo) -->
+<script src="vendor/leaflet-1.9.4.js"></script>
+<link rel="preload" href="vendor/globe.gl-2.34.4.min.js" as="script">
+<script>
+(function(){
+"use strict";
+
+/* respect the OS "reduce motion" setting across the whole globe */
+var RM=matchMedia('(prefers-reduced-motion: reduce)');
+function dur(ms){return RM.matches?0:ms;}
+/* DEMO=false -> the app runs on real data + connected platforms only; no sample previews */
+var DEMO=false;
+
+/* ===== state names: used only for the geocoder's state-name shortcut ===== */
+var STATES=[["AL","Alabama",32.8,-86.8],["AK","Alaska",64.2,-149.5],["AZ","Arizona",34.0,-111.7],["AR","Arkansas",34.9,-92.4],["CA","California",36.8,-119.4],["CO","Colorado",39.0,-105.5],["CT","Connecticut",41.6,-72.7],["DE","Delaware",39.0,-75.5],["FL","Florida",28.6,-82.4],["GA","Georgia",32.7,-83.4],["HI","Hawaii",20.3,-156.4],["ID","Idaho",44.1,-114.6],["IL","Illinois",40.0,-89.2],["IN","Indiana",39.9,-86.3],["IA","Iowa",42.0,-93.5],["KS","Kansas",38.5,-98.4],["KY","Kentucky",37.5,-85.3],["LA","Louisiana",31.0,-92.0],["ME","Maine",45.4,-69.2],["MD","Maryland",39.0,-76.8],["MA","Massachusetts",42.3,-71.8],["MI","Michigan",44.3,-85.6],["MN","Minnesota",46.3,-94.3],["MS","Mississippi",32.7,-89.7],["MO","Missouri",38.4,-92.5],["MT","Montana",46.9,-110.4],["NE","Nebraska",41.5,-99.8],["NV","Nevada",39.3,-116.6],["NH","New Hampshire",43.7,-71.6],["NJ","New Jersey",40.2,-74.7],["NM","New Mexico",34.4,-106.1],["NY","New York",42.9,-75.5],["NC","North Carolina",35.6,-79.4],["ND","North Dakota",47.5,-100.3],["OH","Ohio",40.3,-82.8],["OK","Oklahoma",35.6,-97.5],["OR","Oregon",44.0,-120.5],["PA","Pennsylvania",40.9,-77.8],["RI","Rhode Island",41.7,-71.5],["SC","South Carolina",33.9,-80.9],["SD","South Dakota",44.4,-100.2],["TN","Tennessee",35.9,-86.4],["TX","Texas",31.0,-99.0],["UT","Utah",39.3,-111.7],["VT","Vermont",44.1,-72.7],["VA","Virginia",37.5,-78.8],["WA","Washington",47.4,-120.5],["WV","West Virginia",38.6,-80.6],["WI","Wisconsin",44.6,-89.9],["WY","Wyoming",43.0,-107.5]].map(function(a){return{s:a[0],n:a[1],lat:a[2],lng:a[3]};});
+var BYNAME={}, BYABBR={};
+STATES.forEach(function(st){BYNAME[st.n.toLowerCase()]=st;BYABBR[st.s.toLowerCase()]=st;});
+/* ===== globe ===== */
+var accent='#3ab67d', accentRGB=[58,182,125];
+function hexRGB(h){h=(h||'').replace('#','');if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+/* recolor the whole globe (atmosphere halo + continents) to the active intent */
+function themeGlobe(col){accent=col;accentRGB=hexRGB(col);if(world&&world.atmosphereColor)world.atmosphereColor(col);if(world&&world.hexPolygonColor)world.hexPolygonColor(function(){return 'rgba('+accentRGB.join(',')+',0.5)';});}
+var US={lat:39.5,lng:-98.5,altitude:1.9};
+/* the globe is a spinning branded backdrop now; no clickable overview points */
+var overview=[];
+/* Lazy globe boot: the 1.4MB globe.gl eval + WebGL init used to run during
+   page parse and block first paint. The bytes still download immediately
+   (rel=preload in <head>); evaluation and construction wait for the frame
+   after the hero has painted. Anything that needs the globe awaits
+   GLOBE_READY - the only pre-boot entries are the submit branches (deep
+   links dispatch submit at load) and resize, and all are gated. */
+var world=null,GLOBE_OK,GLOBE_READY=new Promise(function(r){GLOBE_OK=r;});
+var globeBootStarted=false,bootClassicStarted=false;
+function bootGlobe(){
+  if(globeBootStarted)return;globeBootStarted=true;
+  /* Worker mode: globe.gl runs on a worker thread against an
+     OffscreenCanvas, so eval + WebGL init + tessellation + every frame
+     leave the main thread. Anything that cannot run there (or throws
+     while booting) falls back to the classic on-thread globe. */
+  var wCap=window.Worker&&window.HTMLCanvasElement&&HTMLCanvasElement.prototype.transferControlToOffscreen;
+  if(wCap&&!/[?&]noworker\b/.test(location.search)){
+    try{initWorldViaWorker();return;}catch(e){}
+  }
+  bootClassic();
+}
+function bootClassic(){
+  if(bootClassicStarted)return;bootClassicStarted=true;
+  var s=document.createElement('script');s.src='vendor/globe.gl-2.34.4.min.js';
+  s.onload=initWorld;
+  s.onerror=function(){setTimeout(function(){
+    var t=document.createElement('script');t.src=s.src;t.onload=initWorld;
+    t.onerror=function(){GLOBE_OK(null);};document.head.appendChild(t);},1000);};
+  document.head.appendChild(s);
+}
+var gWorker=null,pinNodes=[];
+function initWorldViaWorker(){
+  var host=document.getElementById('globe');
+  var cv=document.createElement('canvas');cv.className='wgl';host.appendChild(cv);
+  var pl=document.createElement('div');pl.id='gpins';host.appendChild(pl);
+  var off=cv.transferControlToOffscreen();
+  var w=new Worker('globe-worker.js');gWorker=w;
+  var booted=false;
+  function fallback(){
+    if(booted)return;booted=true;
+    try{w.terminate();}catch(e){}
+    gWorker=null;
+    if(cv.parentNode)cv.parentNode.removeChild(cv);
+    if(pl.parentNode)pl.parentNode.removeChild(pl);
+    bootClassic();
+  }
+  window.__wkPing=function(){w.postMessage({op:'stats'});};
+  w.onerror=function(e){window.__wkFail='onerror: '+((e&&e.message)||'?')+' @'+((e&&e.filename)||'')+':'+((e&&e.lineno)||'');fallback();};
+  w.onmessage=function(e){
+    var m=e.data;
+    if(m.ev==='ready'){
+      booted=true;hideLoad();
+      world=makeWorldProxy(w);
+      GLOBE_OK(world);
+    }else if(m.ev==='pins'){
+      for(var i=0;i<m.p.length;i++){
+        var r=m.p[i],n=pinNodes[r[0]];
+        if(!n)continue;
+        if(!r[3]){n.style.display='none';continue;}
+        n.style.display='';n.style.left=r[1]+'px';n.style.top=r[2]+'px';
+      }
+    }else if(m.ev==='stats'){
+      window.__wkStats=m;
+    }else if(m.ev==='werr'){
+      window.__wkStack=m.stack||m.message;
+    }else if(m.ev==='error'){
+      window.__wgErr=(window.__wgErr||[]).concat([m.op+': '+m.message]);
+      if(!booted)fallback();
+    }
+  };
+  ['pointerdown','pointermove','pointerup','pointercancel'].forEach(function(t){
+    cv.addEventListener(t,function(e){
+      w.postMessage({op:'pointer',type:t,x:e.clientX,y:e.clientY,button:e.button,buttons:e.buttons,pointerId:e.pointerId,pointerType:e.pointerType});
+    });
+  });
+  cv.addEventListener('wheel',function(e){
+    e.preventDefault();
+    w.postMessage({op:'pointer',type:'wheel',x:e.clientX,y:e.clientY,deltaY:e.deltaY,ctrlKey:e.ctrlKey});
+  },{passive:false});
+  w.postMessage({op:'init',canvas:off,width:innerWidth,height:innerHeight,
+    dpr:devicePixelRatio,accent:accent,reducedMotion:RM.matches,
+    overview:overview.map(function(o){return{lat:o.lat,lng:o.lng,sample:o.sample,st:{s:o.st.s,n:o.st.n,lat:o.st.lat,lng:o.st.lng}};}),
+    pov:US},[off]);
+  setTimeout(function(){if(!booted){window.__wkFail=window.__wkFail||'timeout: no ready after 7s';fallback();}},7000);
+}
+function makeWorldProxy(w){
+  var pendW=innerWidth,proxy;
+  function send(name){return function(){w.postMessage({op:'call',name:name,args:[].slice.call(arguments)});return proxy;};}
+  var ctrl={};
+  ['autoRotate','autoRotateSpeed','enableDamping'].forEach(function(k){
+    Object.defineProperty(ctrl,k,{set:function(v){w.postMessage({op:'ctrl',key:k,value:v});},get:function(){}});
+  });
+  proxy={
+    pointsData:send('pointsData'),arcsData:send('arcsData'),ringsData:send('ringsData'),
+    pointOfView:send('pointOfView'),
+    htmlElementsData:function(items){
+      var pl=document.getElementById('gpins');
+      pinNodes=[];
+      while(pl&&pl.firstChild)pl.removeChild(pl.firstChild);
+      (items||[]).forEach(function(d){
+        var n=pinEl(d);n.style.display='none';
+        if(pl)pl.appendChild(n);pinNodes.push(n);
+      });
+      w.postMessage({op:'pins',items:(items||[]).map(function(d){return{lat:d.lat,lng:d.lng};})});
+      return proxy;
+    },
+    atmosphereColor:function(col){w.postMessage({op:'theme',accent:col});return proxy;},
+    hexPolygonColor:function(){w.postMessage({op:'theme',accent:accent});return proxy;},
+    width:function(v){pendW=v;return proxy;},
+    height:function(v){w.postMessage({op:'size',width:pendW,height:v});return proxy;},
+    controls:function(){return ctrl;}
+  };
+  return proxy;
+}
+function initWorld(){
+world=Globe()(document.getElementById('globe'))
+  .globeImageUrl('vendor/earth-dark.jpg')
+  .backgroundColor('rgba(0,0,0,0)')
+  .atmosphereColor(accent).atmosphereAltitude(0.2)
+  .pointsData(overview).pointLat('lat').pointLng('lng').pointAltitude(0.012)
+    .pointRadius(0.34).pointColor(function(){return accent;}).pointsMerge(false)
+  .ringColor(function(){return function(t){return'rgba('+accentRGB.join(',')+','+(1-t)+')';};})
+  .ringMaxRadius(0.95).ringPropagationSpeed(0.7).ringRepeatPeriod(RM.matches?0:900)
+  .htmlElement(pinEl).htmlLat('lat').htmlLng('lng').htmlAltitude(0.02);
+world.arcColor(function(){return['rgba('+accentRGB.join(',')+',0.95)','rgba('+accentRGB.join(',')+',0.15)'];})
+  .arcStroke(0.7).arcDashLength(0.4).arcDashGap(0.18).arcDashAnimateTime(2200).arcAltitudeAutoScale(0.45);
+world.pointOfView(US,0);
+world.controls().autoRotate=!RM.matches;
+world.controls().autoRotateSpeed=0.55;
+world.controls().enableDamping=true;
+/* "Temple of Time" globe — pale marble sphere, soft slate continents */
+(function(){
+  var gm=world.globeMaterial&&world.globeMaterial();
+  if(gm){ if(gm.color)gm.color.set('#173A61'); if(gm.emissive)gm.emissive.set('#0A2140'); if('emissiveIntensity' in gm)gm.emissiveIntensity=0.3; if('shininess' in gm)gm.shininess=9; }
+  world.hexPolygonResolution(3).hexPolygonMargin(0.26).hexPolygonAltitude(0.008).hexPolygonColor(function(){return 'rgba('+accentRGB.join(',')+',0.5)';});
+  fetch('vendor/countries-110m.min.geojson')
+    .then(function(r){return r.json();}).then(function(j){
+      // Feed the hex tessellation in chunks: one call for all 177
+      // countries blocked the main thread for ~1.3s. three-globe joins
+      // by object identity, so earlier features are not recomputed and
+      // the same final globe renders, one frame-sized slice at a time.
+      var feats=j.features||j,i=0,CH=3;
+      (function step(){
+        i=Math.min(feats.length,i+CH);
+        world.hexPolygonsData(feats.slice(0,i));
+        if(i<feats.length)requestAnimationFrame(step);
+      })();
+    }).catch(function(){});
+})();
+world.onGlobeReady?world.onGlobeReady(hideLoad):setTimeout(hideLoad,1400);
+size();
+GLOBE_OK(world);
+}
+requestAnimationFrame(function(){requestAnimationFrame(bootGlobe);});
+setTimeout(bootGlobe,2500);
+/* procedural starfield — crisp at any resolution, replaces the low-res night-sky png */
+(function(){
+  var box=document.getElementById('stars');if(!box)return;
+  function layer(n,size,op,tw){
+    var el=document.createElement('div');el.style.width=el.style.height=size+'px';if(tw)el.className='tw';
+    var sh=[];for(var i=0;i<n;i++){var b=205+(Math.random()*50|0);sh.push((Math.random()*100).toFixed(2)+'vw '+(Math.random()*100).toFixed(2)+'vh 0 rgba(205,255,'+b+','+op+')');}
+    el.style.boxShadow=sh.join(',');box.appendChild(el);
+  }
+  layer(90,1,0.45,false);   // faint dust
+  layer(38,1.6,0.75,false); // mid motes
+  layer(16,2.4,1,true);     // bright drifting motes
+})();
+
+function size(){if(world)world.width(innerWidth).height(innerHeight);}
+addEventListener('resize',size);
+
+setTimeout(hideLoad,2600);
+function hideLoad(){var l=document.getElementById('loading');if(l)l.classList.add('gone');}
+
+/* ===== travel mode + trip planner ===== */
+var travelMode='drive', form=document.getElementById('searchForm');
+function defHint(){return travelMode==='fly'?'List the cities you want to hit. We draw the route and gather stays and things to do for each.':(travelMode==='boat'?'List your ports and coastal stops. We map the water route and what to do at each landing.':'Add your stops. We map the road route, pace your stays, and surface things to do along the way.');}
+function configTravel(tm){
+  travelMode=(tm==='fly'||tm==='boat')?tm:'drive';
+  form.classList.add('roadtrip');                                   // planner is always visible
+  form.classList.remove('tm-drive','tm-fly','tm-boat');form.classList.add('tm-'+travelMode);
+  document.body.classList.remove('m-drive','m-fly','m-boat');document.body.classList.add('m-'+travelMode);
+  getStatus();
+  if(!document.getElementById('stops').children.length)buildStops();
+  syncTmSeg();relabelStops();
+  var btn=document.getElementById('tripBtn');
+  btn.textContent=travelMode==='fly'?'Draw the flight':(travelMode==='boat'?'Draw the boat trip':'Map the drive');
+  document.getElementById('hint').textContent=defHint();
+}
+function syncTmSeg(){var seg=document.getElementById('tmseg');if(!seg)return;[].forEach.call(seg.children,function(x){x.classList.toggle('on',x.dataset.tm===travelMode);});}
+/* the gate cards choose the travel mode and drop into the planner */
+[].forEach.call(document.querySelectorAll('.cards .card'),function(c){
+  c.addEventListener('click',function(){configTravel(c.dataset.mode);document.body.classList.add('chosen');pushURL();setTimeout(function(){var f=document.querySelector('#stops .stopin');if(f)f.focus();},220);});
+});
+/* the in-planner segmented control switches mode and re-plans a live trip */
+document.getElementById('tmseg').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  if(b.dataset.tm===travelMode)return;                 // no-op re-click
+  var live=tripCtx&&tripCtx.pts&&document.body.classList.contains('inarea');
+  // pinned stays were bound to the old mode's stops; a mode change invalidates them
+  if(live)cart=cart.filter(function(x){return x.kind!=='stay';});
+  configTravel(b.dataset.tm);
+  if(live){
+    clearTimeout(window.__replanT);
+    window.__replanT=setTimeout(function(){planTrip(tripCtx.pts);pushURL();},300);   // URL follows the re-planned trip, not stale input edits
+  }
+});
+/* stops editor (placeholders adapt to the travel mode) */
+function stopPh(i,last){
+  if(travelMode==='fly')return i===0?'Departure city':(last?'Destination city':'City '+(i+1));
+  if(travelMode==='boat')return i===0?'Departure port':(last?'Destination port':'Port '+(i+1));
+  return i===0?'Start: city or address':(last?'Destination: city or address':'Stop '+(i+1));
+}
+function stopRow(ph){
+  var r=document.createElement('div');r.className='stoprow';
+  r.innerHTML='<span class="sdot"></span><input class="stopin" placeholder="'+ph+'" autocomplete="off"><button type="button" class="srem" title="remove">&times;</button>';
+  r.querySelector('.srem').addEventListener('click',function(){var s=document.getElementById('stops');if(s.children.length>2){r.remove();relabelStops();}});
+  return r;
+}
+function buildStops(){var s=document.getElementById('stops');s.innerHTML='';s.appendChild(stopRow(stopPh(0,false)));s.appendChild(stopRow(stopPh(1,true)));}
+function relabelStops(){var ins=document.querySelectorAll('#stops .stopin');[].forEach.call(ins,function(inp,i){inp.placeholder=stopPh(i,i===ins.length-1);});}
+document.getElementById('addStop').addEventListener('click',function(){var s=document.getElementById('stops');if(s.children.length>=6)return;s.insertBefore(stopRow('Stop'),s.lastElementChild);relabelStops();});
+
+/* ----- permalinks + back button: the URL carries intent and search, so a
+   result is shareable (text a route to family) and Back walks the real
+   history instead of doing nothing ----- */
+var restoring=false;
+function pushURL(){
+  if(restoring)return;
+  var sp=new URLSearchParams();
+  if(document.body.classList.contains('chosen')){
+    sp.set('mode',travelMode);
+    var vals=[].map.call(document.querySelectorAll('#stops .stopin'),function(i){return i.value.trim();}).filter(Boolean);
+    if(vals.length)sp.set('stops',vals.join('|'));
+  }
+  var url=location.pathname+(sp.toString()?'?'+sp.toString():'');
+  if(url!==location.pathname+location.search)history.pushState(null,'',url);
+}
+// the feedback form gets the trip being planned (hidden fields), never personal data
+document.getElementById('betafb').addEventListener('click',function(){
+  var sp=new URLSearchParams(location.search),q=new URLSearchParams();
+  if(sp.get('mode'))q.set('mode',sp.get('mode'));
+  if(sp.get('stops'))q.set('stops',sp.get('stops'));
+  this.href='https://form.jotform.com/262747271566062'+(q.toString()?'?'+q.toString():'');
+});
+function applyParams(sp){
+  var m=sp.get('mode')||sp.get('intent');                          // ?intent= kept so old links still resolve
+  if(!m){openGate();return;}
+  if(['drive','fly','boat'].indexOf(m)<0)m='drive';                 // legacy accident/commute/roadtrip -> drive
+  configTravel(m);document.body.classList.add('chosen');syncTmSeg();
+  var raw=sp.get('stops');
+  if(raw){
+    var vals=raw.split('|').map(function(s){return s.trim();}).filter(Boolean).slice(0,6);
+    if(vals.length>=2){
+      // rebuild the stop editor to EXACTLY these rows, so a back-nav from a
+      // 3-stop trip to a 2-stop one does not leave a stale third row that the
+      // submit would then pick up (the URL is the source of truth here)
+      buildStops();
+      while(document.querySelectorAll('#stops .stopin').length<vals.length){
+        var before=document.querySelectorAll('#stops .stopin').length;
+        document.getElementById('addStop').click();
+        if(document.querySelectorAll('#stops .stopin').length===before)break;
+      }
+      var ins=document.querySelectorAll('#stops .stopin');
+      vals.forEach(function(v,i){if(ins[i])ins[i].value=v;});
+      form.dispatchEvent(new Event('submit',{cancelable:true}));
+    }
+  }
+}
+window.addEventListener('popstate',function(){
+  restoring=true;
+  try{applyParams(new URLSearchParams(location.search));}
+  finally{setTimeout(function(){restoring=false;},60);}
+});
+/* road-trip preferences: how long to drive, where to stay, what to see */
+var tripPrefs={hrs:8,stay:'any',see:[]};
+function syncPrefs(){
+  var h=document.querySelector('.chips[data-pref="hrs"] .chip.on');tripPrefs.hrs=h?parseInt(h.getAttribute('data-v'),10):8;
+  var s=document.querySelector('.chips[data-pref="stay"] .chip.on');tripPrefs.stay=s?s.getAttribute('data-v'):'any';
+  tripPrefs.see=[].map.call(document.querySelectorAll('.chips[data-pref="see"] .chip.on'),function(x){return x.getAttribute('data-v');});
+}
+var prefsEl=document.getElementById('prefs');
+if(prefsEl){prefsEl.addEventListener('click',function(e){
+  var c=e.target.closest('.chip');if(!c)return;
+  var grp=c.parentNode.getAttribute('data-pref');
+  if(grp==='see')c.classList.toggle('on');
+  else[].forEach.call(c.parentNode.children,function(x){x.classList.toggle('on',x===c);});
+  syncPrefs();
+  // a live trip re-plans to the new pace: landing zones and stops move
+  if(tripCtx&&tripCtx.pts&&document.body.classList.contains('inarea')){
+    clearTimeout(window.__replanT);
+    window.__replanT=setTimeout(function(){planTrip(tripCtx.pts);},450);
+  }
+});syncPrefs();}
+
+/* ----- trip date range (optional): powers date-aware stays/events and carries the dates into the Airbnb/booking links ----- */
+var tripDates={start:'',end:''};
+function todayISO(){var t=new Date();t.setMinutes(t.getMinutes()-t.getTimezoneOffset());return t.toISOString().slice(0,10);}
+function addDaysISO(iso,n){if(!iso)return '';var d=new Date(iso+'T00:00:00');d.setDate(d.getDate()+n);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10);}
+function fmtDate(iso){if(!iso)return '';try{return new Date(iso+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});}catch(e){return iso;}}
+function dateRangeLabel(){if(tripDates.start&&tripDates.end)return fmtDate(tripDates.start)+' - '+fmtDate(tripDates.end);if(tripDates.start)return 'from '+fmtDate(tripDates.start);return '';}
+function syncDates(){var a=document.getElementById('dStart'),b=document.getElementById('dEnd');tripDates.start=a?a.value:'';tripDates.end=b?b.value:'';if(a&&b&&a.value)b.min=a.value;}
+(function(){var a=document.getElementById('dStart'),b=document.getElementById('dEnd');if(!a||!b)return;
+  a.min=todayISO();b.min=todayISO();
+  function onch(){
+    if(a.value&&b.value&&b.value<a.value)b.value=a.value;   // returning cannot precede leaving
+    syncDates();
+    if(tripCtx&&tripCtx.pts&&document.body.classList.contains('inarea')){clearTimeout(window.__replanT);window.__replanT=setTimeout(function(){planTrip(tripCtx.pts);},450);}
+  }
+  a.addEventListener('change',onch);b.addEventListener('change',onch);
+})();
+
+/* ----- trip cost estimator + "add to the trip" cart -----
+   An editable rough budget (lodging + fuel + food) plus a cart: pin a specific
+   stay or event from the cards and its price folds into the total. Pinned
+   stays replace the lodging estimate, so nothing is double-counted. Honest by
+   design: every number is an assumption the traveler can change, and flights
+   and fares are never invented. */
+var budget={nightly:120,foodDay:55,mpg:26,gas:3.4,rental:55,ppl:1},cart=[],cartSeq=1;
+function usd(n){return '$'+Math.round(n||0).toLocaleString('en-US');}
+function tripDays(){
+  var D=(tripCtx&&tripCtx.dates)||tripDates;
+  if(D&&D.start&&D.end){var n=Math.max(0,Math.round((new Date(D.end+'T00:00:00')-new Date(D.start+'T00:00:00'))/864e5));return {nights:n,days:n+1};}
+  var n2=(tripCtx&&tripCtx.travel==='drive')?(tripCtx.nights||0):Math.max(1,(tripCtx&&tripCtx.pts?tripCtx.pts.length-1:1));
+  return {nights:n2,days:n2+1};
+}
+function estimate(){
+  var td=tripDays(),ppl=Math.max(1,+budget.ppl||1),drive=!!(tripCtx&&tripCtx.travel==='drive');
+  var stays=cart.filter(function(x){return x.kind==='stay';}),extras=cart.filter(function(x){return x.kind==='extra';});
+  var pinned=stays.reduce(function(s,x){return s+(+x.cost||0);},0);
+  var Stay=pinned+Math.max(0,td.nights-stays.length)*(+budget.nightly||0);   // pinned stays + remaining nights at the estimate
+  var Tix=extras.reduce(function(s,x){return s+((+x.cost||0)*(x.pp?ppl:1));},0);   // tickets are per person
+  var Food=td.days*(+budget.foodDay||0)*ppl;
+  var Gas=(drive&&budget.mpg>0)?(tripCtx.miles/budget.mpg*(+budget.gas||0)):0;
+  var Car=drive?0:(td.days*(+budget.rental||0));   // fly/boat: rent a car at the destination
+  return {Stay:Stay,Tix:Tix,Food:Food,Gas:Gas,Car:Car,nights:td.nights,days:td.days,ppl:ppl,drive:drive,stays:stays,extras:extras,total:Stay+Tix+Food+Gas+Car};
+}
+function costRow(name,detail,val){return '<div class="cotrow"><div class="cotl"><b>'+esc(name)+'</b><span>'+esc(detail)+'</span></div><div class="cotv">'+usd(val)+'</div></div>';}
+function lineRow(it,ppl){var per=(it.pp&&ppl>1);var v=(+it.cost||0)*(it.pp?Math.max(1,ppl||1):1);
+  return '<div class="cotrow cotadd"><div class="cotl">'+esc(it.label)+(per?' <span class="cotpp">'+usd(it.cost)+' x '+ppl+'</span>':'')+'</div><div class="cotv">'+usd(v)+'</div><button type="button" class="cotx" data-rm="'+it.id+'" aria-label="Remove">&times;</button></div>';}
+function adjIn(lbl,key,val,step){return '<label class="cotf"><span>'+esc(lbl)+'</span><input type="text" inputmode="decimal" autocomplete="off" data-bk="'+key+'" value="'+esc(String(val))+'"></label>';}
+function costHTML(){return '<details class="cot" id="cot" open><summary>Estimated trip cost <span class="cottot" id="cotTot">--</span></summary><div class="cotbody" id="cotBody"></div></details>';}
+function renderCost(){
+  var b=document.getElementById('cotBody');if(!b)return;
+  // remember the focused assumption field so a rebuild does not eat mid-typing
+  var ae=document.activeElement,aek=(ae&&ae.getAttribute)?ae.getAttribute('data-bk'):null,aeSel=(aek&&typeof ae.selectionStart==='number')?ae.selectionStart:null;
+  var e=estimate();
+  var t=document.getElementById('cotTot');if(t)t.textContent=usd(e.total);
+  var hm=document.getElementById('metaEst');if(hm)hm.textContent=' · est '+usd(e.total);
+  var pn=e.ppl>1?(' x '+e.ppl+' travelers'):'';
+  var html='';
+  if(e.stays.length){var rem=Math.max(0,e.nights-e.stays.length);html+=costRow('Stays',e.stays.length+' pinned'+(rem?(' + '+rem+' est night'+(rem===1?'':'s')):''),e.Stay);e.stays.forEach(function(it){html+=lineRow(it,e.ppl);});}
+  else html+=costRow('Stays',e.nights+(e.nights===1?' night':' nights')+' x '+usd(budget.nightly),e.Stay);
+  if(e.drive)html+=costRow('Gas',Math.round(tripCtx.miles)+' mi / '+budget.mpg+' mpg x $'+(+budget.gas).toFixed(2),e.Gas);
+  else html+=costRow('Rental car',e.days+(e.days===1?' day':' days')+' x '+usd(budget.rental),e.Car);
+  html+=costRow('Food',e.days+(e.days===1?' day':' days')+' x '+usd(budget.foodDay)+pn,e.Food);
+  if(e.extras.length){html+=costRow('Event tickets',e.extras.length+' pinned'+(e.ppl>1?(' x '+e.ppl+' travelers'):''),e.Tix);e.extras.forEach(function(it){html+=lineRow(it,e.ppl);});}
+  html+='<div class="cotadj">'+adjIn('Nightly $','nightly',budget.nightly,'5')+adjIn('Food/day $','foodDay',budget.foodDay,'5')+
+    (e.drive?(adjIn('MPG','mpg',budget.mpg,'1')+adjIn('Gas $','gas',budget.gas,'0.1')):adjIn('Car/day $','rental',budget.rental,'5'))+
+    adjIn('Travelers','ppl',budget.ppl,'1')+'</div>';
+  html+='<p class="note">A rough estimate you can adjust'+(e.drive?'':'; flight and fare prices are not included')+'. Tap + on a stay or event below to add real prices; pinned stays replace the estimate, and tickets count per traveler.</p>';
+  b.innerHTML=html;
+  if(aek){var ni=b.querySelector('input[data-bk="'+aek+'"]');if(ni){ni.focus();if(aeSel!=null){try{ni.setSelectionRange(aeSel,aeSel);}catch(e2){}}}}
+}
+function addCart(kind,label,cost,pp){cart.push({id:'c'+(cartSeq++),kind:kind,label:label,cost:+cost||0,pp:!!pp});renderCost();}
+function addBtn(kind,label,cost,pp){var dc=(typeof cost==='number')?Math.round(cost):esc(cost);return '<span class="hsadd" role="button" tabindex="0" data-kind="'+kind+'" data-label="'+esc(label)+'"'+(pp?' data-pp="1"':'')+' data-cost="'+dc+'" title="Add to trip cost">+</span>';}
+function stayTile(href,lbl,place){return '<a class="hslide hsmore" href="'+href+'" target="_blank" rel="noopener"><span>'+esc(lbl)+'</span>'+addBtn('stay','Stay: '+lbl+' in '+place,'nightly')+'</a>';}
+function bindCost(ex){
+  if(ex._costBound)return;ex._costBound=true;
+  ex.addEventListener('input',function(e){var k=e.target.getAttribute&&e.target.getAttribute('data-bk');if(!k)return;var v=parseFloat(e.target.value);budget[k]=isFinite(v)?v:0;renderCost();});
+  ex.addEventListener('click',function(e){
+    var rm=e.target.getAttribute&&e.target.getAttribute('data-rm');
+    if(rm){e.preventDefault();e.stopPropagation();cart=cart.filter(function(x){return x.id!==rm;});renderCost();return;}
+    var add=e.target.closest&&e.target.closest('.hsadd');
+    if(add){e.preventDefault();e.stopPropagation();
+      var ca=add.getAttribute('data-cost');
+      addCart(add.getAttribute('data-kind'),add.getAttribute('data-label'),ca==='nightly'?budget.nightly:ca,add.getAttribute('data-pp')==='1');
+      add.textContent='Added';add.classList.add('on');setTimeout(function(){add.textContent='+';add.classList.remove('on');},1100);}
+  });
+}
+
+/* ===== pin elements ===== */
+function pinEl(){
+  var el=document.createElement('div');el.className='gpin';
+  el.innerHTML='<span class="gdot"></span>';
+  return el;
+}
+
+/* ===== rendering the trip result ===== */
+var current=[], selRow=null;
+function renderArea(opts){
+  // opts: {title, meta, badge, center, travel}
+  current=[];
+  document.body.classList.add('inarea');
+  world.controls().autoRotate=false;
+  world.htmlElementsData([]);
+  world.pointsData([]);
+  world.arcsData([]);
+  world.ringsData([{lat:opts.center.lat,lng:opts.center.lng}]);
+  world.pointOfView({lat:opts.center.lat,lng:opts.center.lng,altitude:0.34},dur(1900));
+  // fly/boat are direct-line estimates (an "est" badge); drive is real routing
+  var badge=document.getElementById('badge');
+  var est=(opts.travel==='fly'||opts.travel==='boat');
+  badge.className='badge '+(est?'sample':'real');
+  badge.textContent=opts.badge||'';
+  document.getElementById('pTitle').textContent=opts.title;
+  // the meta line carries a LIVE estimate total (renderCost keeps it fresh), so
+  // the number the traveler cares about is visible even in the phone peek sheet
+  var pm=document.getElementById('pMeta');pm.textContent=opts.meta||'';
+  var ms=document.createElement('b');ms.className='metaest';ms.id='metaEst';pm.appendChild(ms);
+  document.getElementById('pCount').textContent='';
+  document.getElementById('rows').innerHTML='';
+  buildDetail(opts);
+  var panelEl=document.getElementById('panel');
+  if(window.matchMedia('(max-width:700px)').matches)panelEl.classList.add('peek');
+  else panelEl.classList.remove('peek');
+  panelEl.classList.add('open');
+  document.getElementById('reset').classList.add('show');
+  document.getElementById('disc').classList.add('hide');
+}
+document.getElementById('switch').addEventListener('click',function(){openGate();pushURL();});
+document.getElementById('editTrip').addEventListener('click',function(e){e.stopPropagation();var on=document.body.classList.toggle('editing');this.textContent=on?'Done':'Edit trip';if(on){var f=document.querySelector('#stops .stopin');if(f)f.focus();}});
+/* phone bottom sheet: tapping the panel header toggles peek/expanded */
+(function(){
+  var mqPhone=window.matchMedia('(max-width:700px)');
+  var panelEl=document.getElementById('panel');
+  var ph=panelEl.querySelector('.ph');
+  ph.setAttribute('role','button');
+  ph.setAttribute('aria-label','Toggle results sheet between peek and expanded');
+  ph.tabIndex=0;
+  function toggle(){
+    if(!mqPhone.matches)return;
+    panelEl.classList.toggle('peek');
+    // collapsing back to the footer restores the centered route
+    if(panelEl.classList.contains('peek')&&lastFit)setTimeout(function(){fitWithUI(lastFit);},500);
+  }
+  ph.addEventListener('click',function(e){if(e.target.closest('.methodlink'))return;toggle();});
+  ph.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+})();
+/* data methodology modal (reachable from the footer and the panel) */
+function showMethod(){document.getElementById('method').classList.add('show');}
+function hideMethod(){document.getElementById('method').classList.remove('show');}
+document.getElementById('methodx').addEventListener('click',hideMethod);
+document.getElementById('method').addEventListener('click',function(e){if(e.target.id==='method')hideMethod();});
+document.addEventListener('click',function(e){var l=e.target.closest('.methodlink');if(l){e.preventDefault();showMethod();}});
+document.getElementById('chx').addEventListener('click',hideChooser);
+document.getElementById('chooser').addEventListener('click',function(e){if(e.target.id==='chooser')hideChooser();});
+var hint=document.getElementById('hint');
+/* bounded fetch: every lookup gets a deadline so no spinner outlives its cause */
+function bfetch(url,ms){
+  var ctl=(typeof AbortController!=='undefined')?new AbortController():null;
+  var t=ctl?setTimeout(function(){ctl.abort();},ms||15000):null;
+  var p=fetch(url,ctl?{signal:ctl.signal}:{});
+  return p.then(function(r){if(t)clearTimeout(t);return r;},function(e){if(t)clearTimeout(t);throw e;});
+}
+/* tag network failures with their true cause so error copy never blames the user */
+function tagNetErr(e){
+  if(e&&e.kind)throw e;
+  if(e&&e.name==='AbortError')throw {kind:'timeout'};
+  throw {kind:'net'};
+}
+/* stage transitions are scheduled 1300ms out; bumping the generation voids
+   any pending one (Back-to-globe mid-transition must not resurrect the stage) */
+var stageGen=0;
+/* plan generation: every new plan (submit, live re-plan, or a reset) bumps this,
+   so a slow /api/route response from a superseded plan bails instead of
+   clobbering the current tripCtx/panel with the wrong trip. */
+var planGen=0;
+function netErrMsg(e){
+  if(e.kind==='timeout')return 'The map service is slow right now. Give it a few seconds and try again.';
+  if(e.kind==='upstream')return 'The map lookup service is temporarily unavailable. Try again in a minute.';
+  return 'The Voyage server is not responding. Start it (node server.js) and try again.';
+}
+
+form.addEventListener('submit',function(e){
+  e.preventDefault();pushURL();hint.classList.remove('err');cart=[];closeEdit();   // a fresh search starts an empty cart
+  var vals=[].map.call(document.querySelectorAll('#stops .stopin'),function(i){return i.value.trim();}).filter(Boolean);
+  if(vals.length<2){hint.textContent=travelMode==='fly'?'Add at least a departure and destination city.':(travelMode==='boat'?'Add at least a departure and destination port.':'Add at least a start and a destination.');hint.classList.add('err');return;}
+  hint.textContent=travelMode==='drive'?'Mapping your route, stops, and stays...':'Drawing your route and gathering each stop...';
+  var pts=[],chain=Promise.resolve(null);
+  vals.forEach(function(v){chain=chain.then(function(prev){return resolveLocation(v,prev?prev.lat+','+prev.lng:undefined,travelMode==='drive').then(function(r){pts.push(r);return r;});});});
+  chain.then(function(){return GLOBE_READY;}).then(function(){planTrip(pts);hint.textContent=defHint();})
+    .catch(function(er){if(er==='cancel'){hint.textContent=defHint();}else if(er&&er.kind){hint.textContent=netErrMsg(er);hint.classList.add('err');}else{hint.textContent='We could not find one of those stops. Add a city or state.';hint.classList.add('err');}});
+});
+
+/* ===== reset ===== */
+document.getElementById('reset').addEventListener('click',function(){
+  stageGen++;planGen++;closeEdit();   // void any stage transition and in-flight plan
+  streetStatus('');
+  lastFit=null;document.getElementById('recenter').classList.remove('show');
+  document.body.classList.remove('inarea');
+  document.getElementById('panel').classList.remove('open');
+  this.classList.remove('show');
+  document.getElementById('disc').classList.remove('hide');
+  world.htmlElementsData([]);world.ringsData([]);world.arcsData([]);world.pointsData(overview);
+  document.getElementById('stage').classList.remove('show');
+  world.pointOfView(US,dur(1600));
+  world.controls().autoRotate=!RM.matches;
+  if(selRow){selRow.classList.remove('sel');selRow=null;}
+});
+
+/* ===== util ===== */
+/* esc escapes &<> AND both quote chars, so esc() output is safe inside a
+   double- or single-quoted HTML attribute, not just element text. API-supplied
+   names (hotels, events, places) flow straight into attributes. */
+function closeEdit(){document.body.classList.remove('editing');var eb=document.getElementById('editTrip');if(eb)eb.textContent='Edit trip';}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+/* allowlist http(s) before a value reaches href/src/url() so a javascript: or
+   data: URL from an upstream can never execute */
+function urlOk(u){u=String(u||'');return /^https?:\/\//i.test(u)?u:'';}
+/* YouTube titles arrive entity-encoded ("&amp;"); decode once BEFORE esc so
+   titles read clean without ever trusting the raw string as HTML */
+function deent(s){var t=document.createElement('textarea');t.innerHTML=s||'';return t.value;}
+function miles(a,b,c,d){var R=3959,t=Math.PI/180,dl=(c-a)*t,dn=(d-b)*t;var x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a*t)*Math.cos(c*t)*Math.sin(dn/2)*Math.sin(dn/2);return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+
+/* ===== street-detail stage + routing ===== */
+var stageMap=null, gLayer=null, rLayer=null, cLayer=null, sLayer=null, dLayer=null, stLayer=null, tripCtx=null;
+
+function buildDetail(opts){
+  var ex=document.getElementById('extra');
+  var rc=tripCtx;
+  var recsHtml=(rc.recs||[]).map(stopCardHTML).join('');
+  var byWord=travelMode==='fly'?'by air':(travelMode==='boat'?'by sea':'by car');
+  ex.className='extra';
+  ex.innerHTML=costHTML()+
+    (recsHtml||'<p class="note">Add another stop to build an itinerary.</p>')+
+    (rc.travel==='drive'?('<div class="lbl" style="margin-top:16px">Along the way</div>'+
+      '<div id="sights"><div class="feedv"><div class="fslide fskel"></div><div class="fslide fskel" style="height:120px"></div></div></div>'):'')+
+    wpsHTML('Taking this trip '+byWord+'. Great places to stay and things to do at each stop?');
+  bindCost(ex);renderCost();
+  initWPS();
+  // shared experiences load themselves: run the community search for this trip
+  // so other travelers' posts and videos appear without the user typing a thing
+  (function(){
+    var dl=rc.pts&&rc.pts[rc.pts.length-1]||{},dn=dl.city||dl.label||'';
+    if(!dn)return;
+    if(dl.st&&dn.indexOf(dl.st)<0)dn+=' '+dl.st;   // "Austin TX" beats "Austin" for relevance
+    var wq=(travelMode==='drive'?'road trip to ':'trip to ')+dn+' tips';
+    getStatus().then(function(st){
+      if(!(st.youtube||st.reddit||st.google))return;
+      var w=document.getElementById('wps'),qi=document.getElementById('wpsq'),go=document.getElementById('wpsgo');
+      if(!w||!qi||!go)return;
+      w.open=true;qi.value=wq;go.click();
+    });
+  })();
+  initStopSliders(rc.recs||[]);
+  var g2=++stageGen;
+  setTimeout(function(){if(g2!==stageGen)return;
+    showStage(opts.center,rc.travel==='drive'?7:5,null,rc.line);
+    drawTrip();
+    if(rc.travel==='drive'){
+      drawEndpointStreets(rc.pts);
+      (rc.sightsPromise||loadSights(rc.line)).then(function(sg){if(g2!==stageGen)return;tripCtx.sights=sg;drawSights(sg);renderStories(sg);});
+    }
+  },1300);
+}
+
+function ml(href,lbl){return '<a href="'+href+'" target="_blank" rel="noopener">'+esc(lbl)+'</a>';}
+
+/* ----- live social + booking platforms (credential-gated; /api/social/status says what's on) ----- */
+var platStatus=null;
+var statusP=null;
+function getStatus(){ if(platStatus)return Promise.resolve(platStatus);
+  // memoize the in-flight promise: a road trip fires many slider fills at
+  // once and each used to pay its own /api/social/status round trip
+  if(statusP)return statusP;
+  statusP=bfetch('/api/social/status',3000).then(function(r){return r.json();})
+    .then(function(s){platStatus=s;return s;})
+    .catch(function(){statusP=null;return {};});
+  return statusP;
+}
+function connectHTML(st){
+  function row(name,on,how){return '<div class="conrow"><b>'+esc(name)+'</b><span class="'+(on?'con-on':'con-off')+'">'+(on?'Connected':esc(how))+'</span></div>';}
+  return '<div class="connectbox">'+
+    row('YouTube',st.youtube,'Free API key · 5 min')+
+    row('Google web search',st.google,'Free key + engine ID · 5 min')+
+    row('Reddit',st.reddit,'Approval form · 2-4 weeks')+
+    row('Hotels (Amadeus)',st.hotels,'Free tier · 10 min')+
+    row('Instagram / Facebook (Meta)',false,'Needs Meta app review')+
+    row('TikTok',false,'Needs developer approval')+
+    row('Airbnb',false,'No public API exists')+
+    '<p class="note">Voyage searches only the platforms marked Connected. The rest open as direct links until they join.</p></div>';
+}
+/* ----- "What people are saying" — in-app community research across connected platforms ----- */
+function aggCard(x){
+  var icon=x.plat==='youtube'?'▶':x.plat==='reddit'?'💬':'✦';
+  var eng=fmtViews(x.engagement)+' '+x.kind;
+  return '<a class="svcard" href="'+esc(urlOk(x.url))+'" target="_blank" rel="noopener">'+
+    (x.thumb?'<img class="svthumb" src="'+esc(urlOk(x.thumb))+'" alt="" loading="lazy">':'<span class="svthumb svglyph">'+icon+'</span>')+
+    '<div class="svb"><div class="svt">'+esc(deent(x.title))+'</div><div class="svm">'+icon+' '+esc(x.plat)+' · '+esc(eng)+(x.meta?' · '+esc(x.meta):'')+'</div></div></a>';
+}
+function wpsLinks(q){
+  var e=encodeURIComponent(q);
+  return '<div class="platrow">'+
+    ml('https://www.tiktok.com/search?q='+e,'♪ TikTok')+
+    ml('https://www.instagram.com/explore/search/keyword/?q='+e,'◍ Instagram')+
+    ml('https://www.facebook.com/search/posts/?q='+e,'f Facebook')+
+    ml('https://www.youtube.com/results?search_query='+e+'&sp=CAMSAhAB','▶ YouTube')+'</div>';
+}
+function wpsHTML(ph){
+  return '<details class="wps" id="wps"><summary>What travelers say <span class="wpshint">shared experiences</span></summary>'+
+    '<div class="wpsin"><input id="wpsq" placeholder="'+esc(ph)+'" autocomplete="off"><button type="button" id="wpsgo">Search</button></div>'+
+    '<div id="wpsout"><p class="note">Ask anything about a route or a place. We search the connected platforms and rank the best posts by views, votes, and likes.</p></div>'+
+    '<p class="note">These are public posts aggregated from social platforms and ranked by engagement. They are opinions, not guarantees. Where you go and what you decide is entirely your call, and Voyage is not responsible for those posts or for what happens on your trip.</p></details>';
+}
+function initWPS(){
+  var go=document.getElementById('wpsgo'),qi=document.getElementById('wpsq'),out=document.getElementById('wpsout');
+  if(!go||!qi||!out)return;
+  function run(){
+    var v=qi.value.trim();if(!v)return;
+    out.innerHTML='<p class="note">Searching connected platforms…</p>';
+    fetch('/api/social/aggregate?q='+encodeURIComponent(v)).then(function(r){return r.json();}).then(function(j){
+      var h='',con=j.connected||{};
+      (j.results||[]).forEach(function(x){h+=aggCard(x);});
+      var webH=(j.web||[]).map(function(w){
+        return '<a class="svcard" href="'+esc(urlOk(w.url))+'" target="_blank" rel="noopener"><span class="svthumb svglyph">🌐</span>'+
+          '<div class="svb"><div class="svt">'+esc(w.title)+'</div><div class="svm">'+esc(w.site)+(w.snippet?' · '+esc(w.snippet.slice(0,90)):'')+'</div></div></a>';
+      }).join('');
+      if(webH)h+='<div class="lbl" style="margin-top:12px">From the web</div>'+webH;
+      if(h){
+        h+='<p class="note">Videos ranked by engagement; web results by relevance. Search the not-yet-connected platforms directly:</p>'+wpsLinks(v);
+      }else if(con.youtube||con.reddit||con.google){
+        h='<p class="note">Nothing strong came back for that. Try fewer words, or search the platforms directly:</p>'+wpsLinks(v);
+      }else{
+        h='<p class="note">No platforms are connected yet, so we can’t rank posts in-app. Search directly:</p>'+wpsLinks(v)+connectHTML(platStatus||{});
+      }
+      out.innerHTML=h;
+    }).catch(function(){out.innerHTML='<p class="note">Search failed. Try again in a moment.</p>'+wpsLinks(v);});
+  }
+  go.addEventListener('click',run);
+  qi.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();run();}});
+}
+/* ----- Leaflet satellite stage ----- */
+function ensureMap(){
+  if(stageMap)return stageMap;
+  stageMap=L.map('smap',{zoomControl:false,attributionControl:true});
+  L.control.zoom({position:matchMedia('(min-width:701px)').matches?'bottomright':'topleft'}).addTo(stageMap);
+  // Keyless OpenStreetMap standard tiles (labels baked in, no account needed).
+  // The #waterink filter on .leaflet-tile-pane greens the water and mutes OSM's
+  // colors toward the algae ground.
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{subdomains:'abc',maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(stageMap);
+  stLayer=L.layerGroup().addTo(stageMap);gLayer=L.layerGroup().addTo(stageMap);rLayer=L.layerGroup().addTo(stageMap);cLayer=L.layerGroup().addTo(stageMap);sLayer=L.layerGroup().addTo(stageMap);dLayer=L.layerGroup().addTo(stageMap);
+  return stageMap;
+}
+function showStage(center,zoom,roads,fitLine){
+  document.getElementById('stage').classList.add('show');
+  var m=ensureMap();
+  if(sLayer)sLayer.clearLayers();   // story markers only persist in road-trip view
+  if(dLayer)dLayer.clearLayers();   // demo preview markers too
+  if(stLayer)stLayer.clearLayers(); // street outline only for the searched street
+  setTimeout(function(){m.invalidateSize();
+    if(fitLine&&fitLine.length)fitWithUI(L.latLngBounds(fitLine));
+    else{
+      m.setView([center.lat,center.lng],zoom||14,{animate:false});
+      var ph=window.matchMedia('(max-width:700px)').matches;
+      m.panBy(ph?[0,120]:[-Math.round(Math.min(404,innerWidth*0.92)/2),0],{animate:false});
+    }
+  },600);
+}
+/* fit a route so it centers in the VISIBLE map: pad for the bottom sheet
+   on phones and the side panel on desktop, then leave the camera alone.
+   The last fit is remembered so the re-center button (and a sheet
+   collapse) can restore it after any accidental pan. */
+var lastFit=null;
+function fitWithUI(bounds){
+  var m=ensureMap();
+  lastFit=bounds;
+  var rc=document.getElementById('recenter');if(rc)rc.classList.add('show');
+  var phone=window.matchMedia('(max-width:700px)').matches;
+  var opts=phone
+    ?{paddingTopLeft:[24,104],paddingBottomRight:[24,184]}
+    :{paddingTopLeft:[450,90],paddingBottomRight:[40,60]};
+  m.fitBounds(bounds,opts);
+}
+document.getElementById('recenter').addEventListener('click',function(){if(lastFit)fitWithUI(lastFit);});
+/* ----- polyline decode (shared by drive routing) ----- */
+function decode(str,prec){var idx=0,lat=0,lng=0,out=[],f=Math.pow(10,prec||6),sh,rs,by;
+  while(idx<str.length){sh=0;rs=0;do{by=str.charCodeAt(idx++)-63;rs|=(by&0x1f)<<sh;sh+=5;}while(by>=0x20);lat+=(rs&1)?~(rs>>1):(rs>>1);
+  sh=0;rs=0;do{by=str.charCodeAt(idx++)-63;rs|=(by&0x1f)<<sh;sh+=5;}while(by>=0x20);lng+=(rs&1)?~(rs>>1):(rs>>1);out.push([lat/f,lng/f]);}return out;}
+function fmtViews(v){return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?Math.round(v/1e3)+'K':''+v;}
+/* ----- reopen the dual-intent gate ----- */
+function openGate(){
+  stageGen++;planGen++;closeEdit();   // void any stage transition and in-flight plan
+  streetStatus('');
+  lastFit=null;var rcb=document.getElementById('recenter');if(rcb)rcb.classList.remove('show');
+  document.body.classList.remove('chosen','inarea','m-drive','m-fly','m-boat');themeGlobe('#3ab67d');
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('reset').classList.remove('show');
+  document.getElementById('disc').classList.remove('hide');
+  document.getElementById('stage').classList.remove('show');
+  document.getElementById('ac').classList.remove('show');
+  world.htmlElementsData([]);world.ringsData([]);world.arcsData([]);world.pointsData(overview);
+  world.pointOfView(US,dur(1500));world.controls().autoRotate=!RM.matches;
+  if(selRow){selRow.classList.remove('sel');selRow=null;}
+}
+
+/* ----- vague-search disambiguation, ETA, connect helpers ----- */
+/* one silent retry before any lookup failure reaches the user: most
+   upstream blips clear in a second or two */
+function geoFetch(url,attempt){
+  return bfetch(url)
+    .then(function(r){if(r.status>=500)throw {kind:'upstream'};return r.json();},tagNetErr)
+    .catch(function(e){
+      if(e&&(e.kind==='upstream'||e.kind==='timeout')&&!attempt){
+        return new Promise(function(ok){setTimeout(ok,1800);}).then(function(){return geoFetch(url,1);});
+      }
+      throw e;
+    });
+}
+function geocodeMulti(qq,near,geom){
+  return geoFetch('/api/geocode?limit=10'+(near?'&near='+encodeURIComponent(near):'')+(geom?'&geom=1':'')+'&q='+encodeURIComponent(qq)).then(function(j){
+      if(!j||!j.length||j.error)return [];
+      var seen={},out=[];
+      j.forEach(function(hit){
+        var ad=hit.address||{},city=ad.city||ad.town||ad.village||ad.hamlet||'',county=ad.county||'',stN=ad.state||'',st=BYNAME[stN.toLowerCase()];
+        var k=((ad.road||'')+'|'+city+'|'+county+'|'+stN).toLowerCase();if(seen[k])return;seen[k]=1;
+        var parts=hit.display_name.split(',').map(function(s){return s.trim();});
+        /* hyper-specific: exact street on top, then city · county · state so nothing is ambiguous */
+        var sub=[city,county,stN].filter(Boolean).filter(function(v,i,a){return a.indexOf(v)===i;}).join(' · ');
+        out.push({lat:parseFloat(hit.lat),lng:parseFloat(hit.lon),label:parts[0],sub:sub||parts.slice(1,3).join(', '),st:st?st.s:'',road:(ad.road||''),city:city,county:county,geojson:(hit.geojson||null)});
+      });
+      return out;
+    });
+}
+var chooserPick=null, chooserCancel=null;
+function showChooser(list,onPick,onCancel,title,subtitle){
+  chooserPick=onPick||null; chooserCancel=onCancel||null;
+  document.getElementById('chh').textContent=title||'Which one did you mean?';
+  document.getElementById('chsub').textContent=subtitle||'Pick the exact one: street, city, and county shown, so nothing is ambiguous';
+  var box=document.getElementById('chlist');
+  box.innerHTML=list.map(function(c,i){return '<button class="chopt" type="button" data-i="'+i+'"><b>'+esc(c.label)+'</b>'+esc(c.sub||'')+'</button>';}).join('');
+  box.onclick=function(e){var b=e.target.closest('.chopt');if(!b)return;var c=list[+b.dataset.i];document.getElementById('chooser').classList.remove('show');var f=chooserPick;chooserPick=chooserCancel=null;if(f)f(c);};
+  document.getElementById('chooser').classList.add('show');
+}
+function hideChooser(){document.getElementById('chooser').classList.remove('show');var f=chooserCancel;chooserPick=chooserCancel=null;if(f)f('cancel');}
+/* does the query already name a state? (full names anywhere; 2-letter abbr only as the LAST word,
+   excluding abbrs that double as street/common words: CT=court, LA=lane, IN, OR, ME, OK, HI, OH, DE) */
+var ABBR_RISKY={ct:1,la:1,'in':1,'or':1,me:1,ok:1,hi:1,oh:1,de:1};
+function hasStateToken(q){
+  var t=' '+q.toLowerCase().replace(/[.,]/g,' ').replace(/\s+/g,' ').trim()+' ';
+  for(var i=0;i<STATES.length;i++){if(t.indexOf(' '+STATES[i].n.toLowerCase()+' ')>-1)return true;}
+  var last=t.trim().split(' ').pop();
+  return !!(BYABBR[last]&&!ABBR_RISKY[last]);
+}
+/* "Which state?" picker — type-to-filter list of all 50, shown before street options for short queries */
+function askState(query,onPick,onCancel){
+  chooserPick=null; chooserCancel=onCancel||null;
+  document.getElementById('chh').textContent='Which state is that in?';
+  document.getElementById('chsub').textContent='“'+query+'” exists in more than one state. Pick yours and we’ll list the exact streets. No need to type the full address.';
+  var box=document.getElementById('chlist');
+  function grid(f){
+    var ms=STATES.filter(function(s){return !f||s.n.toLowerCase().indexOf(f)>-1||s.s.toLowerCase()===f;});
+    return ms.map(function(s){return '<button class="chstate" type="button" data-s="'+s.s+'">'+esc(s.n)+'<span>'+s.s+'</span></button>';}).join('')||'<div class="chnone">No state matches that</div>';
+  }
+  box.innerHTML='<input class="chfilter" id="chfilter" placeholder="Type your state…" autocomplete="off"><div class="chstates" id="chstates">'+grid('')+'</div>';
+  var fi=document.getElementById('chfilter');
+  fi.addEventListener('input',function(){document.getElementById('chstates').innerHTML=grid(fi.value.trim().toLowerCase());});
+  box.onclick=function(e){var b=e.target.closest('.chstate');if(!b)return;var st=BYABBR[b.getAttribute('data-s').toLowerCase()];document.getElementById('chooser').classList.remove('show');chooserPick=chooserCancel=null;if(st)onPick(st);};
+  document.getElementById('chooser').classList.add('show');
+  setTimeout(function(){fi.focus();},80);
+}
+/* "Which city?" picker — options come from real matches in the chosen state; typing a city
+   that isn't listed searches it directly (Enter or the dashed button) */
+function askCity(query,st,options,onPick,onCancel){
+  chooserPick=null; chooserCancel=onCancel||null;
+  document.getElementById('chh').textContent='Which city in '+st.n+'?';
+  document.getElementById('chsub').textContent='Pick the city where “'+query+'” is. Not listed? Type it and we’ll search it.';
+  var box=document.getElementById('chlist');
+  function grid(f){
+    var ms=options.filter(function(c){return !f||c.city.toLowerCase().indexOf(f)>-1;});
+    var h=ms.map(function(c){return '<button class="chstate" type="button" data-c="'+esc(c.city)+'">'+esc(c.city)+'<span>'+esc(c.county||'')+'</span></button>';}).join('');
+    if(f&&!ms.some(function(c){return c.city.toLowerCase()===f;}))h+='<button class="chstate chfree" type="button" data-c="'+esc(f)+'">Search &ldquo;'+esc(f)+'&rdquo;<span>city</span></button>';
+    return h||'<div class="chnone">Type your city above</div>';
+  }
+  box.innerHTML='<input class="chfilter" id="chfilter" placeholder="Type your city…" autocomplete="off"><div class="chstates" id="chstates">'+grid('')+'</div>';
+  var fi=document.getElementById('chfilter');
+  function done(city){document.getElementById('chooser').classList.remove('show');chooserPick=chooserCancel=null;onPick(city);}
+  fi.addEventListener('input',function(){document.getElementById('chstates').innerHTML=grid(fi.value.trim().toLowerCase());});
+  fi.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();var v=fi.value.trim();if(v)done(v);}});
+  box.onclick=function(e){var b=e.target.closest('.chstate');if(!b)return;done(b.getAttribute('data-c'));};
+  document.getElementById('chooser').classList.add('show');
+  setTimeout(function(){fi.focus();},80);
+}
+/* resolve a typed place to one location. Guided drill-down so the user never has to type a
+   full address: single match goes straight through; a short query like "kings hwy" asks
+   WHICH STATE, then WHICH CITY (from real matches), then shows county-labeled options. */
+function resolveLocation(query,near,geom){
+  var k=query.toLowerCase();
+  if(BYNAME[k])return Promise.resolve({lat:BYNAME[k].lat,lng:BYNAME[k].lng,label:BYNAME[k].n,st:BYNAME[k].s,state:BYNAME[k]});
+  if(BYABBR[k])return Promise.resolve({lat:BYABBR[k].lat,lng:BYABBR[k].lng,label:BYABBR[k].n,st:BYABBR[k].s,state:BYABBR[k]});
+  return geocodeMulti(query,near,geom).then(function(list){
+    if(list.length===1)return list[0];            // unambiguous -> just go (typos already fixed upstream)
+    if(list.length>1&&hasStateToken(query))       // user already told us the state -> show exact options
+      return new Promise(function(resolve,reject){ showChooser(list,resolve,reject); });
+    if(!list.length&&hasStateToken(query))return Promise.reject('notfound');
+    /* guided drill-down: state -> city -> county-labeled exact options */
+    return new Promise(function(resolve,reject){
+      function finish(l3,where){
+        if(l3.length===1)return resolve(l3[0]);
+        if(l3.length>1)return showChooser(l3,resolve,reject,'Which one in '+where+'?','County shown on every option so you can pick the exact one');
+        reject('notfound');
+      }
+      askState(query,function(st){
+        geocodeMulti(query+', '+st.n,near,geom).then(function(l2){
+          if(l2.length===1)return resolve(l2[0]);
+          var cities=[],seen={};
+          l2.forEach(function(c){var nm=c.city||c.county;if(!nm)return;var kk=nm.toLowerCase();if(seen[kk])return;seen[kk]=1;cities.push({city:nm,county:c.county||''});});
+          if(cities.length<=1){                     // one city (or none named): county options directly
+            if(l2.length)return finish(l2,cities.length?cities[0].city:st.n);
+            return askCity(query,st,[],function(cityNm){
+              geocodeMulti(query+', '+cityNm+', '+st.n,near,geom).then(function(l3){finish(l3,cityNm);}).catch(reject);
+            },function(){reject('cancel');});
+          }
+          askCity(query,st,cities,function(cityNm){
+            geocodeMulti(query+', '+cityNm+', '+st.n,near,geom).then(function(l3){
+              if(!l3.length){var lf=l2.filter(function(c){return (c.city||c.county).toLowerCase()===cityNm.toLowerCase();});if(lf.length)return finish(lf,cityNm);}
+              finish(l3,cityNm);
+            }).catch(reject);
+          },function(){ showChooser(l2,resolve,reject,'Which one in '+st.n+'?'); });
+        }).catch(reject);
+      },function(){ if(list.length){showChooser(list,resolve,reject);}else reject('cancel'); });
+    });
+  });
+}
+function fmtTime(m){if(!m||m<1)return '<1 min';m=Math.round(m);return m<60?(m+' min'):(Math.floor(m/60)+'h '+(m%60)+'m');}
+/* ----- road trip: Snapchat-style "stories on the map" of real sights + viral videos ----- */
+function wpLang(wp){var p=(wp||'').split(':');return p.length>1?p[0]:'en';}
+function wpTitle(wp){var p=(wp||'').split(':');return p.length>1?p.slice(1).join(':'):wp;}
+function wikiImage(wp,big){
+  if(!wp)return Promise.resolve(null);
+  return fetch('https://'+wpLang(wp)+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(wpTitle(wp)))
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(j){
+      if(!j)return null;
+      if(big&&j.originalimage&&j.originalimage.source&&(j.originalimage.width||9999)<=6000)return j.originalimage.source;
+      return (j.thumbnail&&j.thumbnail.source)||null;
+    }).catch(function(){return null;});
+}
+function wikiThumb(wp){return wikiImage(wp,false);}
+/* lazy-load the real Wikipedia photo into any not-yet-loaded story bubble (map + panel) */
+function loadThumbs(){
+  [].forEach.call(document.querySelectorAll('.snapimg[data-wp]'),function(el){
+    var wp=el.getAttribute('data-wp'),big=el.hasAttribute('data-big');el.removeAttribute('data-wp');if(!wp)return;
+    wikiImage(wp,big).then(function(src){if(src)el.style.backgroundImage='url("'+src.replace(/"/g,'')+'")';});
+  });
+}
+function sightVideos(name){return 'https://www.youtube.com/results?search_query='+encodeURIComponent(name+' travel')+'&sp=CAMSAhAB';}
+function sightPopup(s){
+  var ph='https://www.google.com/search?tbm=isch&q='+encodeURIComponent(s.name);
+  var wpUrl='https://'+wpLang(s.wp)+'.wikipedia.org/wiki/'+encodeURIComponent(wpTitle(s.wp));
+  return '<b style="color:'+accent+'">'+esc(s.name)+'</b><br><span style="color:#8a9a93;font-size:10px;text-transform:capitalize">'+esc(s.kind||'sight')+'</span><br>'+
+    '<a href="'+sightVideos(s.name)+'" target="_blank" rel="noopener" style="color:'+accent+';font-weight:600">&#9654; Popular videos</a> &middot; '+
+    '<a href="'+ph+'" target="_blank" rel="noopener" style="color:#bcd">Photos</a> &middot; '+
+    '<a href="'+wpUrl+'" target="_blank" rel="noopener" style="color:#bcd">Wiki</a>';
+}
+/* sample the route and ask the proxy for notable sights near it */
+function loadSights(line){
+  if(!line||!line.length)return Promise.resolve([]);
+  var n=Math.min(12,line.length),step=Math.max(1,Math.floor(line.length/n)),pts=[];
+  for(var i=0;i<line.length;i+=step)pts.push(line[i][0].toFixed(3)+','+line[i][1].toFixed(3));
+  return bfetch('/api/sights?pts='+encodeURIComponent(pts.join(';')),25000).then(function(r){return r.ok?r.json():[];}).catch(function(){return [];});
+}
+var sightVidCache={};
+function expandSnap(s,root){
+  var snap=root.querySelector('.snap');if(!snap||snap.querySelector('.snapvid'))return;
+  var card=document.createElement('div');card.className='snapvid';
+  card.innerHTML='<span class="svv"></span><span class="svt2">'+esc(s.name)+'</span>';
+  snap.appendChild(card);
+  requestAnimationFrame(function(){snap.classList.add('on');});
+  var vv=card.querySelector('.svv');
+  getStatus().then(function(st){
+    if(!st.youtube){
+      /* no video platform connected: expand with the big wiki image instead */
+      vv.className='svv snapimg';vv.setAttribute('data-wp',s.wp||'');vv.setAttribute('data-big','1');
+      loadThumbs();return;
+    }
+    var key=s.name;
+    var got=sightVidCache[key]?Promise.resolve(sightVidCache[key])
+      :bfetch('/api/social/videos?q='+encodeURIComponent(s.name+' tour'),8000)
+        .then(function(r){return r.ok?r.json():[];}).catch(function(){return [];})
+        .then(function(vs){sightVidCache[key]=vs&&vs[0]?vs[0]:null;return sightVidCache[key];});
+    got.then(function(v){
+      if(!snap.classList.contains('on'))return;    /* collapsed while loading */
+      if(!v){vv.className='svv snapimg';vv.setAttribute('data-wp',s.wp||'');vv.setAttribute('data-big','1');loadThumbs();return;}
+      if(v.thumb)vv.style.backgroundImage='url('+v.thumb+')';
+      var f=document.createElement('iframe');
+      f.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(v.id)+'?autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1';
+      f.allow='autoplay; encrypted-media';f.title=v.title||s.name;
+      vv.appendChild(f);
+      var t=card.querySelector('.svt2');if(t&&v.title){var dx=document.createElement('textarea');dx.innerHTML=v.title;t.textContent=dx.value;}
+    });
+  });
+}
+function collapseSnap(root){
+  var snap=root.querySelector('.snap');if(!snap)return;
+  snap.classList.remove('on');
+  var card=snap.querySelector('.snapvid');
+  if(card)setTimeout(function(){if(card.parentNode)card.parentNode.removeChild(card);},240);
+}
+function drawSights(sights){
+  if(!sLayer)return;sLayer.clearLayers();
+  var fine=window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+  (sights||[]).forEach(function(s){
+    var m=L.marker([s.lat,s.lng],{icon:L.divIcon({className:'snapwrap',iconSize:[34,34],iconAnchor:[17,17],
+      html:'<div class="snap" title="'+esc(s.name)+'"><span class="snapimg" data-wp="'+esc(s.wp||'')+'"></span><span class="snapplay">&#9654;</span></div>'})});
+    m.bindPopup(sightPopup(s),{maxWidth:220});
+    if(fine){
+      var armT=null;
+      m.on('mouseover',function(){
+        var root=m.getElement();if(!root)return;
+        armT=setTimeout(function(){expandSnap(s,root);},130);
+      });
+      m.on('mouseout',function(){
+        if(armT){clearTimeout(armT);armT=null;}
+        var root=m.getElement();if(root)collapseSnap(root);
+      });
+    }
+    sLayer.addLayer(m);
+  });
+  loadThumbs();
+}
+/* the horizontal "story tray" in the panel */
+function renderStories(sg){
+  var box=document.getElementById('sights');if(!box)return;
+  if(!sg||!sg.length){box.innerHTML='<p class="note">No tagged sights along this route yet.</p>';return;}
+  function slide(s){return '<a class="fslide" href="'+sightVideos(s.name)+'" target="_blank" rel="noopener">'+
+    '<div class="snapimg fbg" data-wp="'+esc(s.wp||'')+'" data-big="1"></div><div class="fscrim"></div>'+
+    '<div class="fmeta"><div class="fname">'+esc(s.name)+'</div><div class="fkind">'+esc(s.kind||'sight')+' &middot; on your route</div></div>'+
+    '<span class="fplay">&#9654;</span></a>';}
+  // cap the tall feed at 4 so it does not bury the travelers band below; the rest expand on tap
+  var top=sg.slice(0,4),rest=sg.slice(4,12);
+  box.innerHTML='<div class="feedv">'+top.map(slide).join('')+
+    (rest.length?'<button type="button" class="fmore" id="fmore">See '+rest.length+' more along the way <span class="hsarr">&#8595;</span></button>':'')+'</div>';
+  var fm=box.querySelector('#fmore');
+  if(fm)fm.addEventListener('click',function(){fm.insertAdjacentHTML('beforebegin',rest.map(slide).join(''));fm.remove();loadThumbs();});
+  loadThumbs();
+}
+/* outline every chosen street so the user sees exactly what they're looking at.
+   The reliable Nominatim geometry draws instantly, then upgrades to the FULL
+   street from Overpass (20 km sweep) when it responds. Each street lives in its
+   own sub-layer, so every trip stop can be outlined at once without wiping
+   the others. */
+function streetSegInto(g,pts){
+  L.polyline(pts,{color:accent,weight:9,opacity:.85,lineCap:'round',lineJoin:'round'}).addTo(g);
+  L.polyline(pts,{color:'#0C2F20',weight:2.5,opacity:.45,lineCap:'round',lineJoin:'round'}).addTo(g);
+}
+function streetDrawInto(g,lines,fit){
+  if(!lines||!lines.length)return false;
+  g.clearLayers();var all=[];
+  lines.forEach(function(pts){streetSegInto(g,pts);all=all.concat(pts);});
+  if(fit&&all.length&&stageMap)stageMap.fitBounds(L.latLngBounds(all).pad(0.3),
+    Object.assign({maxZoom:16},window.matchMedia('(max-width:700px)').matches
+      ?{paddingTopLeft:[24,104],paddingBottomRight:[24,184]}
+      :{paddingTopLeft:[450,90],paddingBottomRight:[40,60]}));
+  return true;
+}
+function geoToLines(g){
+  if(!g)return [];
+  if(g.type==='LineString')return [g.coordinates.map(function(c){return [c[1],c[0]];})];
+  if(g.type==='MultiLineString')return g.coordinates.map(function(seg){return seg.map(function(c){return [c[1],c[0]];});});
+  return [];
+}
+var streetChipTimer=null;
+function streetStatus(msg,autoclear){
+  var el=document.getElementById('stChip');if(!el)return;
+  if(streetChipTimer){clearTimeout(streetChipTimer);streetChipTimer=null;}
+  el.textContent=msg||'';el.classList.toggle('show',!!msg);
+  if(msg&&autoclear)streetChipTimer=setTimeout(function(){el.classList.remove('show');},7000);
+}
+function drawStreet(center,name,geojson,fit){
+  if(!stLayer||!center)return;
+  var g=L.layerGroup().addTo(stLayer);             // this street's own sub-layer
+  streetDrawInto(g,geoToLines(geojson),fit);       // instant, reliable (from the same search)
+  if(!name)return;
+  // Upgrade to the whole street. Status chip only for the primary street
+  // (fit=true); silent background upgrades for non-primary stops. Outage
+  // (503) retries once; a genuine no-match says so instead of silence.
+  var gen=stageGen;
+  function attempt(second){
+    bfetch('/api/street?name='+encodeURIComponent(name)+'&lat='+center.lat+'&lng='+center.lng,50000)
+      .then(function(r){if(r.status>=500)throw {kind:'busy'};return r.json();})
+      .then(function(lines){
+        if(gen!==stageGen)return;
+        if(lines&&lines.length){streetDrawInto(g,lines,fit);if(fit)streetStatus('');}
+        else if(fit)streetStatus('No full outline in the map data for this street name. The stop pin still marks the spot.',true);
+      })
+      .catch(function(){
+        if(gen!==stageGen)return;
+        if(!second){
+          if(fit)streetStatus('Street outline service is busy. Retrying…');
+          setTimeout(function(){if(gen===stageGen)attempt(true);},8000);
+        }else if(fit){
+          streetStatus('Street outline unavailable right now. The pin still marks the spot.',true);
+        }
+      });
+  }
+  if(fit)streetStatus('Outlining the full street…');
+  attempt(false);
+}
+function drawEndpointStreets(pts){
+  (pts||[]).forEach(function(p){if(p&&(p.road||p.geojson))drawStreet({lat:p.lat,lng:p.lng},p.road,p.geojson,false);});
+}
+/* ----- road trip: lodging + things-to-do recommendations (real live searches) ----- */
+function slugify(s){return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+function seeStr(){return tripPrefs.see.length?(' '+tripPrefs.see.join(' ')):'';}
+function stopCardHTML(r,i){
+  var ds=r.date?(' \u00b7 '+fmtDate(r.date)):'';
+  if(travelMode!=='drive'){
+    var t=r.first?'Departure':(r.last?'Destination':(travelMode==='boat'?('Port '+(i+1)):('City '+(i+1))));
+    var m=esc(r.place||'this stop')+(r.legMi?(' \u00b7 ~'+Math.round(r.legMi)+' mi direct line'):'')+ds;
+    return stopCardShell(t,m,i);
+  }
+  if(r.dest)return stopCardShell('Destination',esc(r.place||'this area')+ds,i);
+  var place=r.place||'Finding the town...';
+  var hrsIn=(tripCtx&&tripCtx.hrs?tripCtx.hrs:8)*(r.night||1);
+  return stopCardShell('Night '+r.night,esc(place)+' \u00b7 ~'+r.afterMi+' mi \u00b7 about '+hrsIn+'h of driving in'+ds,i);
+}
+function stopCardShell(title,meta,i){
+  function sl(kind){return '<div class="hslider" data-kind="'+kind+'" data-i="'+i+'"><div class="hslide hskel"></div><div class="hslide hskel"></div><div class="hslide hskel"></div></div>';}
+  return '<div class="stopcard"><div class="sh"><div class="sn">'+esc(title)+'</div><div class="sm" data-smi="'+i+'">'+meta+'</div></div>'+
+    '<div class="slbl">Stay</div>'+sl('stay')+
+    '<div class="slbl">Do</div>'+sl('do')+
+    '<div class="slbl">Events</div>'+sl('events')+
+    '<div class="slbl">Top videos</div>'+sl('videos')+'</div>';
+}
+/* ----- in-app browse sliders: real data in the app, "look further" opens the platform ----- */
+function hsMore(href,lbl){return '<a class="hslide hsmore" href="'+href+'" target="_blank" rel="noopener"><span>'+esc(lbl)+'</span><span class="hsarr">&#8599;</span></a>';}
+function hsTile(html){return '<div class="hslide hsinfo">'+html+'</div>';}
+function fillStay(el,s){
+  var place=s.place||'this area',p=encodeURIComponent(place);
+  var ab='https://www.airbnb.com/s/'+p+'/homes'+(s.ci?('?checkin='+s.ci+(s.co?('&checkout='+s.co):'')):'');
+  var gh='https://www.google.com/travel/search?q='+encodeURIComponent('hotels in '+place);
+  var gm='https://www.google.com/travel/search?q='+encodeURIComponent('motels in '+place);
+  getStatus().then(function(st){
+    if(!st.hotels){
+      el.innerHTML=stayTile(gh,'Hotels',place)+stayTile(gm,'Motels',place)+stayTile(ab,'Airbnb',place);
+      return;
+    }
+    bfetch('/api/stays/hotels?lat='+s.lat+'&lng='+s.lng+(s.ci?('&in='+s.ci+(s.co?('&out='+s.co):'')):'')).then(function(r){return r.ok?r.json():[];}).catch(function(){return null;}).then(function(hs){
+      if(hs===null){el.innerHTML=hsTile('Didn’t load right now.')+hsMore(gh,'Hotels')+hsMore(ab,'Airbnb');return;}
+      var h=(hs||[]).filter(function(x){return x.name;}).slice(0,8).map(function(x){
+        return '<a class="hslide" href="'+gh+'" target="_blank" rel="noopener"><span class="hsimg hsglyph">🏨</span><span class="hst">'+esc(x.name)+'</span><span class="hsm">'+(x.price?('$'+esc(String(x.price))+' '+esc(x.currency||'')+' / night'):'see rates')+'</span>'+addBtn('stay','Stay: '+x.name+' in '+place,x.price||budget.nightly)+'</a>';
+      }).join('');
+      el.innerHTML=(h||hsTile('No live offers for this stop'))+hsMore(gh,'More hotels')+hsMore(ab,'Airbnb');
+    });
+  });
+}
+function doIcon(kind){
+  var k=(kind||'').toLowerCase();
+  if(k.indexOf('historic')>-1)return '🏛';
+  if(k.indexOf('park')>-1||k.indexOf('nature')>-1||k.indexOf('garden')>-1)return '🌳';
+  if(k.indexOf('museum')>-1||k.indexOf('gallery')>-1)return '🖼';
+  if(k.indexOf('viewpoint')>-1)return '🌄';
+  if(k.indexOf('camp')>-1||k.indexOf('picnic')>-1)return '🏕';
+  if(k.indexOf('zoo')>-1||k.indexOf('aquarium')>-1)return '🐾';
+  return '📍';
+}
+function fillDo(el,s){
+  var place=s.place||'this area';
+  var more='https://www.google.com/search?q='+encodeURIComponent('things to do in '+place+seeStr());
+  /* The route-wide sights fetch (sightsPromise) already carries Overpass
+     POIs along the whole line; a stop reuses the ones within ~28 miles
+     instead of queueing its own Overpass round trip. The per-stop
+     loose=1 + 40 km query stays as the fallback for sparse stretches. */
+  var poolP=(tripCtx&&tripCtx.sightsPromise)?tripCtx.sightsPromise:Promise.resolve(null);
+  poolP.catch(function(){return null;}).then(function(all){
+    var near=(all||[]).filter(function(x){return x.lat&&x.lng&&miles(s.lat,s.lng,x.lat,x.lng)<=28;});
+    if(near.length>=3)return near;
+    return bfetch('/api/sights?loose=1&r=40000&pts='+s.lat.toFixed(3)+','+s.lng.toFixed(3),12000).then(function(r){return r.ok?r.json():[];}).catch(function(){return null;}).then(function(sg){
+      if(sg===null)return near.length?near:null;
+      return near.concat(sg||[]);
+    });
+  }).then(function(sg){
+    if(sg===null){el.innerHTML=hsTile('Didn’t load right now.')+hsMore(more,'Things to do');return;}
+    var h=(sg||[]).slice(0,10).map(function(x){
+      if(x.wp){
+        var wp='https://'+wpLang(x.wp)+'.wikipedia.org/wiki/'+encodeURIComponent(wpTitle(x.wp));
+        return '<a class="hslide" href="'+wp+'" target="_blank" rel="noopener"><span class="snapimg hsimg" data-wp="'+esc(x.wp)+'"></span><span class="hst">'+esc(x.name)+'</span><span class="hsm">'+esc(x.kind||'sight')+'</span></a>';
+      }
+      var g='https://www.google.com/search?q='+encodeURIComponent(x.name+' '+place);
+      return '<a class="hslide" href="'+g+'" target="_blank" rel="noopener"><span class="hsimg hsglyph">'+doIcon(x.kind)+'</span><span class="hst">'+esc(x.name)+'</span><span class="hsm">'+esc(x.kind||'sight')+'</span></a>';
+    }).join('');
+    el.innerHTML=(h||hsTile('Nothing tagged near this stop'))+hsMore(more,'More to do');
+    loadThumbs();
+  });
+}
+function fillEvents(el,s){
+  var place=s.place||'this area';
+  var eb='https://www.eventbrite.com/d/'+slugify(place)+'/all-events/';
+  getStatus().then(function(st){
+    if(!st.events){
+      el.innerHTML=hsMore(eb,'Eventbrite');
+      return;
+    }
+    bfetch('/api/events?lat='+s.lat+'&lng='+s.lng+(s.ci?('&start='+s.ci+(s.co?('&end='+s.co):'')):'')).then(function(r){return r.ok?r.json():[];}).catch(function(){return null;}).then(function(ev){
+      if(ev===null){el.innerHTML=hsTile('Didn’t load right now.')+hsMore(eb,'Eventbrite');return;}
+      var h=(ev||[]).slice(0,8).map(function(x){
+        return '<a class="hslide" href="'+esc(urlOk(x.url))+'" target="_blank" rel="noopener"><span class="hsimg" style="'+(x.img?'background-image:url('+esc(urlOk(x.img))+')':'')+'"></span><span class="hst">'+esc(x.name)+'</span><span class="hsm">'+esc(x.date||'')+(x.venue?' · '+esc(x.venue):'')+(x.price?(' · from $'+esc(String(x.price))):'')+'</span>'+(x.price?addBtn('extra','Event: '+x.name,x.price,true):'')+'</a>';
+      }).join('');
+      el.innerHTML=(h||hsTile('No listed events right now'))+hsMore(eb,'Eventbrite');
+    });
+  });
+}
+function fillVideos(el,s){
+  var place=s.place||'this area';
+  var yt='https://www.youtube.com/results?search_query='+encodeURIComponent(place+seeStr()+' travel things to do')+'&sp=CAMSAhAB';
+  getStatus().then(function(st){
+    if(!st.youtube){
+      el.innerHTML=hsMore(yt,'YouTube');
+      return;
+    }
+    bfetch('/api/social/videos?q='+encodeURIComponent(place+' travel things to do')).then(function(r){return r.ok?r.json():[];}).catch(function(){return null;}).then(function(vs){
+      if(vs===null){el.innerHTML=hsTile('Didn’t load right now.')+hsMore(yt,'YouTube');return;}
+      function vidCard(x){
+        var book='https://www.google.com/search?q='+encodeURIComponent(x.title+' '+place+' tickets booking info');
+        return '<div class="hslide hsvid" data-v="'+esc(x.id)+'"><span class="hsimg" style="'+(x.thumb?'background-image:url('+esc(urlOk(x.thumb))+')':'')+'"></span><span class="hsplay">&#9654;</span><span class="hst">'+esc(deent(x.title))+'</span><span class="hsm">'+fmtViews(x.views)+' views · '+esc(x.channel)+'</span>'+
+          '<span class="hsact"><button type="button" class="hsbtn hsloc" data-lat="'+s.lat+'" data-lng="'+s.lng+'" data-place="'+esc(place)+'">Map</button>'+
+          '<a class="hsbtn" href="'+book+'" target="_blank" rel="noopener">Book &#8599;</a></span></div>';
+      }
+      // top 5 by real view counts; most people settle in the first three
+      vs=(vs||[]).slice().sort(function(a,b){return (b.views||0)-(a.views||0);});
+      var top=vs.slice(0,5),rest=vs.slice(5,15);
+      var h=top.map(vidCard).join('');
+      var tail=(rest.length?'<button type="button" class="hslide hsmore hsexpand">'+rest.length+' more videos<span class="hsarr">&#8595;</span></button>':'')+
+        '<button type="button" class="hslide hsmore hscomm">Ask the community<span class="hsarr">&#8599;</span></button>'+
+        hsMore(yt,'YouTube');
+      el.innerHTML=(h||hsTile('No videos found for this stop'))+tail;
+      var exb=el.querySelector('.hsexpand');
+      if(exb)exb.addEventListener('click',function(e){e.stopPropagation();
+        exb.insertAdjacentHTML('beforebegin',rest.map(vidCard).join(''));exb.remove();
+      });
+      var cmb=el.querySelector('.hscomm');
+      if(cmb)cmb.addEventListener('click',function(e){e.stopPropagation();
+        var w=document.getElementById('wps');if(w){w.open=true;w.scrollIntoView({behavior:'smooth',block:'start'});}
+      });
+    });
+  });
+}
+function flyToStop(lat,lng,label){
+  if(!stageMap||!isFinite(lat)||!isFinite(lng))return;
+  if(window.matchMedia('(max-width:700px)').matches)document.getElementById('panel').classList.add('peek');
+  setTimeout(function(){
+    stageMap.setView([lat,lng],13,{animate:true});
+    L.popup({maxWidth:230,autoPan:false}).setLatLng([lat,lng])
+      .setContent('<b style="color:#13714C">'+esc(label||'Your stop')+'</b><br>The area from that video. Stays, events, and sights for this stop live in the panel below.')
+      .openOn(stageMap);
+  },360);
+}
+function initStopSliders(recs){
+  var ex=document.getElementById('extra');if(!ex)return;
+  [].forEach.call(ex.querySelectorAll('.hslider[data-kind]'),function(el){
+    var s=recs[+el.getAttribute('data-i')];if(!s)return;
+    var k=el.getAttribute('data-kind');
+    var ready=(s.labelP&&(k==='stay'||k==='events'||k==='videos'))?s.labelP:Promise.resolve(s);
+    ready.then(function(){
+      if(k==='stay')fillStay(el,s);else if(k==='do')fillDo(el,s);
+      else if(k==='events')fillEvents(el,s);else if(k==='videos')fillVideos(el,s);
+    });
+  });
+  if(!ex._vidBound){
+    ex._vidBound=true;
+    ex.addEventListener('click',function(e){
+      var lb=e.target.closest('.hsloc');
+      if(lb){e.stopPropagation();flyToStop(parseFloat(lb.getAttribute('data-lat')),parseFloat(lb.getAttribute('data-lng')),lb.getAttribute('data-place'));return;}
+      if(e.target.closest('.hsact'))return;
+      var v=e.target.closest('.hsvid');if(!v)return;
+      var id=v.getAttribute('data-v');if(!id)return;
+      var f=document.createElement('div');f.className='hslide hsvidplay';
+      f.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+esc(id)+'?autoplay=1" title="YouTube video" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+      v.parentNode.replaceChild(f,v);
+    });
+  }
+}
+/* split the route into overnight stops spaced by the user's daily drive limit */
+function planStays(line,totalMiles,totalMins,hrs){
+  /* Placement is pure math and returns instantly; the town name for each
+     stop arrives later via s.labelP so the panel never waits on the
+     reverse-geocode queue (server spaces Nominatim calls >=1.1s apart). */
+  var totalHrs=Math.max(0.1,totalMins/60),nights=Math.max(0,Math.ceil(totalHrs/hrs)-1);
+  if(!nights||!line.length)return [];
+  var cum=[0];for(var i=1;i<line.length;i++)cum[i]=cum[i-1]+miles(line[i-1][0],line[i-1][1],line[i][0],line[i][1]);
+  var stays=[];
+  for(var n=1;n<=nights;n++){
+    var target=totalMiles*(n*hrs/totalHrs),idx=line.length-1;
+    for(var j=0;j<cum.length;j++){if(cum[j]>=target){idx=j;break;}}
+    stays.push({lat:line[idx][0],lng:line[idx][1],night:n,afterMi:Math.round(target)});
+  }
+  stays.forEach(function(s){
+    s.labelP=bfetch('/api/reverse?lat='+s.lat+'&lon='+s.lng,9000).then(function(r){return r.ok?r.json():null;}).then(function(j){
+      var a=(j&&j.address)||{},city=a.city||a.town||a.village||a.hamlet||a.county||'';
+      s.place=city?(city+(a.state?(', '+a.state):'')):(a.state||'this area');return s;
+    }).catch(function(){s.place='this area';return s;});
+  });
+  return stays;
+}
+/* ----- great-circle arcs (fly/boat) + the trip planner ----- */
+function greatCircle(a,b,segments){
+  var R=Math.PI/180,D=180/Math.PI;
+  var la1=a.lat*R,lo1=a.lng*R,la2=b.lat*R,lo2=b.lng*R;
+  var dphi=la2-la1,dlmb=lo2-lo1;
+  var hv=Math.sin(dphi/2)*Math.sin(dphi/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dlmb/2)*Math.sin(dlmb/2);
+  var dd=2*Math.asin(Math.min(1,Math.sqrt(hv)));
+  if(dd<1e-9)return [[a.lat,a.lng]];
+  var out=[],sd=Math.sin(dd);
+  for(var i=0;i<=segments;i++){
+    var f=i/segments,A=Math.sin((1-f)*dd)/sd,B=Math.sin(f*dd)/sd;
+    var x=A*Math.cos(la1)*Math.cos(lo1)+B*Math.cos(la2)*Math.cos(lo2);
+    var y=A*Math.cos(la1)*Math.sin(lo1)+B*Math.cos(la2)*Math.sin(lo2);
+    var z=A*Math.sin(la1)+B*Math.sin(la2);
+    out.push([Math.atan2(z,Math.sqrt(x*x+y*y))*D,Math.atan2(y,x)*D]);
+  }
+  return out;
+}
+function segsFor(a,b){return Math.max(8,Math.min(160,Math.round(miles(a.lat,a.lng,b.lat,b.lng)/40)));}
+function buildArcLine(pts){
+  var line=[];
+  for(var i=0;i<pts.length-1;i++){
+    var seg=greatCircle(pts[i],pts[i+1],segsFor(pts[i],pts[i+1]));
+    if(i>0)seg=seg.slice(1);
+    line=line.concat(seg);
+  }
+  return line.length?line:[[pts[0].lat,pts[0].lng]];
+}
+function buildDirectRecs(pts){
+  return pts.map(function(p,i){
+    var last=i===pts.length-1;
+    return {dest:true,direct:true,idx:i,first:i===0,last:last,place:(p.city||p.label||'this stop'),lat:p.lat,lng:p.lng,legMi:(i>0?miles(pts[i-1].lat,pts[i-1].lng,p.lat,p.lng):0)};
+  });
+}
+function planTrip(pts){var g=++planGen;return travelMode==='drive'?planDrive(pts,g):planDirect(pts,g);}
+function planDrive(pts,g){
+  syncPrefs();syncDates();
+  var stops=pts.map(function(p){return p.lat+','+p.lng;}).join(';');
+  bfetch('/api/route?costing=auto&stops='+encodeURIComponent(stops),30000).then(function(r){if(r.status>=500)throw {kind:'upstream'};return r.json();},tagNetErr).then(function(j){
+    if(g!==planGen)return;   // a newer plan superseded this one; drop the stale response
+    var t=j.trip;if(!t||!t.legs)throw 0;
+    var line=[];t.legs.forEach(function(lg){line=line.concat(decode(lg.shape,6));});
+    var miles2=t.summary.length,mins=(t.summary.time||0)/60;
+    var sightsP=loadSights(line);
+    var stays=planStays(line,miles2,mins,tripPrefs.hrs);
+    var dest=pts[pts.length-1],destRec={dest:true,place:(dest.city||dest.label||'your destination'),lat:dest.lat,lng:dest.lng};
+    var recs=stays.slice();recs.push(destRec);
+    if(tripDates.start){
+      stays.forEach(function(st){st.ci=addDaysISO(tripDates.start,st.night-1);st.co=addDaysISO(tripDates.start,st.night);st.date=st.ci;});
+      destRec.ci=addDaysISO(tripDates.start,stays.length);
+      destRec.co=(tripDates.end&&tripDates.end>destRec.ci)?tripDates.end:addDaysISO(destRec.ci,1);   // checkout is always after check-in
+      destRec.date=destRec.ci;
+    }
+    tripCtx={travel:'drive',line:line,pts:pts,miles:miles2,mins:mins,recs:recs,nights:stays.length,hrs:tripPrefs.hrs,sightsPromise:sightsP,dates:{start:tripDates.start,end:tripDates.end}};
+    var mid=line[Math.floor(line.length/2)]||[pts[0].lat,pts[0].lng];
+    var drange=dateRangeLabel();
+    renderArea({title:'Your drive',travel:'drive',meta:pts.length+' stops \u00b7 '+miles2.toFixed(0)+' mi \u00b7 '+fmtTime(mins)+(stays.length?(' \u00b7 '+stays.length+' night'+(stays.length>1?'s':'')):'')+(drange?(' \u00b7 '+drange):''),badge:'Real road routing \u00b7 OpenStreetMap',center:{lat:mid[0],lng:mid[1]}});
+    stays.forEach(function(st,si){
+      st.labelP.then(function(){
+        if(g!==planGen)return;
+        var el=document.querySelector('.sm[data-smi="'+si+'"]');
+        if(el)el.textContent=st.place+' \u00b7 ~'+st.afterMi+' mi \u00b7 about '+((tripCtx&&tripCtx.hrs?tripCtx.hrs:8)*st.night)+'h of driving in'+(st.date?(' \u00b7 '+fmtDate(st.date)):'');
+      });
+    });
+  }).catch(function(er){if(g!==planGen)return;var hn=document.getElementById('hint');
+    hn.textContent=(er&&er.kind)?netErrMsg(er):'We could not map that drive. Check the stops and try again.';
+    hn.classList.add('err');});
+}
+function planDirect(pts,g){
+  syncPrefs();syncDates();
+  if(g!==planGen)return;   // superseded before we even drew
+  var line=buildArcLine(pts),totMi=0;
+  for(var i=0;i<pts.length-1;i++)totMi+=miles(pts[i].lat,pts[i].lng,pts[i+1].lat,pts[i+1].lng);
+  var recs=buildDirectRecs(pts);
+  if(tripDates.start){recs.forEach(function(r){r.ci=tripDates.start;r.co=tripDates.end||addDaysISO(tripDates.start,1);r.date=tripDates.start;});}
+  tripCtx={travel:travelMode,line:line,pts:pts,miles:totMi,mins:0,recs:recs,nights:0,hrs:0,sightsPromise:null,dates:{start:tripDates.start,end:tripDates.end}};
+  var mid=line[Math.floor(line.length/2)]||[pts[0].lat,pts[0].lng];
+  var noun=travelMode==='fly'?'cities':'ports';
+  var drange2=dateRangeLabel();
+  renderArea({title:travelMode==='fly'?'By air':'By sea',travel:travelMode,meta:pts.length+' '+noun+' \u00b7 ~'+totMi.toFixed(0)+' mi direct line'+(drange2?(' \u00b7 '+drange2):''),badge:travelMode==='fly'?'Direct-line estimate \u00b7 not an airline route':'Direct-line estimate \u00b7 not a shipping lane',center:{lat:mid[0],lng:mid[1]}});
+  recs.forEach(function(r,ri){
+    if(r.place&&r.place!=='this stop')return;
+    bfetch('/api/reverse?lat='+r.lat+'&lon='+r.lng,9000).then(function(x){return x.ok?x.json():null;}).then(function(jj){
+      if(g!==planGen)return;
+      var a=(jj&&jj.address)||{},city=a.city||a.town||a.village||a.county||a.state||'';
+      if(city){r.place=city;var el=document.querySelector('.sm[data-smi="'+ri+'"]');if(el)el.textContent=city+(r.legMi?(' \u00b7 ~'+Math.round(r.legMi)+' mi direct line'):'')+(r.date?(' \u00b7 '+fmtDate(r.date)):'');}
+    }).catch(function(){});
+  });
+}
+function drawTrip(){
+  if(!rLayer)return;rLayer.clearLayers();
+  var style=tripCtx.travel==='fly'?{color:accent,weight:4,opacity:.9,dashArray:'2 9',lineCap:'round'}:(tripCtx.travel==='boat'?{color:'#2f6fa6',weight:4,opacity:.9,dashArray:'10 8'}:{color:accent,weight:5,opacity:.9});
+  style.interactive=false;
+  L.polyline(tripCtx.line,style).addTo(rLayer);
+  if(tripCtx.travel==='drive'){
+    (tripCtx.recs||[]).forEach(function(r){
+      if(r.dest)return;
+      var ring=L.circle([r.lat,r.lng],{radius:40000,color:'#13714C',weight:1.5,dashArray:'6 7',fillColor:'#3AB67D',fillOpacity:.07,interactive:false}).addTo(rLayer);
+      ring.bindTooltip('Night '+r.night+' zone \u00b7 ~'+((tripCtx.hrs||8)*r.night)+'h in',{permanent:true,direction:'top',className:'zonetip'});
+    });
+  }
+  tripCtx.pts.forEach(function(p,i){var last=i===tripCtx.pts.length-1;
+    L.circleMarker([p.lat,p.lng],{radius:7,color:'#0C2F20',weight:2,fillColor:i===0?'#E9EBED':(last?accent:'#A2E494'),fillOpacity:1}).addTo(rLayer).bindTooltip(i===0?(travelMode==='boat'?'Departure port':(travelMode==='fly'?'Departure':'Start')):(last?'Destination':(travelMode==='boat'?('Port '+(i+1)):(travelMode==='fly'?('City '+(i+1)):('Stop '+(i+1))))));
+  });
+}
+
+/* restore a shared or reloaded permalink once everything above exists */
+if(location.search){
+  restoring=true;
+  try{applyParams(new URLSearchParams(location.search));}
+  finally{setTimeout(function(){restoring=false;},60);}
+}
+
+})();
+</script>
+</body>
+</html>
