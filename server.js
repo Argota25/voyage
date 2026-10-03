@@ -567,8 +567,49 @@ async function ytSearch(q){
     thumb: (i.snippet.thumbnails && i.snippet.thumbnails.medium && i.snippet.thumbnails.medium.url) || '',
     views: parseInt((stats[i.id.videoId] || {}).viewCount || '0', 10),
   })).sort((a, b) => b.views - a.views);
-  cset(key, out, 7 * 24 * 3600 * 1000);   // a week: the free quota is ~99 lookups a day, so every repeat must be a cache hit
+  if (out.length) cset(key, out, 7 * 24 * 3600 * 1000);   // a week: the free quota is ~99 lookups a day, so every repeat must be a cache hit (never cache empties)
   return out;
+}
+
+/* Short vertical videos for one stop (YouTube Shorts). One search per place:
+   relevance order pulls travel shorts, then we keep only the ones that name
+   the city (or, failing that, the state) so a "Dallas" search does not serve
+   football clips, and rank what is left by real view counts. */
+function isoSecs(d){ const m = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(d || ''); return m ? (+(m[1] || 0) * 3600 + +(m[2] || 0) * 60 + +(m[3] || 0)) : 9999; }
+async function ytShorts(place){
+  const key = 'yts:' + place.toLowerCase();
+  const hit = cget(key); if (hit) return hit;
+  if (!spend('yt')) throw new Error('youtube daily budget spent');
+  const parts = place.split(',').map(x => x.trim()).filter(Boolean);
+  const city = (parts[0] || '').replace(/ county$/i, '').toLowerCase(), state = (parts[1] || '').toLowerCase();
+  const after = new Date(Date.now() - 730 * 864e5).toISOString().slice(0, 10) + 'T00:00:00Z';
+  const s = await upstream('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoDuration=short&order=relevance&maxResults=25&regionCode=US&relevanceLanguage=en&publishedAfter=' + after +
+    '&q=' + encodeURIComponent(place + ' travel things to do #shorts') + '&key=' + YT_KEY);
+  if (s.status !== 200) throw new Error('youtube ' + s.status);
+  const items = (JSON.parse(s.body).items || []).filter(i => i.id && i.id.videoId);
+  const ids = items.map(i => i.id.videoId);
+  const meta = {};
+  if (ids.length){
+    const v = await upstream('https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails&id=' + ids.join(',') + '&key=' + YT_KEY);
+    if (v.status === 200) JSON.parse(v.body).items.forEach(it => meta[it.id] = { views: parseInt((it.statistics || {}).viewCount || '0', 10), secs: isoSecs((it.contentDetails || {}).duration) });
+  }
+  const all = items.map(i => {
+    const text = ((i.snippet.title || '') + ' ' + (i.snippet.description || '')).toLowerCase();
+    const m = meta[i.id.videoId] || { views: 0, secs: 9999 };
+    return { id: i.id.videoId, title: i.snippet.title, channel: i.snippet.channelTitle, views: m.views, secs: m.secs,
+      tier: (city && text.indexOf(city) > -1) ? 0 : ((state && text.indexOf(state) > -1) ? 1 : 2) };
+  }).filter(x => x.secs <= 180 && x.tier < 2);
+  all.sort((a, b) => a.tier - b.tier || b.views - a.views);
+  const out = all.slice(0, 12).map(x => ({ id: x.id, title: x.title, channel: x.channel, views: x.views, secs: x.secs }));
+  if (out.length) cset(key, out, 7 * 24 * 3600 * 1000);
+  return out;
+}
+async function handleShorts(reqUrl, res){
+  if (!YT_KEY) return json(res, 501, { error: 'youtube not configured' });
+  const place = (reqUrl.searchParams.get('place') || '').trim().slice(0, 80);
+  if (!place) return json(res, 400, { error: 'missing place' });
+  try { json(res, 200, await ytShorts(place)); }
+  catch (e){ json(res, 502, { error: 'youtube unavailable' }); }
 }
 async function handleVideos(reqUrl, res){
   if (!YT_KEY) return json(res, 501, { error: 'youtube not configured' });
@@ -946,6 +987,7 @@ http.createServer((req, res) => {
     if (u.pathname === '/api/street')  return void guard(handleStreet(u, res), res);
     if (u.pathname === '/api/social/status') return void guard(handleSocialStatus(res), res);
     if (u.pathname === '/api/social/videos') return void guard(handleVideos(u, res), res);
+    if (u.pathname === '/api/social/shorts') return void guard(handleShorts(u, res), res);
     if (u.pathname === '/api/social/reddit') return void guard(handleReddit(u, res), res);
     if (u.pathname === '/api/social/aggregate') return void guard(handleAggregate(u, res), res);
     if (u.pathname === '/api/social/google') return void guard(handleGoogle(u, res), res);

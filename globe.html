@@ -1316,6 +1316,38 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
 .calbtns{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center}
 .calclear{min-height:50px;padding:0 16px;border-radius:14px;border:1.5px solid rgba(19,113,76,.3);background:#fff;color:#123626;font:800 14px var(--body);cursor:pointer}
 .calbtns .actbtn{margin-top:0}
+/* Shorts: vertical cards in each stop */
+#panel .extra .hslider.shrow{gap:10px;padding:2px 0 8px;scroll-snap-type:x proximity}
+.shcard{position:relative;flex:none;width:150px;height:266px;border-radius:16px;overflow:hidden;border:0;padding:0;background:#0c1a16;cursor:pointer;scroll-snap-align:start;box-shadow:0 12px 24px -16px rgba(12,54,36,.7)}
+.shimg{position:absolute;inset:0;background:#0c1a16 center/auto 100% no-repeat}
+.shcard::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(4,18,12,.86) 100%)}
+.shplay{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);z-index:2;width:46px;height:46px;border-radius:50%;background:var(--sun);color:var(--sun-ink);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px -6px rgba(0,0,0,.6)}
+.shplay svg{width:22px;height:22px;margin-left:2px}
+.shviews{position:absolute;left:8px;top:8px;z-index:2;font:800 11px var(--body);color:#fff;background:rgba(4,18,12,.66);border-radius:999px;padding:4px 9px}
+.shtitle{position:absolute;left:10px;right:10px;bottom:10px;z-index:2;font:700 13px/1.25 var(--body);color:#fff;text-align:left;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+/* Shorts: the full-screen feed */
+.shorts{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;background:#06120D}
+.shorts.show{display:flex}
+.shtop{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px}
+.shback{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 16px 0 8px;border-radius:999px;border:0;background:#fff;color:#123626;font:800 14px var(--body);cursor:pointer}
+.shback svg{width:20px;height:20px}
+.shmeta{display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:0}
+.shmeta b{font:800 14px var(--heading);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
+.shmeta span{font:700 12px var(--body);color:#A2E494}
+.shfeed{flex:1;min-height:0;overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.shfeed::-webkit-scrollbar{display:none}
+.shslide{height:100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;align-items:center;padding:0 14px 14px}
+.shframe{position:relative;flex:1;min-height:0;aspect-ratio:9/16;max-width:100%;border-radius:18px;overflow:hidden;background:#000}
+.shframe iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.shposter{position:absolute;inset:0;background:#000 center/auto 100% no-repeat}
+.shcap{flex:none;width:100%;max-width:520px;padding:12px 2px 0;display:flex;flex-direction:column;gap:3px}
+.shcap b{font:800 15px/1.3 var(--body);color:#fff;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.shcap>span{font:600 12.5px var(--body);color:#B9D8C5}
+.shnav{display:grid;grid-template-columns:52px 1fr;gap:10px;margin-top:10px}
+.shnav button{min-height:52px;border-radius:14px;font:800 15px var(--body);cursor:pointer;border:0}
+.shprev{background:rgba(255,255,255,.14);color:#fff;font-size:20px!important}
+.shnext{background:var(--sun);color:var(--sun-ink)}
+.shnext.shend{background:#fff;color:#123626}
 /* wizard chrome */
 .staycard .acthead{margin-bottom:8px}
 .actback{display:inline-flex;align-items:center;gap:4px;min-height:42px;padding:0 14px 0 8px;border-radius:999px;border:1.5px solid rgba(19,113,76,.3);background:#fff;color:#123626;font:800 14px var(--body);cursor:pointer}
@@ -1495,6 +1527,10 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
     <div class="calbody" id="calBody"></div>
     <div class="calfoot"><div class="calsum" id="calSum"></div><div class="calbtns"><button type="button" class="calclear" id="calClear">Clear</button><button type="button" class="actbtn actadd" id="calDone">Done</button></div></div>
   </div>
+</div>
+<div class="shorts" id="shorts" role="dialog" aria-modal="true" aria-label="Short videos">
+  <div class="shtop"><button type="button" class="shback" id="shClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Back to my trip</button><span class="shmeta"><b id="shWhere"></b><span id="shCount"></span></span></div>
+  <div class="shfeed" id="shFeed"></div>
 </div>
 <div class="cheer" id="cheer" role="status" aria-live="polite">
   <div class="cheercard">
@@ -2302,7 +2338,7 @@ function jumpTarget(k){
 }
 function buildJump(drive){
   var jb=document.getElementById('jumpbar');if(!jb)return;
-  var secs=[['cost','Trip cost'],['stay','Stays'],['do','Things to do'],['events','Events'],['videos','Videos']];
+  var secs=[['cost','Trip cost'],['stay','Stays'],['do','Things to do'],['events','Events'],['videos','Shorts']];
   if(drive)secs.push(['along','Along the way']);
   secs.push(['wps','What travelers say']);
   jb.innerHTML='<button type="button" class="jbmap" data-jump="map" aria-label="Back to the map">'+
@@ -2315,6 +2351,7 @@ function selectTab(card,kind){
   if(!card)return;
   [].forEach.call(card.querySelectorAll('.stab'),function(b){var on=b.getAttribute('data-tab')===kind;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false');});
   [].forEach.call(card.querySelectorAll('.spane'),function(p){p.classList.toggle('on',p.getAttribute('data-pane')===kind);});
+  var lz=card.querySelector('.spane[data-pane="'+kind+'"] .hslider');if(lz&&lz._load)lz._load();
 }
 document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.stab');if(!b)return;selectTab(b.closest('.stopcard'),b.getAttribute('data-tab'));});
 function scrollToSec(k){
@@ -2537,7 +2574,7 @@ function doRender(){
   var rows=d.items.slice(0,12).map(function(x){var on=isSaved(st.i,x.name);
     return '<button type="button" class="strow dorow'+(on?' on':'')+'" data-name="'+esc(x.name)+'"><span class="strt"><b>'+esc(x.name)+'</b><span>'+esc(x.kind||'Sight')+'</span></span><span class="strpick">'+(on?'\u2713 Saved':'Save')+'</span></button>';
   }).join('');
-  if(!rows)rows='<p class="stnote">'+(d.loading?'Looking for things to do near this stop...':'Nothing is tagged on the map near this stop yet. The Videos tab still shows what travelers filmed here.')+'</p>';
+  if(!rows)rows='<p class="stnote">'+(d.loading?'Looking for things to do near this stop...':'Nothing is tagged on the map near this stop yet. The Shorts tab still shows what travelers filmed here.')+'</p>';
   b.innerHTML='<p class="actsub">'+esc(stopLabel(st.i).replace(/^./,function(c){return c.toUpperCase();}))+' \u00b7 stop '+(st.k+1)+' of '+ss.length+'</p>'+
     '<p class="stnote" style="margin-top:0">Tap anything that sounds good. It is saved to your trip.</p>'+
     '<div class="stlist">'+rows+'</div>'+
@@ -3345,12 +3382,12 @@ var SEC_IC={stay:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 function stopCardShell(title,meta,i){
   function sl(kind){return '<div class="hslider" data-kind="'+kind+'" data-i="'+i+'"><div class="hslide hskel"></div><div class="hslide hskel"></div><div class="hslide hskel"></div></div>';}
   return '<div class="stopcard"><div class="sh"><div class="sn">'+esc(title)+'</div><div class="sm" data-smi="'+i+'">'+meta+'</div></div>'+
-    '<div class="stabs" role="tablist">'+tab('stay','Stay',true)+tab('do','To do',false)+tab('events','Events',false)+tab('videos','Videos',false)+'</div>'+
+    '<div class="stabs" role="tablist">'+tab('stay','Stay',true)+tab('do','To do',false)+tab('events','Events',false)+tab('videos','Shorts',false)+'</div>'+
     '<div class="spanes">'+
     pane('stay','Places to stay','Choose where you will sleep at this stop.',true)+
     pane('do','Things to do','Sights and spots near this stop.',false)+
     pane('events','Events','What is on while you are there.',false)+
-    pane('videos','Top videos','What travelers filmed here.',false)+'</div></div>';
+    pane('videos','Short videos from here','Tap one to watch. Swipe up for the next.',false)+'</div></div>';
   function tab(kind,label,on){
     return '<button type="button" role="tab" class="stab'+(on?' on':'')+'" data-tab="'+kind+'" aria-selected="'+(on?'true':'false')+'">'+SEC_IC[kind]+'<span>'+label+'</span></button>';
   }
@@ -3426,40 +3463,82 @@ function fillEvents(el,s){
   });
 }
 function fillVideos(el,s){
-  var place=s.place||'this area';
-  var yt='https://www.youtube.com/results?search_query='+encodeURIComponent(place+seeStr()+' travel things to do')+'&sp=CAMSAhAB';
+  // Shorts for this stop: vertical cards; a tap opens the full-screen feed
+  var place=s.place||'';
+  el.classList.add('shrow');
+  if(!place||place==='this area'||place==='this stop'){el.innerHTML=hsTile('Short videos show once this stop has a name.');return;}
   getStatus().then(function(st){
-    if(!st.youtube){
-      el.innerHTML=hsMore(yt,'YouTube');
-      return;
-    }
-    bfetch('/api/social/videos?q='+encodeURIComponent(place+' travel things to do')).then(function(r){return r.ok?r.json():[];}).catch(function(){return null;}).then(function(vs){
-      if(vs===null){el.innerHTML=hsTile('Didn’t load right now.')+hsMore(yt,'YouTube');return;}
-      function vidCard(x){
-        var book='https://www.google.com/search?q='+encodeURIComponent(x.title+' '+place+' tickets booking info');
-        return '<div class="hslide hsvid" data-v="'+esc(x.id)+'"><span class="hsimg" style="'+(x.thumb?'background-image:url('+esc(urlOk(x.thumb))+')':'')+'"></span><span class="hsplay">&#9654;</span><span class="hst">'+esc(deent(x.title))+'</span><span class="hsm">'+fmtViews(x.views)+' views · '+esc(x.channel)+'</span>'+
-          '<span class="hsact"><button type="button" class="hsbtn hsloc" data-lat="'+s.lat+'" data-lng="'+s.lng+'" data-place="'+esc(place)+'">Map</button>'+
-          '</span></div>';
-      }
-      // top 5 by real view counts; most people settle in the first three
-      vs=(vs||[]).slice().sort(function(a,b){return (b.views||0)-(a.views||0);});
-      var top=vs.slice(0,5),rest=vs.slice(5,15);
-      var h=top.map(vidCard).join('');
-      var tail=(rest.length?'<button type="button" class="hslide hsmore hsexpand">'+rest.length+' more videos<span class="hsarr">&#8595;</span></button>':'')+
-        '<button type="button" class="hslide hsmore hscomm">Ask the community<span class="hsarr">&#8595;</span></button>'+
-        hsMore(yt,'YouTube');
-      el.innerHTML=(h||hsTile('No videos found for this stop'))+tail;
-      var exb=el.querySelector('.hsexpand');
-      if(exb)exb.addEventListener('click',function(e){e.stopPropagation();
-        exb.insertAdjacentHTML('beforebegin',rest.map(vidCard).join(''));exb.remove();
-      });
-      var cmb=el.querySelector('.hscomm');
-      if(cmb)cmb.addEventListener('click',function(e){e.stopPropagation();
-        var w=document.getElementById('wps');if(w){w.open=true;w.scrollIntoView({behavior:'smooth',block:'start'});}
-      });
+    if(!st.youtube){el.innerHTML=hsTile('Short videos are not connected yet.');return;}
+    var q=place,stN=s.st&&BYABBR[String(s.st).toLowerCase()];
+    if(q.indexOf(',')<0&&stN)q+=', '+stN.n;   // "El Paso, Texas" finds more, and lets the server fall back to state-wide shorts
+    bfetch('/api/social/shorts?place='+encodeURIComponent(q),15000).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}).then(function(vs){
+      if(vs===null){el.innerHTML=hsTile('Short videos did not load right now. Try again in a bit.');return;}
+      if(!vs.length){el.innerHTML=hsTile('No short videos turned up for this stop yet.');return;}
+      s._shorts=vs;
+      el.innerHTML=vs.map(function(x,k){
+        return '<button type="button" class="shcard" data-k="'+k+'" aria-label="Play: '+esc(deent(x.title))+'">'+
+          '<span class="shimg" style="background-image:url(https://i.ytimg.com/vi/'+esc(x.id)+'/hqdefault.jpg)"></span>'+
+          '<span class="shplay"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>'+
+          '<span class="shviews">'+fmtViews(x.views)+' views</span>'+
+          '<span class="shtitle">'+esc(deent(x.title))+'</span></button>';
+      }).join('');
+      el.addEventListener('click',function(e){var c=e.target.closest('.shcard');if(!c)return;openShorts(vs,+c.getAttribute('data-k'),place);});
     });
   });
 }
+/* ===== Shorts feed: one video per screen, swipe up for the next =====
+   Only the video on screen is loaded, so the one you left stops playing.
+   The player is YouTube's own (a cross-origin frame), so a swipe has to start
+   on the caption or the bars around the video; the Next button does the same. */
+var shortsSt=null;
+function openShorts(list,k,place){
+  var box=document.getElementById('shorts'),feed=document.getElementById('shFeed');if(!box||!feed)return;
+  shortsSt={list:list,place:place,cur:-1};
+  feed.innerHTML=list.map(function(x,i){
+    return '<section class="shslide" data-i="'+i+'">'+
+      '<div class="shframe" id="shf'+i+'"><span class="shposter" style="background-image:url(https://i.ytimg.com/vi/'+esc(x.id)+'/hqdefault.jpg)"></span></div>'+
+      '<div class="shcap"><b>'+esc(deent(x.title))+'</b><span>'+esc(x.channel)+' \u00b7 '+fmtViews(x.views)+' views</span>'+
+      '<div class="shnav">'+(i>0?'<button type="button" class="shprev" data-go="'+(i-1)+'" aria-label="Previous video">\u2191</button>':'<span></span>')+
+      (i<list.length-1?'<button type="button" class="shnext" data-go="'+(i+1)+'">Next video \u2193</button>':'<button type="button" class="shnext shend" data-go="-1">Back to my trip</button>')+'</div></div></section>';
+  }).join('');
+  document.getElementById('shWhere').textContent=place;
+  box.classList.add('show');
+  var slide=feed.children[k];if(slide)feed.scrollTop=slide.offsetTop;
+  shortsShow(k);
+}
+function shortsShow(i){
+  var st=shortsSt;if(!st||i===st.cur||!st.list[i])return;
+  if(st.cur>-1){var old=document.getElementById('shf'+st.cur);if(old)old.innerHTML='<span class="shposter" style="background-image:url(https://i.ytimg.com/vi/'+esc(st.list[st.cur].id)+'/hqdefault.jpg)"></span>';}
+  st.cur=i;
+  var f=document.getElementById('shf'+i),id=st.list[i].id;
+  if(f)f.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+esc(id)+'?autoplay=1&playsinline=1&rel=0&loop=1&playlist='+esc(id)+'" title="'+esc(deent(st.list[i].title))+'" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+  document.getElementById('shCount').textContent=(i+1)+' of '+st.list.length;
+}
+function closeShorts(){var box=document.getElementById('shorts');if(!box)return;box.classList.remove('show');document.getElementById('shFeed').innerHTML='';shortsSt=null;}
+(function(){
+  var box=document.getElementById('shorts'),feed=document.getElementById('shFeed');if(!box||!feed)return;
+  var t=0;
+  feed.addEventListener('scroll',function(){
+    clearTimeout(t);t=setTimeout(function(){
+      if(!shortsSt)return;
+      var i=Math.round(feed.scrollTop/Math.max(1,feed.clientHeight));
+      shortsShow(Math.max(0,Math.min(shortsSt.list.length-1,i)));
+    },140);
+  },{passive:true});
+  box.addEventListener('click',function(e){
+    if(e.target.closest('#shClose')){closeShorts();return;}
+    var g=e.target.closest('[data-go]');if(!g)return;
+    var i=+g.getAttribute('data-go');
+    if(i<0){closeShorts();return;}
+    var slide=feed.children[i];if(slide)feed.scrollTo({top:slide.offsetTop,behavior:RM.matches?'auto':'smooth'});
+  });
+  document.addEventListener('keydown',function(e){
+    if(!box.classList.contains('show')||!shortsSt)return;
+    if(e.key==='Escape')closeShorts();
+    var d=e.key==='ArrowDown'?1:(e.key==='ArrowUp'?-1:0);
+    if(d){var sl=feed.children[shortsSt.cur+d];if(sl){e.preventDefault();feed.scrollTo({top:sl.offsetTop,behavior:'smooth'});}}
+  });
+})();
 function flyToStop(lat,lng,label){
   if(!stageMap||!isFinite(lat)||!isFinite(lng))return;
   if(window.matchMedia('(max-width:700px)').matches)document.getElementById('panel').classList.add('peek');
@@ -3478,7 +3557,8 @@ function initStopSliders(recs){
     var ready=(s.labelP&&(k==='stay'||k==='events'||k==='videos'))?s.labelP:Promise.resolve(s);
     ready.then(function(){
       if(k==='stay')fillStay(el,s);else if(k==='do')fillDo(el,s);
-      else if(k==='events')fillEvents(el,s);else if(k==='videos')fillVideos(el,s);
+      else if(k==='events')fillEvents(el,s);
+      else if(k==='videos')el._load=function(){el._load=null;fillVideos(el,s);};   // Shorts load when the tab is opened: each lookup spends daily video quota
     });
   });
   if(!ex._vidBound){
@@ -3548,7 +3628,7 @@ function buildArcLine(pts){
 function buildDirectRecs(pts){
   return pts.map(function(p,i){
     var last=i===pts.length-1;
-    return {dest:true,direct:true,idx:i,first:i===0,last:last,place:(p.city||p.label||'this stop'),lat:p.lat,lng:p.lng,legMi:(i>0?miles(pts[i-1].lat,pts[i-1].lng,p.lat,p.lng):0)};
+    return {dest:true,direct:true,idx:i,first:i===0,last:last,place:(p.city||p.label||'this stop'),st:p.st||'',lat:p.lat,lng:p.lng,legMi:(i>0?miles(pts[i-1].lat,pts[i-1].lng,p.lat,p.lng):0)};
   });
 }
 function planTrip(pts){var g=++planGen;return travelMode==='drive'?planDrive(pts,g):planDirect(pts,g);}
@@ -3562,7 +3642,7 @@ function planDrive(pts,g){
     var miles2=t.summary.length,mins=(t.summary.time||0)/60;
     var sightsP=loadSights(line);
     var stays=planStays(line,miles2,mins,tripPrefs.hrs);
-    var dest=pts[pts.length-1],destRec={dest:true,place:(dest.city||dest.label||'your destination'),lat:dest.lat,lng:dest.lng};
+    var dest=pts[pts.length-1],destRec={dest:true,place:(dest.city||dest.label||'your destination'),st:dest.st||'',lat:dest.lat,lng:dest.lng};
     var recs=stays.slice();recs.push(destRec);
     if(tripDates.start){
       stays.forEach(function(st){st.ci=addDaysISO(tripDates.start,st.night-1);st.co=addDaysISO(tripDates.start,st.night);st.date=st.ci;});
