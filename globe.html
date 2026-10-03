@@ -115,7 +115,7 @@ body.chosen .gate{opacity:0;pointer-events:none}
 .stops{display:flex;flex-direction:column;gap:7px}
 .stoprow{display:flex;align-items:center;gap:9px;background:rgba(8,42,30,.72);border:1px solid var(--rule-2);border-radius:var(--radius);padding:3px 8px;backdrop-filter:blur(8px)}
 .sdot{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);flex:none}
-.stopin{flex:1;background:none;border:0;color:var(--text);font:16px/1.4 var(--body);padding:10px 2px}
+.stopin{flex:1;min-width:0;background:none;border:0;color:var(--text);font:16px/1.4 var(--body);padding:10px 2px}
 .stopin:focus{outline:none}
 .srem{background:none;border:0;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;padding:0 4px;flex:none}
 .srem:hover{color:var(--warn)}
@@ -202,7 +202,27 @@ body:not(.chosen) .brand,body:not(.chosen) .disc{visibility:hidden}
 .betafb:hover,.betafb:focus-visible{color:#A2E494;border-color:#A2E494}
 /* planner view: the trip-type switch owns the top row, so the pill sits under it */
 body.chosen .betafb{top:76px}
+/* the trip editor is taller than a phone screen: it scrolls inside itself
+   (html/body never scroll). Side padding keeps the card shadow unclipped. */
+body.chosen .search.roadtrip{max-height:calc(100dvh - 32px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;pointer-events:auto;touch-action:pan-y;scrollbar-width:none;width:min(544px,calc(100vw - 24px));padding:0 12px 18px}
+body.chosen .search.roadtrip::-webkit-scrollbar{display:none}
+/* mid widths: the centered editor and the top-right trip-type switch collide,
+   so the editor drops below a top row that holds the switch and the beta pill */
+@media (min-width:701px) and (max-width:1100px){
+  body.chosen:not(.inarea) .search,body.inarea.editing .search{top:76px}
+  body.chosen:not(.inarea) .search.roadtrip,body.inarea.editing .search.roadtrip{max-height:calc(100dvh - 88px)}
+  body.chosen:not(.inarea) .betafb{top:20px;right:auto;left:24px}
+}
 @media (max-width:640px){.betafb{top:10px;right:10px;padding:7px 10px;font-size:9px;gap:6px}.betafb .fbw{display:none}body.chosen .betafb{top:72px}}
+/* the open trip editor reaches the bottom disclaimer on phones and short
+   screens (this rule used the retired m-roadtrip class and had stopped firing) */
+@media (max-width:700px),(max-height:820px){body.chosen:not(.inarea) .disc,body.inarea.editing .disc{visibility:hidden}}
+/* phone trip editor: the switch sits top-left, so the pill takes the top-right
+   slot instead of landing on the editor */
+@media (max-width:700px){
+  body.chosen:not(.inarea) .betafb{top:22px;right:12px}
+  body.chosen .search.roadtrip{max-height:calc(100dvh - 80px)}
+}
 /* dark leaflet popup */
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#141414;color:#fff;border:1px solid #2c2c2c}
 .leaflet-popup-content{font-family:var(--body);font-size:12px;line-height:1.5;margin:12px 14px}
@@ -926,7 +946,6 @@ i,em,.panel .ph .meta,.row .ct{font-style:normal}
   .chip{min-height:44px}
   .chips{grid-template-columns:repeat(2,1fr)}
   /* the tall trip editor reaches the disclaimer's zone on phones */
-  body.m-roadtrip:not(.inarea) .disc{visibility:hidden}
   .srem{min-width:44px;min-height:44px}
   .search .hint{font-size:11px}
 }
@@ -940,10 +959,21 @@ i,em,.panel .ph .meta,.row .ct{font-style:normal}
 .tmseg{margin-bottom:10px}
 .search:not(.tm-drive) .prefrow.hrs{display:none}
 .daterow{display:flex;gap:8px;margin-bottom:8px}
-.datefield{flex:1;display:flex;flex-direction:column;gap:2px;background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(246,250,248,.78));border:1px solid rgba(19,113,76,.22);border-radius:12px;padding:7px 12px;cursor:pointer;box-shadow:0 2px 8px -5px rgba(12,54,36,.3)}
-.datefield span{font:600 9px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#5f7268}
-.datefield input[type=date]{border:0;background:transparent;font:600 16px var(--body);color:#123626;padding:0;width:100%;cursor:pointer;min-height:20px}
-.datefield input[type=date]::-webkit-calendar-picker-indicator{opacity:.55;cursor:pointer}
+.datefield{position:relative;flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;background:#fff;border:1.5px solid rgba(19,113,76,.38);border-radius:12px;padding:8px 44px 9px 12px;cursor:pointer;box-shadow:0 4px 14px -8px rgba(12,54,36,.4);transition:border-color .15s,box-shadow .15s,transform .15s}
+/* calendar badge on the right: reads as a button on every browser (iOS shows no native icon) */
+.datefield::before{content:"";position:absolute;right:9px;top:50%;width:28px;height:28px;transform:translateY(-50%);border-radius:8px;background:#13714C url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22white%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%225%22%20width%3D%2218%22%20height%3D%2216%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M16%203v4M8%203v4M3%2011h18%22%2F%3E%3C%2Fsvg%3E') center/16px no-repeat;pointer-events:none}
+.datefield:hover{border-color:#13714C;box-shadow:0 8px 20px -10px rgba(12,54,36,.5);transform:translateY(-1px)}
+.datefield:focus-within{border-color:#13714C;box-shadow:0 0 0 3px rgba(58,182,125,.28)}
+.datefield span{font:700 9px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#13714C}
+.datefield input[type=date]{position:static;min-width:0;border:0;background:transparent;font:600 16px var(--body);color:#123626;padding:0;width:100%;cursor:pointer;min-height:20px}
+/* Chromium: stretch the native picker button over the whole field, so a tap
+   anywhere opens the calendar (the visible badge is the ::before above) */
+.datefield input[type=date]::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:auto;height:auto;opacity:0;cursor:pointer}
+/* empty: a clear call to action instead of the browser's mm/dd/yyyy mask */
+.datefield.empty input[type=date]{color:transparent}
+.datefield.empty::after{content:"Pick a date";position:absolute;left:12px;bottom:9px;font:700 16px var(--body);color:#13714C;pointer-events:none}
+.datefield.empty:focus-within input[type=date]{color:#123626}
+.datefield.empty:focus-within::after{content:none}
 /* ----- trip cost estimator ----- */
 .cot{margin:0 0 6px;border:1px solid rgba(19,113,76,.2);border-radius:14px;background:#fff;box-shadow:0 10px 30px -18px rgba(12,54,36,.3);overflow:hidden}
 .cot>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;font:800 15px var(--heading);color:#123626}
@@ -1414,9 +1444,13 @@ function todayISO(){var t=new Date();t.setMinutes(t.getMinutes()-t.getTimezoneOf
 function addDaysISO(iso,n){if(!iso)return '';var d=new Date(iso+'T00:00:00');d.setDate(d.getDate()+n);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10);}
 function fmtDate(iso){if(!iso)return '';try{return new Date(iso+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});}catch(e){return iso;}}
 function dateRangeLabel(){if(tripDates.start&&tripDates.end)return fmtDate(tripDates.start)+' - '+fmtDate(tripDates.end);if(tripDates.start)return 'from '+fmtDate(tripDates.start);return '';}
-function syncDates(){var a=document.getElementById('dStart'),b=document.getElementById('dEnd');tripDates.start=a?a.value:'';tripDates.end=b?b.value:'';if(a&&b&&a.value)b.min=a.value;}
+function syncDates(){var a=document.getElementById('dStart'),b=document.getElementById('dEnd');tripDates.start=a?a.value:'';tripDates.end=b?b.value:'';if(a&&b&&a.value)b.min=a.value;
+  [a,b].forEach(function(i){if(i&&i.parentNode)i.parentNode.classList.toggle('empty',!i.value);});}
 (function(){var a=document.getElementById('dStart'),b=document.getElementById('dEnd');if(!a||!b)return;
   a.min=todayISO();b.min=todayISO();
+  syncDates();
+  // a tap anywhere on the field opens the calendar (Safari/Firefox have no stretched indicator)
+  [a,b].forEach(function(i){i.parentNode.addEventListener('click',function(){try{if(i.showPicker)i.showPicker();}catch(e){}});});
   function onch(){
     if(a.value&&b.value&&b.value<a.value)b.value=a.value;   // returning cannot precede leaving
     syncDates();
