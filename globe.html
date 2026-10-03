@@ -1152,6 +1152,46 @@ body.editing .editbtn{background:#467F67;color:#fff;border-color:#467F67}
 .shprev{background:rgba(255,255,255,.14);color:#fff;font-size:20px!important}
 .shnext{background:var(--pop);color:var(--pop-ink)}
 .shnext.shend{background:#fff;color:#27493D}
+.idopts{display:flex;flex-direction:column;gap:10px}
+.idopt{display:flex;align-items:center;gap:14px;width:100%;min-height:84px;padding:14px;border-radius:16px;border:1.5px solid rgba(70,127,103,.28);background:#fff;text-align:left;cursor:pointer;box-shadow:0 6px 16px -12px rgba(39,73,61,.5)}
+.idopt:hover{border-color:#467F67}
+.idic{flex:none;width:48px;height:48px;border-radius:14px;background:#E4EFE3;color:#467F67;display:flex;align-items:center;justify-content:center}
+.idic svg{width:24px;height:24px}
+.idopt .strt b{font:800 17px/1.25 var(--heading);color:#27493D}
+.idopt .strt span{font:500 13.5px/1.4 var(--body);color:#5f7268}
+.idgo{flex:none;width:20px;height:20px;color:var(--pop)}
+.idseg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:2px 0 12px}
+.idseg button{display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px;border-radius:12px;border:1.5px solid rgba(70,127,103,.25);background:#F8F6F0;color:#467F67;font:800 13px var(--body);cursor:pointer}
+.idseg button svg{width:17px;height:17px}
+.idseg button.on{background:#467F67;border-color:#467F67;color:#fff}
+.idhead{font:800 15px var(--heading);color:#27493D;margin:10px 2px 0}
+.idrow{display:flex;align-items:stretch;gap:8px;border-radius:14px;border:1.5px solid rgba(70,127,103,.2);background:#fff;padding:6px}
+.idrow.on{border-color:#467F67;background:#EDF3E8}
+.idmain{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:6px 6px 6px 8px;border:0;background:none;text-align:left;cursor:pointer}
+.idmain .strt b{font:800 15px/1.25 var(--heading);color:#27493D}
+.idmain .strt span{font:500 12.5px/1.4 var(--body);color:#5f7268;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.idthumb{flex:none;width:54px;height:84px;border-radius:10px;background:#0c1a16 center/auto 100% no-repeat}
+.idsave{flex:none;align-self:center;min-width:76px;min-height:44px;padding:0 12px;border-radius:999px;border:1.5px solid #467F67;background:#fff;color:#467F67;font:800 13px var(--body);cursor:pointer}
+.idrow.on .idsave{background:#467F67;color:#fff}
+.idredo{display:inline-flex;align-items:center;min-height:40px;margin:2px 0 8px;padding:0 14px;border-radius:999px;border:1.5px solid rgba(70,127,103,.3);background:#fff;color:#27493D;font:700 13px var(--body);cursor:pointer}
+.chat{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.cb{max-width:86%;padding:11px 14px;border-radius:16px;font:600 15px/1.4 var(--body)}
+.cb.bot{align-self:flex-start;background:#E4EFE3;color:#27493D;border-bottom-left-radius:6px}
+.cb.me{align-self:flex-end;background:#467F67;color:#fff;border-bottom-right-radius:6px}
+.cb.new{animation:paneIn .25s ease}
+.chatopts{display:grid;grid-template-columns:1fr;gap:8px}
+.chatopts.multi{grid-template-columns:1fr 1fr}
+.chopt2{min-height:54px;padding:0 14px;border-radius:14px;border:1.5px solid rgba(70,127,103,.3);background:#fff;color:#27493D;font:800 15px var(--body);text-align:left;cursor:pointer}
+.chopt2:hover{border-color:#467F67}
+.chopt2.on{background:#467F67;border-color:#467F67;color:#fff}
+#chatDone{margin-top:12px}
+.mypicks{margin:0 2px 12px}
+.mypicks:empty{display:none}
+.mypicks b{display:block;font:800 13px var(--body);color:#467F67;margin-bottom:6px}
+.mpl{display:flex;flex-wrap:wrap;gap:6px}
+.mpk{display:inline-flex;align-items:center;gap:4px;padding:6px 6px 6px 12px;border-radius:999px;background:#EDF3E8;border:1px solid rgba(70,127,103,.3);font:700 13px var(--body);color:#27493D}
+.mpx{width:26px;height:26px;border-radius:50%;border:0;background:#fff;color:#5f7268;font:700 16px/1 var(--body);cursor:pointer}
+@media (prefers-reduced-motion:reduce){.cb.new{animation:none}}
 .staycard .acthead{margin-bottom:8px}
 .actback{display:inline-flex;align-items:center;gap:4px;min-height:42px;padding:0 14px 0 8px;border-radius:999px;border:1.5px solid rgba(70,127,103,.3);background:#fff;color:#27493D;font:800 14px var(--body);cursor:pointer}
 .actback svg{width:20px;height:20px}
@@ -2073,7 +2113,7 @@ document.addEventListener('click',function(e){
   var b=e.target.closest&&e.target.closest('.nxbtn');if(!b)return;
   var go=b.getAttribute('data-jumpto');
   if(go==='pick'){var i=nextOpenStop();if(i>-1){openStaySheet(i);return;}go='stay';}
-  if(go==='dowiz'){openDoSheet(0);return;}
+  if(go==='dowiz'){openIdeas();return;}
   if(go==='map'){var pe=document.getElementById('panel');pe.classList.add('peek');if(lastFit)setTimeout(function(){fitWithUI(lastFit);},450);return;}
   scrollToSec(go);
 });
@@ -2225,6 +2265,7 @@ function stayDefaultNights(i){
 }
 function openStaySheet(i,editId){
   var sh=document.getElementById('actsheet'),r=(tripCtx.recs||[])[i];if(!sh||!r)return;
+  doSt=null;chatSt=null;ideaView='';
   var old=editId?cart.filter(function(x){return x.id===editId;})[0]:null;
   staySt={i:i,type:(old&&old.type)||'hotel',price:old?old.cost:(r.pd?r.pd.lodging:(+budget.nightly||0)),nights:old?(+old.nights||1):stayDefaultNights(i),list:null,editId:editId||null};
   document.getElementById('actTitle').textContent='Where will you sleep?';
@@ -2235,7 +2276,7 @@ function openStaySheet(i,editId){
     r._stayList=l||[];if(staySt&&staySt.i===i){staySt.list=r._stayList;stayRender();}
   });
 }
-function closeStaySheet(){var sh=document.getElementById('actsheet');if(sh)sh.classList.remove('show');staySt=null;doSt=null;}
+function closeStaySheet(){var sh=document.getElementById('actsheet');if(sh)sh.classList.remove('show');staySt=null;doSt=null;chatSt=null;ideaView='';}
 function stayRender(){
   var st=staySt;if(!st)return;
   var r=tripCtx.recs[st.i],b=document.getElementById('actBody');
@@ -2277,7 +2318,7 @@ function stayDone(name){
   document.getElementById('actsheet').classList.remove('show');
   cheer(more?pickLine(lbl):'Every night has a place.',
         more?(usd(e.total)+' so far. Next up: '+stopLabel(nx)+'.'):('This trip is taking shape. '+usd(e.total)+' so far.'),
-        function(){if(more)openStaySheet(nx);else openDoSheet(0);});
+        function(){if(more)openStaySheet(nx);else openIdeas();});
 }
 var CHEER_LINES=['sorted.','locked in.','handled.','done. One less thing to figure out.'];
 var cheerN=0;
@@ -2329,9 +2370,10 @@ function wizBackShown(on){var b=document.getElementById('actBack');if(b)b.style.
 function lastPickFor(i){var pk=stopPicks(i);return pk.length?pk[pk.length-1].id:null;}
 function wizBack(){
   var ss=stayStops();
-  if(doSt){
-    if(doSt.k>0){openDoSheet(doSt.k-1);return;}
-    doSt=null;var li=ss[ss.length-1];
+  if(ideaView==='chat'){openIdeas();return;}
+  if(ideaView==='stop'&&doSt){if(doSt.k>0)openDoSheet(doSt.k-1);else openIdeas();return;}
+  if(ideaView==='choose'){
+    ideaView='';var li=ss[ss.length-1];
     for(var k=ss.length-1;k>=0;k--){if(stopPicks(ss[k]).length){li=ss[k];break;}}
     openStaySheet(li,lastPickFor(li));return;
   }
@@ -2342,45 +2384,166 @@ function wizBack(){
 }
 function wizRestart(){
   cart=cart.filter(function(x){return x.kind!=='stay';});
-  saved=[];tripReady=false;tripStyle='plan';doSt=null;
+  saved=[];tripReady=false;tripStyle='plan';doSt=null;ideaProfile=null;ideaSrc='travelers';ideaView='';chatSt=null;
   renderCost();markSavedTiles();
   var ss=stayStops();
   if(ss.length)openStaySheet(ss[0]);else closeStaySheet();
 }
 
 var saved=[],tripReady=false,doSt=null;
+var ideaSrc='travelers',ideaProfile=null,ideaView='',chatSt=null;
+var IDEA_IC={travelers:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11a3 3 0 0 1 3 3v11H7a3 3 0 0 1-3-3z"/><path d="M8 9h6M8 13h4"/></svg>',trending:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>',you:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 5.2L20 9l-4.3 3.9L17 19l-5-3-5 3 1.3-6.1L4 9l5.8-.8z"/></svg>'};
+var IDEA_NAME={travelers:'Travelers',trending:'Trending',you:'For you'};
+var CAT_NAME={food:'Food',nature:'Outdoors',history:'History and culture',nightlife:'Nightlife',family:'Family fun',music:'Music and shows',sights:'Sights'};
+var CHAT=[
+  {k:'who',q:'Who is coming with you?',a:[['solo','Just me'],['couple','My partner'],['friends','Friends'],['family','Family with kids']]},
+  {k:'likes',q:'What sounds good? Pick as many as you like, then tap Done.',multi:true,a:[['food','Food'],['nature','Outdoors'],['history','History and culture'],['nightlife','Nightlife'],['family','Family fun'],['music','Music and shows']]},
+  {k:'pace',q:'How full do you want your days?',a:[['easy','Easy. A couple of things.'],['balanced','Balanced'],['packed','Packed. Show me everything.']]}
+];
 function isSaved(i,name){return saved.some(function(x){return x.stopI===i&&x.name===name;});}
+function placeQ(r){var q=r.place||'';var stN=r.st&&BYABBR[String(r.st).toLowerCase()];if(q.indexOf(',')<0&&stN)q+=', '+stN.n;return q;}
+function capFirst(t){return t.replace(/^./,function(c){return c.toUpperCase();});}
 function doItems(i){
-  var card=document.querySelectorAll('#extra .stopcard')[i];if(!card)return {loading:false,items:[]};
-  var tiles=card.querySelectorAll('.spane[data-pane="do"] .hslide');
-  var loading=[].some.call(tiles,function(t){return t.classList.contains('hskel');});
-  var items=[];[].forEach.call(tiles,function(t){var n=t.querySelector('.hst');if(!n)return;var k=t.querySelector('.hsm');items.push({name:n.textContent.trim(),kind:k?k.textContent.trim():''});});
-  return {loading:loading,items:items};
+  var card=document.querySelectorAll('#extra .stopcard')[i];if(!card)return [];
+  var items=[];[].forEach.call(card.querySelectorAll('.spane[data-pane="do"] .hslide'),function(t){var n=t.querySelector('.hst');if(!n)return;var k=t.querySelector('.hsm');items.push({name:n.textContent.trim(),note:k?capFirst(k.textContent.trim()):'Sight'});});
+  return items;
+}
+function sheetShow(){document.getElementById('actsheet').classList.add('show');document.getElementById('actBody').scrollTop=0;}
+function openIdeas(){
+  doSt=null;staySt=null;chatSt=null;ideaView='choose';
+  document.getElementById('actTitle').textContent='How do you want to find things to do?';
+  function opt(k,t,d){return '<button type="button" class="idopt" data-src="'+k+'"><span class="idic">'+IDEA_IC[k]+'</span><span class="strt"><b>'+t+'</b><span>'+d+'</span></span><svg class="idgo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>';}
+  document.getElementById('actBody').innerHTML='<p class="actsub">Pick one to start. You can switch at any stop.</p><div class="idopts">'+
+    opt('travelers','See what travelers recommend','Places other travelers wrote up for each of your stops.')+
+    opt('trending','See what is trending','Short videos people are posting from each stop.')+
+    opt('you','Make it personal','Answer three quick questions and get picks that fit you.')+'</div>'+wizFoot();
+  wizProg(2);wizBackShown(true);sheetShow();
+}
+function openChat(){
+  var ret=doSt?doSt.k:0;
+  doSt=null;staySt=null;ideaView='chat';chatSt={i:0,ans:{},log:[],multi:[],ret:ret};
+  document.getElementById('actTitle').textContent='Let us make it yours';
+  chatRender();wizProg(2);wizBackShown(true);sheetShow();
+}
+function chatRender(){
+  var st=chatSt;if(!st)return;
+  var q=CHAT[st.i],h='<div class="chat">';
+  st.log.forEach(function(m){h+='<div class="cb bot">'+esc(m.q)+'</div><div class="cb me">'+esc(m.a)+'</div>';});
+  if(q){
+    h+='<div class="cb bot new">'+esc(q.q)+'</div></div><div class="chatopts'+(q.multi?' multi':'')+'">'+
+      q.a.map(function(a){return '<button type="button" class="chopt2'+(st.multi.indexOf(a[0])>-1?' on':'')+'" data-v="'+a[0]+'">'+esc(a[1])+'</button>';}).join('')+'</div>'+
+      (q.multi?'<button type="button" class="actbtn actadd" id="chatDone">Done</button>':'');
+  }else h+='<div class="cb bot new">Got it. Here are picks that fit you.</div></div>';
+  document.getElementById('actBody').innerHTML=h+wizFoot();
+  var b=document.getElementById('actBody');b.scrollTop=b.scrollHeight;
+}
+function chatAnswer(vals){
+  var st=chatSt,q=CHAT[st.i];
+  var labels=vals.map(function(v){return (q.a.filter(function(a){return a[0]===v;})[0]||[v,v])[1];});
+  st.ans[q.k]=q.multi?vals:vals[0];
+  st.log.push({q:q.q,a:labels.join(', ')});
+  st.i++;st.multi=[];
+  if(st.i<CHAT.length){chatRender();return;}
+  var likes=(st.ans.likes||[]).slice();
+  if(st.ans.who==='family'&&likes.indexOf('family')<0)likes.push('family');
+  if(!likes.length)likes=['food','history','nature'];
+  ideaProfile={who:st.ans.who,likes:likes,pace:st.ans.pace||'balanced'};
+  (tripCtx.recs||[]).forEach(function(r){r._you=null;});
+  var ret=st.ret||0;
+  chatRender();
+  setTimeout(function(){if(ideaView==='chat'){ideaSrc='you';openDoSheet(ret);}},650);
 }
 function openDoSheet(k){
   var ss=stayStops();
   if(k>=ss.length){finishTrip();return;}
-  doSt={k:k,i:ss[k],tries:0};
-  document.getElementById('actTitle').textContent='What do you want to do?';
-  doRender();
-  document.getElementById('actsheet').classList.add('show');
+  doSt={k:k,i:ss[k]};staySt=null;chatSt=null;ideaView='stop';
+  document.getElementById('actTitle').textContent='Things to do';
+  doRender();sheetShow();
 }
 function doRender(){
   var st=doSt;if(!st)return;
-  var ss=stayStops(),r=tripCtx.recs[st.i],b=document.getElementById('actBody'),d=doItems(st.i),last=st.k===ss.length-1;
-  var rows=d.items.slice(0,12).map(function(x){var on=isSaved(st.i,x.name);
-    return '<button type="button" class="strow dorow'+(on?' on':'')+'" data-name="'+esc(x.name)+'"><span class="strt"><b>'+esc(x.name)+'</b><span>'+esc(x.kind||'Sight')+'</span></span><span class="strpick">'+(on?'\u2713 Saved':'Save')+'</span></button>';
-  }).join('');
-  if(!rows)rows='<p class="stnote">'+(d.loading?'Looking for things to do near this stop...':'Nothing is tagged on the map near this stop yet. The Shorts tab still shows what travelers filmed here.')+'</p>';
-  b.innerHTML='<p class="actsub">'+esc(stopLabel(st.i).replace(/^./,function(c){return c.toUpperCase();}))+' \u00b7 stop '+(st.k+1)+' of '+ss.length+'</p>'+
-    '<p class="stnote" style="margin-top:0">Tap anything that sounds good. It is saved to your trip.</p>'+
-    '<div class="stlist">'+rows+'</div>'+
-    '<button type="button" class="actbtn actadd" id="doNext">'+(last?'Finish my trip':'Next stop \u2192')+'</button>'+wizFoot();
+  var ss=stayStops(),last=st.k===ss.length-1;
+  document.getElementById('actBody').innerHTML='<p class="actsub">'+esc(capFirst(stopLabel(st.i)))+' · stop '+(st.k+1)+' of '+ss.length+'</p>'+
+    '<div class="idseg" role="tablist">'+['travelers','trending','you'].map(function(k){return '<button type="button" role="tab" data-src="'+k+'" class="'+(ideaSrc===k?'on':'')+'">'+IDEA_IC[k]+'<span>'+IDEA_NAME[k]+'</span></button>';}).join('')+'</div>'+
+    '<div id="idList"><p class="stnote">Loading...</p></div>'+
+    '<button type="button" class="actbtn actadd" id="doNext">'+(last?'Finish my trip':'Next stop →')+'</button>'+wizFoot();
   wizProg(2);wizBackShown(true);
-  if(d.loading&&st.tries<12){st.tries++;setTimeout(function(){if(doSt===st)doRender();},800);}
+  loadIdeas(st);
+}
+function ideaRow(st,x){
+  var on=isSaved(st.i,x.name);
+  return '<div class="idrow'+(on?' on':'')+'" data-name="'+esc(x.name)+'">'+
+    '<button type="button" class="idmain"'+(x.v!=null?' data-v="'+x.v+'"':'')+(x.wp?' data-wp="'+esc(x.wp)+'"':'')+' data-note="'+esc(x.note||'')+'">'+
+    (x.thumb?'<span class="idthumb" style="background-image:url('+esc(urlOk(x.thumb))+')"></span>':'')+
+    '<span class="strt"><b>'+esc(x.name)+'</b>'+(x.note?'<span>'+esc(x.note)+'</span>':'')+'</span></button>'+
+    '<button type="button" class="idsave">'+(on?'✓ Saved':'Save')+'</button></div>';
+}
+function ideaList(st,items,head,foot){
+  var el=document.getElementById('idList');if(!el||doSt!==st)return;
+  el.innerHTML=(head||'')+(items.length?'<div class="stlist">'+items.map(function(x){return x.h?('<div class="idhead">'+esc(x.h)+'</div>'):ideaRow(st,x);}).join('')+'</div>':'')+(foot||'');
+}
+function loadIdeas(st){
+  var r=tripCtx.recs[st.i],src=ideaSrc;
+  function fresh(){return doSt===st&&ideaSrc===src;}
+  if(src==='you'&&!ideaProfile){openChat();return;}
+  if(src==='trending'){
+    var showS=function(vs){
+      if(!fresh())return;
+      if(vs&&vs.limited){ideaList(st,[],'<p class="stnote">Trending videos have hit today\'s limit. They come back tomorrow. Try Travelers or For you for this stop.</p>');return;}
+      if(!vs||!vs.length){ideaList(st,[],'<p class="stnote">No short videos turned up for this stop yet. Try Travelers or For you.</p>');return;}
+      st.shorts=vs;
+      ideaList(st,vs.map(function(x,k){return {name:deent(x.title),note:fmtViews(x.views)+' views · '+x.channel,thumb:'https://i.ytimg.com/vi/'+x.id+'/hqdefault.jpg',v:k};}),'<p class="stnote">Tap a video to watch it here. Save the ones that give you ideas.</p>');
+    };
+    if(r._shorts){showS(r._shorts);return;}
+    bfetch('/api/social/shorts?place='+encodeURIComponent(placeQ(r)),15000).then(function(x){return x.ok?x.json():(x.status===429?{limited:true}:null);}).catch(function(){return null;}).then(function(vs){if(vs&&!vs.limited&&vs.length)r._shorts=vs;showS(vs);});
+    return;
+  }
+  var guideP=r._guide?Promise.resolve(r._guide):bfetch('/api/guide?place='+encodeURIComponent(placeQ(r)),15000).then(function(x){return x.ok?x.json():null;}).catch(function(){return null;}).then(function(g){if(g)r._guide=g;return g;});
+  if(src==='travelers'){
+    guideP.then(function(g){
+      if(!fresh())return;
+      var items=[];
+      [['see','Places to see'],['do','Things to do'],['eat','Where to eat'],['drink','Where to drink']].forEach(function(sx){
+        var l=(g&&g[sx[0]])||[];if(!l.length)return;items.push({h:sx[1]});l.forEach(function(x){items.push({name:x.name,note:x.note});});
+      });
+      if(items.length){ideaList(st,items,'<p class="stnote">What other travelers wrote up for this stop. Save the ones you like.</p>','<p class="stnote">From Wikivoyage, the free travel guide written by travelers (CC BY-SA).</p>');return;}
+      var osm=doItems(st.i);
+      ideaList(st,osm.slice(0,12),'<p class="stnote">'+(osm.length?'No traveler guide is written for this stop yet. These are the sights on the map nearby.':'Nothing is written up for this stop yet. Try Trending or For you.')+'</p>');
+    });
+    return;
+  }
+  var pf=ideaProfile,max=pf.pace==='easy'?4:(pf.pace==='packed'?14:8);
+  if(!r._you){
+    r._you={pool:{},pending:pf.likes.length};
+    pf.likes.forEach(function(c){
+      bfetch('/api/places?lat='+r.lat+'&lng='+r.lng+'&cat='+c,45000).then(function(x){return x.ok?x.json():[];}).catch(function(){return [];}).then(function(l){
+        r._you.pool[c]=(l||[]).map(function(x){return {name:x.name,note:capFirst(x.kind)+' · '+x.mi+' mi from your stop',wp:x.wp};});
+        r._you.pending--;if(doSt===st&&ideaSrc==='you')renderYou();
+      });
+    });
+  }
+  function renderYou(){
+    if(!fresh())return;
+    var g=r._guide||{},pools=[];
+    pf.likes.forEach(function(c){
+      var l=[];
+      if(c==='food')l=(g.eat||[]).map(function(x){return {name:x.name,note:x.note||'Recommended by travelers'};});
+      else if(c==='nightlife')l=(g.drink||[]).map(function(x){return {name:x.name,note:x.note||'Recommended by travelers'};});
+      else if(c==='history'||c==='nature'||c==='family')l=((c==='history'?g.see:g.do)||[]).map(function(x){return {name:x.name,note:x.note||'Recommended by travelers'};});
+      var seen={};l=l.concat(r._you.pool[c]||[]).filter(function(x){var k=x.name.toLowerCase();if(seen[k])return false;seen[k]=1;return true;});
+      pools.push({c:c,l:l});
+    });
+    var per=Math.max(2,Math.ceil(max/pools.length)),items=[],total=0;
+    pools.forEach(function(pl){var take=pl.l.slice(0,per);if(!take.length)return;items.push({h:CAT_NAME[pl.c]||pl.c});take.forEach(function(x){items.push(x);total++;});});
+    var who={solo:'a solo trip',couple:'a trip for two',friends:'a trip with friends',family:'a family trip'}[pf.who]||'your trip';
+    var head='<div class="cb bot">For '+esc(who)+': '+esc(pf.likes.map(function(c){return (CAT_NAME[c]||c).toLowerCase();}).join(', '))+', '+esc(pf.pace)+' pace.</div><button type="button" class="idredo" id="chatRedo">Change my answers</button>';
+    var foot=r._you.pending>0?'<p class="stnote">Still finding more places near this stop...</p>':(total?'':'<p class="stnote">Nothing matching turned up near this stop. Try Travelers or Trending here.</p>');
+    ideaList(st,items,head,foot);
+  }
+  guideP.then(renderYou);
 }
 function finishTrip(){
-  doSt=null;tripReady=true;
+  doSt=null;ideaView='';tripReady=true;
   document.getElementById('actsheet').classList.remove('show');
   renderNext();
   var e=estimate();
@@ -2388,10 +2551,26 @@ function finishTrip(){
     var sc=document.querySelector('#panel .scroll');if(sc)sc.scrollTo({top:0,behavior:'smooth'});
   },true);
 }
+function renderPicks(){
+  [].forEach.call(document.querySelectorAll('#extra .stopcard'),function(card,i){
+    var pane=card.querySelector('.spane[data-pane="do"]');if(!pane)return;
+    var box=pane.querySelector('.mypicks');
+    if(!box){box=document.createElement('div');box.className='mypicks';var lb=pane.querySelector('.slbl');pane.insertBefore(box,lb?lb.nextSibling:pane.firstChild);}
+    var mine=saved.filter(function(x){return x.stopI===i;});
+    box.innerHTML=mine.length?('<b>Your picks</b><div class="mpl">'+mine.map(function(x){return '<span class="mpk">'+esc(x.name)+'<button type="button" class="mpx" data-i="'+i+'" data-name="'+esc(x.name)+'" aria-label="Remove '+esc(x.name)+'">&times;</button></span>';}).join('')+'</div>'):'';
+  });
+}
+document.addEventListener('click',function(e){
+  var x=e.target.closest&&e.target.closest('.mpx');if(!x)return;
+  var i=+x.getAttribute('data-i'),nm=x.getAttribute('data-name');
+  saved=saved.filter(function(s2){return !(s2.stopI===i&&s2.name===nm);});
+  renderPicks();markSavedTiles();renderNext();
+});
 function markSavedTiles(){
   [].forEach.call(document.querySelectorAll('#extra .stopcard'),function(card,i){
     [].forEach.call(card.querySelectorAll('.spane[data-pane="do"] .hslide'),function(t){var n=t.querySelector('.hst');if(n)t.classList.toggle('savedtile',isSaved(i,n.textContent.trim()));});
   });
+  renderPicks();
 }
 (function(){
   var sh=document.getElementById('actsheet');if(!sh)return;
@@ -2407,15 +2586,33 @@ function markSavedTiles(){
       document.getElementById('wizFoot').scrollIntoView({block:'nearest'});return;}
     if(e.target.closest('#wizYes')){wizRestart();return;}
     if(e.target.closest('#wizNo')){document.getElementById('wizFoot').outerHTML=wizFoot();return;}
-    var drow=e.target.closest('.dorow');
-    if(drow&&doSt){var nm=drow.getAttribute('data-name');
-      if(isSaved(doSt.i,nm))saved=saved.filter(function(x){return !(x.stopI===doSt.i&&x.name===nm);});
-      else{saved.push({stopI:doSt.i,name:nm});chime();}
-      doRender();markSavedTiles();return;}
+    var op=e.target.closest('.idopt');
+    if(op){ideaSrc=op.getAttribute('data-src');if(ideaSrc==='you'&&!ideaProfile)openChat();else openDoSheet(0);return;}
+    var sg=e.target.closest('.idseg button');
+    if(sg&&doSt){ideaSrc=sg.getAttribute('data-src');doRender();return;}
+    if(e.target.closest('#chatRedo')){openChat();return;}
+    var co=e.target.closest('.chopt2');
+    if(co&&chatSt){var q=CHAT[chatSt.i],v=co.getAttribute('data-v');
+      if(q.multi){var ix=chatSt.multi.indexOf(v);if(ix>-1)chatSt.multi.splice(ix,1);else chatSt.multi.push(v);co.classList.toggle('on');}
+      else chatAnswer([v]);
+      return;}
+    if(e.target.closest('#chatDone')&&chatSt){chatAnswer(chatSt.multi.slice());return;}
+    var sv=e.target.closest('.idsave');
+    if(sv&&doSt){var rw=sv.closest('.idrow'),nm=rw.getAttribute('data-name');
+      if(isSaved(doSt.i,nm)){saved=saved.filter(function(x){return !(x.stopI===doSt.i&&x.name===nm);});rw.classList.remove('on');sv.textContent='Save';}
+      else{saved.push({stopI:doSt.i,name:nm,src:ideaSrc});rw.classList.add('on');sv.textContent='✓ Saved';chime();}
+      markSavedTiles();return;}
+    var im=e.target.closest('.idmain');
+    if(im&&doSt){
+      var nm2=im.closest('.idrow').getAttribute('data-name');
+      if(im.hasAttribute('data-v')&&doSt.shorts){openShorts(doSt.shorts,+im.getAttribute('data-v'),tripCtx.recs[doSt.i].place||'');return;}
+      var wp=im.getAttribute('data-wp');
+      if(wp){inApp.wiki(wpLang(wp),wpTitle(wp));return;}
+      inApp.note(nm2,im.getAttribute('data-note')||'No description for this one yet.');return;}
     if(e.target.closest('#doNext')&&doSt){openDoSheet(doSt.k+1);return;}
     var row=e.target.closest('.strow');
     if(row&&staySt){stayDone(row.getAttribute('data-name'));return;}
-    if(e.target.closest('#stFlow')){tripStyle='flow';closeStaySheet();renderNext();openDoSheet(0);return;}
+    if(e.target.closest('#stFlow')){tripStyle='flow';renderNext();openIdeas();return;}
   });
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&sh.classList.contains('show'))closeStaySheet();});
 })();
@@ -2605,7 +2802,7 @@ function netErrMsg(e){
 }
 
 form.addEventListener('submit',function(e){
-  e.preventDefault();pushURL();hint.classList.remove('err');cart=[];saved=[];tripReady=false;tripStyle='plan';closeEdit();
+  e.preventDefault();pushURL();hint.classList.remove('err');cart=[];saved=[];tripReady=false;tripStyle='plan';ideaProfile=null;ideaSrc='travelers';closeEdit();
   var vals=[].map.call(document.querySelectorAll('#stops .stopin'),function(i){return i.value.trim();}).filter(Boolean);
   if(vals.length<2){hint.textContent=travelMode==='fly'?'Add at least a departure and destination city.':(travelMode==='boat'?'Add at least a departure and destination port.':'Add at least a start and a destination.');hint.classList.add('err');return;}
   hint.textContent=travelMode==='drive'?'Planning your route, stops, and stays...':'Planning your trip...';
@@ -2656,14 +2853,14 @@ function buildDetail(opts){
   (function(){
     var dl=rc.pts&&rc.pts[rc.pts.length-1]||{},dn=dl.city||dl.label||'';
     if(!dn)return;
-    if(dl.st&&dn.indexOf(dl.st)<0)dn+=' '+dl.st;
-    var wq=(travelMode==='drive'?'road trip to ':'trip to ')+dn+' tips';
-    getStatus().then(function(st){
-      if(!(st.youtube||st.reddit||st.google))return;
-      var w=document.getElementById('wps'),qi=document.getElementById('wpsq'),go=document.getElementById('wpsgo');
-      if(!w||!qi||!go)return;
-      w.open=true;qi.value=wq;go.click();
-    });
+    var stN=dl.st&&BYABBR[String(dl.st).toLowerCase()];
+    if(stN&&dn.toLowerCase()===stN.n.toLowerCase())dn+=' USA';
+    else if(stN&&dn.indexOf(',')<0)dn+=', '+stN.n;
+    var wq='fun things to do in '+dn;
+    var w=document.getElementById('wps'),qi=document.getElementById('wpsq'),go=document.getElementById('wpsgo');
+    if(!w||!qi||!go)return;
+    qi.value=wq;
+    w.addEventListener('toggle',function once(){if(!w.open)return;w.removeEventListener('toggle',once);go.click();});
   })();
   initStopSliders(rc.recs||[]);
   applyPerDiem(rc.recs||[],planGen);
@@ -2732,7 +2929,7 @@ function initWPS(){
       if(h){
         h+='<p class="note">Videos ranked by engagement; web results by relevance. Search the not-yet-connected platforms directly:</p>'+wpsLinks(v);
       }else if(con.youtube||con.reddit||con.google){
-        h='<p class="note">Nothing strong came back for that. Try fewer words, or search the platforms directly:</p>'+wpsLinks(v);
+        h='<p class="note">'+(j.limited?'Video search has hit its daily limit. It comes back tomorrow.':'No videos came back for that. Try the name of a city, like "fun things to do in Austin".')+'</p>';
       }else{
         h='<p class="note">No platforms are connected yet, so we can’t rank posts in-app. Search directly:</p>'+wpsLinks(v)+connectHTML(platStatus||{});
       }

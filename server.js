@@ -386,6 +386,88 @@ async function handleStaysOsm(reqUrl, res){
   } catch (e){ json(res, 502, { error: 'stays unavailable' }); }
 }
 
+function stripTags(h){
+  return String(h || '').replace(/<style[^>]*>[^]*?<\/style>/gi, '').replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").replace(/&nbsp;|&#160;|&#32;/g, ' ').replace(/&#(\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ').trim();
+}
+async function wikivoyagePage(title){
+  const up = await upstream('https://en.wikivoyage.org/w/api.php?action=parse&prop=text&format=json&redirects=1&formatversion=2&page=' + encodeURIComponent(title));
+  if (up.status !== 200) return null;
+  let j; try { j = JSON.parse(up.body); } catch (e){ return null; }
+  if (!j.parse || !j.parse.text) return null;
+  const parts = j.parse.text.split(/<h2[^>]*id="([^"]+)"/);
+  const want = { See: 'see', Do: 'do', Eat: 'eat', Drink: 'drink' }, out = { see: [], do: [], eat: [], drink: [] };
+  for (let i = 1; i < parts.length; i += 2){
+    const k = want[parts[i]]; if (!k) continue;
+    const re = /listing-name[^>]*>([^]*?)<\/span>([^]*?)(?=listing-name|$)/g; let m; const seen = {};
+    while ((m = re.exec(parts[i + 1])) && out[k].length < 14){
+      const name = stripTags(m[1]); if (!name || name.length > 70 || seen[name.toLowerCase()]) continue;
+      seen[name.toLowerCase()] = 1;
+      const c = /listing-content[^>]*>([^]*?)<\/span>/.exec(m[2]);
+      let note = c ? stripTags(c[1]) : '';
+      if (note.length > 170) note = note.slice(0, 167).replace(/\s+\S*$/, '') + '...';
+      out[k].push({ name, note });
+    }
+  }
+  out.title = j.parse.title || title;
+  return (out.see.length + out.do.length + out.eat.length + out.drink.length) ? out : null;
+}
+async function handleGuide(reqUrl, res){
+  const place = (reqUrl.searchParams.get('place') || '').trim().slice(0, 80);
+  if (!place) return json(res, 400, { error: 'missing place' });
+  const key = 'guide:' + place.toLowerCase();
+  const hit = cget(key); if (hit) return json(res, 200, hit, true);
+  const bits = place.split(',').map(x => x.trim()).filter(Boolean);
+  const city = (bits[0] || '').replace(/ county$/i, ''), state = bits[1] || '';
+  const tries = state ? [city + ' (' + state + ')', city] : [city];
+  try {
+    let g = null;
+    for (const t of tries){ g = await wikivoyagePage(t); if (g) break; }
+    const out = g || { see: [], do: [], eat: [], drink: [], title: '' };
+    cset(key, out, (g ? 7 * 24 : 6) * 3600 * 1000);
+    json(res, 200, out);
+  } catch (e){ json(res, 502, { error: 'guide unavailable' }); }
+}
+
+const PLACE_CATS = {
+  food:      { r: 4000,  q: ['["amenity"="restaurant"]["cuisine"]["name"]'] },
+  nightlife: { r: 6000,  q: ['["amenity"="bar"]["name"]', '["amenity"="pub"]["name"]', '["amenity"="nightclub"]["name"]'] },
+  nature:    { r: 12000, q: ['["leisure"="park"]["name"]["wikidata"]', '["leisure"="nature_reserve"]["name"]', '["tourism"="viewpoint"]["name"]'] },
+  hikes:     { r: 20000, q: ['["leisure"="nature_reserve"]["name"]', '["highway"="trailhead"]["name"]', '["natural"="peak"]["name"]["wikidata"]'] },
+  history:   { r: 12000, q: ['["tourism"="museum"]["name"]', '["tourism"="gallery"]["name"]', '["historic"="monument"]["name"]', '["historic"="memorial"]["name"]["wikidata"]'] },
+  family:    { r: 20000, q: ['["tourism"="zoo"]["name"]', '["tourism"="aquarium"]["name"]', '["tourism"="theme_park"]["name"]', '["leisure"="water_park"]["name"]', '["leisure"="miniature_golf"]["name"]'] },
+  music:     { r: 10000, q: ['["amenity"="theatre"]["name"]', '["amenity"="music_venue"]["name"]', '["amenity"="arts_centre"]["name"]'] },
+  beaches:   { r: 25000, q: ['["natural"="beach"]["name"]', '["leisure"="beach_resort"]["name"]'] }
+};
+async function handlePlaces(reqUrl, res){
+  const lat = parseFloat(reqUrl.searchParams.get('lat')), lng = parseFloat(reqUrl.searchParams.get('lng'));
+  const cat = (reqUrl.searchParams.get('cat') || '').toLowerCase(), def = PLACE_CATS[cat];
+  if (!isFinite(lat) || !isFinite(lng) || !def) return json(res, 400, { error: 'lat/lng/cat required' });
+  const key = 'places:' + cat + ':' + lat.toFixed(2) + ',' + lng.toFixed(2);
+  const hit = cget(key); if (hit) return json(res, 200, hit, true);
+  const around = '(around:' + def.r + ',' + lat.toFixed(4) + ',' + lng.toFixed(4) + ')';
+  const ql = '[out:json][timeout:20];(' + def.q.map(f => 'nw' + around + f + ';').join('') + ');out center 60;';
+  try {
+    const j = await overpassRace(ql);
+    const seen = {}, out = [];
+    (j.elements || []).forEach(el => {
+      const t = el.tags || {};
+      const la = el.lat != null ? el.lat : (el.center && el.center.lat);
+      const lo = el.lon != null ? el.lon : (el.center && el.center.lon);
+      if (la == null || lo == null || !t.name) return;
+      const k = t.name.toLowerCase(); if (seen[k]) return; seen[k] = 1;
+      const kind = (t.cuisine ? t.cuisine.split(';')[0].replace(/_/g, ' ') + ' food' : (t.tourism || t.amenity || t.leisure || t.historic || t.natural || 'place').replace(/_/g, ' '));
+      out.push({ name: t.name, kind, cat, lat: la, lng: lo, mi: Math.round(milesLL(lat, lng, la, lo) * 10) / 10,
+        wp: t.wikipedia || null, known: !!(t.wikipedia || t.wikidata) });
+    });
+    out.sort((a, b) => (b.known - a.known) || (a.mi - b.mi));
+    const list = out.slice(0, 24);
+    if (list.length) cset(key, list, 24 * 3600 * 1000);
+    json(res, 200, list);
+  } catch (e){ json(res, 502, { error: 'places unavailable' }); }
+}
+
 async function handleStreet(reqUrl, res){
   const name = (reqUrl.searchParams.get('name') || '').trim();
   const lat = parseFloat(reqUrl.searchParams.get('lat')), lng = parseFloat(reqUrl.searchParams.get('lng'));
@@ -431,11 +513,14 @@ function handleSocialStatus(res){
   });
 }
 
+let ytDownUntil = 0;
 async function ytSearch(q){
   const key = 'yt:' + q.toLowerCase();
   const hit = cget(key); if (hit) return hit;
-  if (!spend('yt')) throw new Error('youtube daily budget spent');
-  const s = await upstream('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&order=viewCount&maxResults=8&q=' + encodeURIComponent(q) + '&key=' + YT_KEY);
+  if (Date.now() < ytDownUntil) { const e = new Error('youtube limited'); e.limited = true; throw e; }
+  if (!spend('yt')) { const e = new Error('youtube limited'); e.limited = true; throw e; }
+  const s = await upstream('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&order=relevance&maxResults=15&regionCode=US&relevanceLanguage=en&q=' + encodeURIComponent(q) + '&key=' + YT_KEY);
+  if (s.status === 403 || s.status === 429){ ytDownUntil = Date.now() + 30 * 60000; const e = new Error('youtube limited'); e.limited = true; throw e; }
   if (s.status !== 200) throw new Error('youtube ' + s.status);
   const sj = JSON.parse(s.body);
   const ids = (sj.items || []).map(i => i.id && i.id.videoId).filter(Boolean);
@@ -458,12 +543,14 @@ function isoSecs(d){ const m = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(d ||
 async function ytShorts(place){
   const key = 'yts:' + place.toLowerCase();
   const hit = cget(key); if (hit) return hit;
-  if (!spend('yt')) throw new Error('youtube daily budget spent');
+  if (Date.now() < ytDownUntil) { const e = new Error('youtube limited'); e.limited = true; throw e; }
+  if (!spend('yt')) { const e = new Error('youtube limited'); e.limited = true; throw e; }
   const parts = place.split(',').map(x => x.trim()).filter(Boolean);
   const city = (parts[0] || '').replace(/ county$/i, '').toLowerCase(), state = (parts[1] || '').toLowerCase();
   const after = new Date(Date.now() - 730 * 864e5).toISOString().slice(0, 10) + 'T00:00:00Z';
   const s = await upstream('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoDuration=short&order=relevance&maxResults=25&regionCode=US&relevanceLanguage=en&publishedAfter=' + after +
     '&q=' + encodeURIComponent(place + ' travel things to do #shorts') + '&key=' + YT_KEY);
+  if (s.status === 403 || s.status === 429){ ytDownUntil = Date.now() + 30 * 60000; const e = new Error('youtube limited'); e.limited = true; throw e; }
   if (s.status !== 200) throw new Error('youtube ' + s.status);
   const items = (JSON.parse(s.body).items || []).filter(i => i.id && i.id.videoId);
   const ids = items.map(i => i.id.videoId);
@@ -488,14 +575,14 @@ async function handleShorts(reqUrl, res){
   const place = (reqUrl.searchParams.get('place') || '').trim().slice(0, 80);
   if (!place) return json(res, 400, { error: 'missing place' });
   try { json(res, 200, await ytShorts(place)); }
-  catch (e){ json(res, 502, { error: 'youtube unavailable' }); }
+  catch (e){ json(res, e && e.limited ? 429 : 502, { error: e && e.limited ? 'video limit reached' : 'youtube unavailable' }); }
 }
 async function handleVideos(reqUrl, res){
   if (!YT_KEY) return json(res, 501, { error: 'youtube not configured' });
   const q = (reqUrl.searchParams.get('q') || '').trim();
   if (!q) return json(res, 400, { error: 'missing q' });
   try { json(res, 200, await ytSearch(q)); }
-  catch (e){ json(res, 502, { error: 'youtube unavailable' }); }
+  catch (e){ json(res, e && e.limited ? 429 : 502, { error: e && e.limited ? 'video limit reached' : 'youtube unavailable' }); }
 }
 
 let rdTok = null, rdExp = 0;
@@ -567,12 +654,13 @@ async function handleAggregate(reqUrl, res){
   const key = 'agg:' + q.toLowerCase();
   const hit = cget(key); if (hit) return json(res, 200, hit, true);
   const cq = condenseQuery(q);
-  const ytq = /\b(trip|travel|vacation|visit|route|drive|driving|road)\b/i.test(q) ? cq + ' road trip travel guide' : cq;
+  const ytq = q.replace(/\s+/g, ' ').slice(0, 120);
+  let limited = false;
   const jobs = [];
   if (YT_KEY) jobs.push(ytSearch(ytq).then(v => v.map(x => ({
     plat: 'youtube', title: x.title, url: 'https://www.youtube.com/watch?v=' + x.id,
     thumb: x.thumb, meta: x.channel + (x.published ? ' · ' + x.published : ''), engagement: x.views, kind: 'views',
-  }))).catch(() => []));
+  }))).catch(e => { if (e && e.limited) limited = true; return []; }));
   if (RD_ID && RD_SECRET) jobs.push(rdSearch(cq).then(v => v.map(x => ({
     plat: 'reddit', title: x.title, url: x.url, thumb: '',
     meta: 'r/' + x.sub + ' · ' + x.comments + ' comments', engagement: x.ups, kind: 'upvotes',
@@ -583,7 +671,7 @@ async function handleAggregate(reqUrl, res){
   all.forEach(r => r.score = Math.log10(Math.max(1, r.engagement)));
   all.sort((a, b) => b.score - a.score);
   const out = {
-    query: q, used: cq,
+    query: q, used: ytq, limited,
     connected: { youtube: !!YT_KEY, reddit: !!(RD_ID && RD_SECRET), google: !!(G_KEY && G_CX), tiktok: false, instagram: false, facebook: false },
     results: all.slice(0, 16),
     web: web.slice(0, 6),
@@ -831,6 +919,8 @@ http.createServer((req, res) => {
     if (u.pathname === '/api/social/google') return void guard(handleGoogle(u, res), res);
     if (u.pathname === '/api/stays/hotels')  return void guard(handleHotels(u, res), res);
     if (u.pathname === '/api/stays/osm')     return void guard(handleStaysOsm(u, res), res);
+    if (u.pathname === '/api/guide')         return void guard(handleGuide(u, res), res);
+    if (u.pathname === '/api/places')        return void guard(handlePlaces(u, res), res);
     if (u.pathname === '/api/events')        return void guard(handleEvents(u, res), res);
     return json(res, 404, { error: 'unknown endpoint' });
   }
