@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Voyage: trip planning made easy</title>
+<meta property="og:title" content="Voyage: trip planning made easy">
+<meta property="og:description" content="Plan a trip by car, plane, or boat. Voyage maps the route, plans your stays, and lines up things to do at every stop.">
+<meta property="og:type" content="website">
 <meta name="description" content="Plan a trip you drive, fly, or boat. List your stops and Voyage maps the route and gathers stays, things to do, events, and videos for every stop along the way.">
 <link rel="stylesheet" href="vendor/leaflet-1.9.4.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -570,7 +573,7 @@ body::after{opacity:.035}
 .stchip{background:rgba(255,255,255,.8)}
 .recenter{position:fixed;right:16px;bottom:calc(var(--peek,250px) + 18px);z-index:12;height:48px;padding:0 16px 0 12px;gap:8px;border-radius:999px;font:700 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;background:#467F67;border:2px solid rgba(255,255,255,.9);color:#FFFFFF;display:none;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 16px 36px -12px rgba(12,54,36,.6)}
 .recenter svg{width:22px;height:22px}
-@media (max-width:700px){#panel.open:not(.peek)~.recenter{display:none!important}}
+@media (max-width:700px){#panel.open:not(.peek)~.recenter,#panel.dragging~.recenter{display:none!important}.recenter{z-index:9}}
 .recenter:hover{background:#3D725C;box-shadow:0 18px 40px -12px rgba(12,54,36,.7)}
 .recenter:active{transform:translateY(1px)}
 body.inarea .recenter.show{display:flex}
@@ -1450,6 +1453,75 @@ body.tripdone #panel.peek .jumpbar{display:none}
 .mytrip b{font:800 16px/1.25 var(--heading);color:#27493D;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mytrip span{font:600 13px var(--body);color:#467F67}
 .mytripx{flex:none;width:48px;border:0;border-left:1px solid rgba(70,127,103,.18);background:none;color:#5f7268;font:700 22px/1 var(--body);cursor:pointer}
+.sharename{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;font:700 13px var(--body);color:#3e5f4f}
+.sharename input{min-height:50px;padding:0 14px;border-radius:12px;border:1.5px solid rgba(70,127,103,.4);background:#fff;color:#27493D;font:700 17px var(--body)}
+.sharename input:focus{outline:none;border-color:#467F67;box-shadow:0 0 0 3px rgba(134,197,164,.35)}
+.shlead{font:600 15px/1.45 var(--body);color:#3e5f4f;margin-bottom:12px}
+.shroute{padding:14px 16px;border-radius:16px;background:#27493D;background-image:var(--tex-hex);background-size:28px 49px;color:#fff}
+.shkind{display:inline-block;margin-bottom:6px;padding:3px 10px;border-radius:999px;background:var(--sun);color:var(--sun-ink);font:800 11px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.shroute b{display:block;font:800 21px/1.25 var(--heading);color:#fff}
+.shroute i{font-style:normal;color:var(--sun)}
+.shstats{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.shstats span{padding:7px 12px;border-radius:999px;background:#EDF3E8;font:700 13px var(--body);color:#27493D}
+.shstats .shtot{background:var(--sun);color:var(--sun-ink)}
+.shsec{margin-top:16px}
+.shsec h4{font:800 17px var(--heading);color:#27493D;margin-bottom:8px}
+.shgroup{margin-bottom:10px}
+.shgroup em{display:block;font:800 12px var(--body);font-style:normal;color:#467F67;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
+.shitem{padding:11px 14px;border-radius:12px;border:1.5px solid rgba(70,127,103,.2);background:#fff;margin-bottom:6px}
+.shitem b{display:block;font:800 15px/1.3 var(--heading);color:#27493D}
+.shitem span{display:block;font:500 12.5px/1.4 var(--body);color:#5f7268;margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+#sharedSee{margin-top:16px}
+.shorts{background:#000}
+.shorts.show{display:block}
+.shorts.away{display:none}
+.shplayer{position:absolute;inset:0;background:#000}
+.shplayer iframe{display:block;width:100%;height:100%;border:0}
+.shorts .shfeed{position:absolute;inset:0;flex:none;overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;scrollbar-width:none}
+.shorts .shslide{position:relative;display:block;height:100%;padding:0;scroll-snap-align:start;scroll-snap-stop:always}
+.shorts .shslide.shmsg{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:0 24px;text-align:center}
+.glass{background:rgba(22,34,29,.42);-webkit-backdrop-filter:blur(22px) saturate(1.6);backdrop-filter:blur(22px) saturate(1.6);border:1px solid rgba(255,255,255,.26);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 18px 40px -20px rgba(0,0,0,.7);color:#fff}
+@supports not ((backdrop-filter:blur(2px)) or (-webkit-backdrop-filter:blur(2px))){.glass{background:rgba(22,34,29,.82)}}
+.shbar{position:absolute;z-index:3;top:calc(10px + env(safe-area-inset-top));left:12px;right:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;pointer-events:none}
+.shbar>*{pointer-events:auto}
+.shorts .shback{display:inline-flex;align-items:center;gap:2px;min-height:46px;padding:0 16px 0 8px;border-radius:999px;font:800 14px var(--body);cursor:pointer}
+.shorts .shback svg{width:20px;height:20px}
+.shorts .shmeta{display:flex;flex-direction:column;align-items:center;gap:0;min-width:0;padding:6px 14px;border-radius:999px;text-align:center}
+.shorts .shmeta b{font:800 12.5px var(--body);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:42vw}
+.shorts .shmeta span{font:700 11.5px var(--body);color:#E6F3EA}
+.shmute{flex:none;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.shmute svg{width:22px;height:22px}
+.shmute .mut{display:none}
+.shorts.muted .shmute .snd{display:none}
+.shorts.muted .shmute .mut{display:inline}
+.shglass{position:absolute;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto;padding:16px;border-radius:26px;display:flex;flex-direction:column;gap:4px}
+.shglass>b{font:800 17px/1.3 var(--heading);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.45);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.shsub{font:600 13px var(--body);color:#E6F3EA;text-shadow:0 1px 2px rgba(0,0,0,.45)}
+.shmapit{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;margin-top:10px;border:0;border-radius:16px;background:var(--pop);color:#fff;font:800 16px var(--body);cursor:pointer;box-shadow:0 12px 24px -12px rgba(0,0,0,.6)}
+.shmapit svg{width:20px;height:20px}
+.shopts{display:none;flex-direction:column;gap:8px;margin-top:8px}
+.shglass.open .shopts{display:flex;animation:paneIn .2s ease}
+.shglass.open .shmapit{display:none}
+.shopts button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:60px;padding:10px 16px;border-radius:16px;text-align:left;cursor:pointer}
+.shopts button b{font:800 16px var(--body)}
+.shopts button span{font:600 12.5px/1.35 var(--body)}
+.shadd{border:0;background:var(--pop);color:#fff}
+.shadd span{color:rgba(255,255,255,.9)}
+.shadd.on{background:#467F67}
+.shsee{border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.14);color:#fff}
+.shsee span{color:#E6F3EA}
+.shstart{position:absolute;z-index:3;left:50%;top:18%;transform:translateX(-50%);display:none;padding:12px 18px;border-radius:999px;font:800 15px var(--body);white-space:nowrap;pointer-events:none}
+.shorts.needtap .shstart{display:block}
+.shorts.needtap .shfeed{pointer-events:none}
+.shorts.needtap .shglass{pointer-events:auto}
+.shhint{position:absolute;z-index:2;left:50%;bottom:calc(210px + env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;font:800 15px var(--body);color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.7);pointer-events:none;animation:shswipe 1.6s ease-in-out infinite}
+.shhint svg{width:34px;height:34px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+@keyframes shswipe{0%,100%{transform:translate(-50%,0);opacity:.95}50%{transform:translate(-50%,-14px);opacity:1}}
+.shorts.scrolled .shhint,.shorts.single .shhint,.shorts.needtap .shhint,.shorts:not(.playing) .shhint{display:none}
+.pkpin.vid svg{margin-left:2px}
+.pkback{margin-top:6px;min-height:42px;border:1.5px solid rgba(70,127,103,.35);border-radius:12px;background:#fff;color:#27493D;font:800 13.5px var(--body);cursor:pointer}
+@media (min-width:701px){.shplayer{left:50%;right:auto;width:min(100vw,calc(100dvh * 9 / 16 + 240px));transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.shhint{animation:none}.shglass.open .shopts{animation:none}}
 </style>
 </head>
 <body>
@@ -1466,10 +1538,16 @@ body.tripdone #panel.peek .jumpbar{display:none}
     <div id="actBody"></div>
   </div>
 </div>
-<div class="shorts" id="shorts" role="dialog" aria-modal="true" aria-label="Short videos">
-  <div class="shtop"><button type="button" class="shback" id="shClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Back to my trip</button><span class="shmeta"><b id="shWhere"></b><span id="shCount"></span></span></div>
-  <div class="shsound">Tap a video to turn its sound on</div>
+<div class="shorts" id="shorts" role="dialog" aria-modal="true" aria-label="What other travelers did">
+  <div class="shplayer" id="shPlayer"></div>
   <div class="shfeed" id="shFeed"></div>
+  <div class="shbar">
+    <button type="button" class="glass shback" id="shClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>My trip</button>
+    <span class="glass shmeta"><b id="shWhere"></b><span id="shCount"></span></span>
+    <button type="button" class="glass shmute" id="shMute" aria-label="Turn sound off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="snd" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/><path class="mut" d="M17 9l5 6M22 9l-5 6"/></svg></button>
+  </div>
+  <div class="glass shstart" aria-live="polite">Tap the video to start it</div>
+  <div class="shhint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-6 6 6"/><path d="M6 20l6-6 6 6" opacity=".5"/></svg>Swipe up to see more</div>
 </div>
 <div class="maphint" id="mapHint" aria-hidden="true"><i></i>Tap a stop to see your picks</div>
 <div class="cheer" id="cheer" role="status" aria-live="polite">
@@ -2267,7 +2345,7 @@ function buildJump(drive){
   var jb=document.getElementById('jumpbar');if(!jb)return;
   var secs=[['cost','Trip cost'],['stay','Stays'],['do','Things to do'],['events','Events'],['videos','Videos']];
   if(drive)secs.push(['along','Along the way']);
-  secs.push(['wps','What travelers say']);
+  secs.push(['wps','What other travelers did']);
   jb.innerHTML='<button type="button" class="jbmap" data-jump="map" aria-label="Back to the map">'+
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>Map</button>'+
     secs.map(function(x){return '<button type="button" data-jump="'+x[0]+'">'+esc(x[1])+'</button>';}).join('');
@@ -2688,7 +2766,8 @@ function myTripsDrop(id){try{localStorage.setItem('voyage-trips',JSON.stringify(
 function stopVals(){return [].map.call(document.querySelectorAll('#stops .stopin'),function(i){return i.value.trim();}).filter(Boolean);}
 function tripTitle(){var v=stopVals();if(v.length<2)return 'My trip';return v[0].split(',')[0]+' to '+v[v.length-1].split(',')[0]+(v.length>2?(' (+'+(v.length-2)+')'):'');}
 function tripState(){
-  return {mode:travelMode,stops:stopVals(),dates:{start:tripDates.start,end:tripDates.end},prefs:{hrs:tripPrefs.hrs,stay:tripPrefs.stay,see:tripPrefs.see},
+  var by='';try{by=localStorage.getItem('voyage-name')||'';}catch(e){}
+  return {mode:travelMode,stops:stopVals(),by:by,pts:((tripCtx&&tripCtx.pts)||[]).map(function(p){return {lat:p.lat,lng:p.lng,label:p.label||'',city:p.city||'',st:p.st||''};}),dates:{start:tripDates.start,end:tripDates.end},prefs:{hrs:tripPrefs.hrs,stay:tripPrefs.stay,see:tripPrefs.see},
     style:tripStyle,ready:tripReady,budget:budget,edited:budgetEdited,
     stays:cart.filter(function(x){return x.kind==='stay';}).map(function(x){return {name:x.name||x.label,type:x.type||'hotel',cost:x.cost,nights:x.nights||1,stopI:x.stopI||0};}),
     picks:saved.map(function(x){return {stopI:x.stopI,name:x.name,src:x.src,note:x.note||'',lat:x.lat,lng:x.lng,wp:x.wp||null,short:x.short||null};})};
@@ -2726,15 +2805,44 @@ function renderSaveBar(){
   el.innerHTML=mine?('<span class="svok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Saved. Changes save by themselves.</span><button type="button" class="svshare" id="shareTrip">Share</button>')
     :('<button type="button" class="svsave'+(tripReady?' hot':'')+'" id="saveTripBtn">'+(tripId?'Save a copy of this trip':'Save this trip')+'</button>');
 }
+function sharedSheet(t){
+  var recs=(tripCtx&&tripCtx.recs)||[],e=estimate();
+  var who=(t.by||'').trim()||'Someone';
+  var names=(t.stops||[]).map(function(x){return x.split(',')[0];});
+  var kind=t.mode==='fly'?'Flight':(t.mode==='boat'?'Boat trip':'Road trip');
+  var h='<p class="shlead">Check it out. Here is the whole plan.</p>'+
+    '<div class="shroute"><span class="shkind">'+kind+'</span><b>'+names.map(esc).join(' <i>\u2192</i> ')+'</b></div>'+
+    '<div class="shstats"><span>'+esc((document.getElementById('pMeta').childNodes[0]||{}).textContent||'')+'</span>'+
+    (t.dates&&t.dates.start?'<span>'+esc(fmtDayLong(t.dates.start)+(t.dates.end?(' to '+fmtDayLong(t.dates.end)):''))+'</span>':'')+
+    '<span class="shtot">About '+usd(e.total)+'</span></div>';
+  var stays=t.stays||[],picks=t.picks||[];
+  if(stays.length){
+    h+='<div class="shsec"><h4>Where they are staying</h4>'+stays.map(function(x){var r=recs[x.stopI]||{};
+      return '<div class="shitem"><b>'+esc(x.name)+'</b><span>'+esc((r.place||'').split(',')[0])+' \u00b7 '+x.nights+(x.nights===1?' night':' nights')+' \u00b7 '+usd(x.cost)+' a night</span></div>';}).join('')+'</div>';
+  }
+  if(picks.length){
+    var by={};picks.forEach(function(x){(by[x.stopI]=by[x.stopI]||[]).push(x);});
+    h+='<div class="shsec"><h4>What they want to do</h4>'+Object.keys(by).map(function(si){var r=recs[si]||{};
+      return '<div class="shgroup"><em>'+esc((r.place||'On the way').split(',')[0])+'</em>'+by[si].map(function(x){return '<div class="shitem"><b>'+esc(x.name)+'</b>'+(x.note?'<span>'+esc(x.note)+'</span>':'')+'</div>';}).join('')+'</div>';}).join('')+'</div>';
+  }
+  if(!stays.length&&!picks.length)h+='<div class="shsec"><p class="intext">No stays or things to do are picked yet. The route is ready to look at.</p></div>';
+  h+='<button type="button" class="actbtn actadd" id="sharedSee">See it on the map</button>'+
+    '<button type="button" class="actbtn actgo" id="sharedCopy">Save a copy to my trips</button>';
+  inApp.show(who+' shared a trip with you',h);
+}
 function shareSheet(){
-  var link=tripLink();
-  inApp.show('Your trip is saved','<p class="intext">Anyone with this link can open your trip. It keeps up when you change it. Find it again on this phone under Your saved trips.</p>'+
+  var link=tripLink(),nm='';try{nm=localStorage.getItem('voyage-name')||'';}catch(e){}
+  inApp.show('Your trip is saved','<label class="sharename"><span>Your name, so friends know who sent it</span><input id="shareName" maxlength="40" autocomplete="given-name" placeholder="Your first name" value="'+esc(nm)+'"></label>'+
+    '<p class="intext">Anyone with this link can open your trip and see the route, the stays and the things to do. It keeps up when you change it.</p>'+
     '<input class="sharelink" id="shareLink" readonly value="'+esc(link)+'" aria-label="Link to your trip">'+
     '<button type="button" class="actbtn actadd" id="copyLink">Copy the link</button>'+
     (navigator.share?'<button type="button" class="actbtn actgo" id="nativeShare">Send it to someone</button>':''));
 }
 document.addEventListener('click',function(e){
-  var t=e.target.closest&&e.target.closest('#saveTripBtn,#shareTrip,#copyLink,#nativeShare,.mytrip,.mytripx');if(!t)return;
+  var t=e.target.closest&&e.target.closest('#saveTripBtn,#shareTrip,#copyLink,#nativeShare,#sharedSee,#sharedCopy,.mytrip,.mytripx');if(!t)return;
+  if(t.id==='sharedSee'){inApp.close();if(tripReady)showTripMap();else{document.getElementById('panel').classList.add('peek');if(lastFit)setTimeout(function(){fitWithUI(lastFit);},400);}return;}
+  if(t.id==='sharedCopy'){t.disabled=true;t.textContent='Saving...';
+    saveTrip().then(function(){inApp.close();cheer('Saved to your trips.','It is yours now. Change anything you like.',function(){if(tripReady)showTripMap();});},function(er){t.disabled=false;t.textContent='Save a copy to my trips';});return;}
   if(t.id==='saveTripBtn'){e.stopPropagation();t.disabled=true;t.textContent='Saving...';
     saveTrip().then(function(){cheer('Trip saved.','It is in Your saved trips, and you can share the link.',function(){shareSheet();});},function(er){t.disabled=false;t.textContent='Save this trip';inApp.note('Not saved',er.message);});return;}
   if(t.id==='shareTrip'){e.stopPropagation();shareSheet();return;}
@@ -2742,9 +2850,17 @@ document.addEventListener('click',function(e){
     if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(tripLink()).then(done,function(){var i=document.getElementById('shareLink');i.select();try{document.execCommand('copy');done();}catch(er){}});
     else{var i2=document.getElementById('shareLink');i2.select();try{document.execCommand('copy');done();}catch(er2){}}
     return;}
-  if(t.id==='nativeShare'){navigator.share({title:'My Voyage trip: '+tripTitle(),url:tripLink()}).catch(function(){});return;}
+  if(t.id==='nativeShare'){var go=function(){navigator.share({title:'My Voyage trip: '+tripTitle(),text:'I planned a trip on Voyage. Take a look.',url:tripLink()}).catch(function(){});};
+    clearTimeout(nameT);if(tripId&&tripKey)saveTrip().then(go,go);else go();return;}
   if(t.classList.contains('mytripx')){e.stopPropagation();myTripsDrop(t.getAttribute('data-id'));renderMyTrips();return;}
   if(t.classList.contains('mytrip')){var id=t.getAttribute('data-id');history.pushState(null,'','?t='+id);applyParams(new URLSearchParams(location.search));}
+});
+var nameT=0;
+document.addEventListener('input',function(e){
+  if(!e.target||e.target.id!=='shareName')return;
+  var v=e.target.value.replace(/[<>]/g,'').trim().slice(0,40);
+  try{localStorage.setItem('voyage-name',v);}catch(er){}
+  clearTimeout(nameT);nameT=setTimeout(function(){if(tripId&&tripKey)saveTrip().catch(function(){});},800);
 });
 function renderMyTrips(){
   var el=document.getElementById('myTrips');if(!el)return;
@@ -2773,6 +2889,14 @@ function loadTrip(id){
     syncPrefs();
     pendingRestore=t;
     setTimeout(function(){restoring=false;},60);
+    if(t.pts&&t.pts.length===t.stops.length){
+      hint.classList.remove('err');hint.textContent='';
+      cart=[];saved=[];tripReady=false;tripStyle='plan';ideaProfile=null;ideaSrc='travelers';
+      document.body.classList.remove('tripdone','pktapped');if(pkLayer)pkLayer.clearLayers();closeEdit();
+      var pts=t.pts.map(function(p,i){return {lat:p.lat,lng:p.lng,label:p.label||t.stops[i],city:p.city||'',st:p.st||''};});
+      GLOBE_READY.then(function(){planTrip(pts);});
+      return;
+    }
     form.dispatchEvent(new Event('submit',{cancelable:true}));
   });
 }
@@ -2784,6 +2908,11 @@ function applyRestore(t){
   tripStyle=t.style==='flow'?'flow':'plan';tripReady=!!t.ready;
   renderCost();markSavedTiles();renderNext();renderSaveBar();
   if(tripReady)setTimeout(function(){if(tripCtx)showTripMap();},1900);
+  var seen='';try{seen=sessionStorage.getItem('voyage-seen')||'';}catch(e){}
+  if(!tripKey&&tripId&&seen.indexOf(tripId)<0){
+    try{sessionStorage.setItem('voyage-seen',seen+' '+tripId);}catch(e){}
+    setTimeout(function(){if(tripCtx&&tripId)sharedSheet(t);},2400);
+  }
 }
 renderMyTrips();
 function renderDoneStrip(){
@@ -3164,7 +3293,7 @@ function aggCard(x){
 function wpsLinks(q){return '';}
 function wpsHTML(ph){
   return '<button type="button" class="wpsopen" id="wps"><span class="wpsplay"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>'+
-    '<span class="strt"><b>What travelers say</b><span>Watch what travelers filmed on this trip. One video at a time, swipe up for the next.</span></span>'+
+    '<span class="strt"><b>What other travelers did</b><span>Full-screen videos from your stops. Swipe up for the next one, and add what you like to your trip.</span></span>'+
     '<svg class="idgo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>';
 }
 function initWPS(){
@@ -3177,16 +3306,18 @@ function openTravelers(){
   for(var i=recs.length-1;i>=0&&order.length<3;i--){var r=recs[i];if(r.place&&r.place!=='this area'&&r.place!=='this stop'&&!(tripCtx.travel!=='drive'&&r.first))order.push(r);}
   var box=document.getElementById('shorts'),feed=document.getElementById('shFeed');
   shortsSt=null;
-  document.getElementById('shWhere').textContent='What travelers say';
+  document.getElementById('shWhere').textContent='What other travelers did';
+  document.getElementById('shPlayer').innerHTML='';ytFrame=null;box.className='shorts';
   document.getElementById('shCount').textContent='';
   feed.innerHTML='<section class="shslide shmsg"><p>Finding what travelers filmed on your trip...</p></section>';
   box.classList.add('show');
   var limited=false;
   Promise.all(order.map(function(r){
-    if(r._shorts)return Promise.resolve(r._shorts.map(function(x){return Object.assign({place:r.place},x);}));
+    var si=recs.indexOf(r);
+    if(r._shorts)return Promise.resolve(r._shorts.map(function(x){return Object.assign({place:r.place,stopI:si},x);}));
     return bfetch('/api/social/shorts?place='+encodeURIComponent(placeQ(r)),20000).then(function(x){if(x.status===429)limited=true;return x.ok?x.json():[];}).catch(function(){return [];}).then(function(vs){
       if(vs&&vs.length)r._shorts=vs;
-      return (vs||[]).map(function(x){return Object.assign({place:r.place},x);});
+      return (vs||[]).map(function(x){return Object.assign({place:r.place,stopI:si},x);});
     });
   })).then(function(lists){
     if(!box.classList.contains('show'))return;
@@ -3196,7 +3327,7 @@ function openTravelers(){
       feed.innerHTML='<section class="shslide shmsg"><p>'+(limited?'Video search has hit its daily limit and none are saved for these stops yet. They come back tomorrow.':'No traveler videos turned up for these stops yet.')+'</p><button type="button" class="shnext shend" data-go="-1">Back to my trip</button></section>';
       return;
     }
-    openShorts(all.slice(0,24),0,'What travelers say');
+    openShorts(all.slice(0,24),0,'What other travelers did');
   });
 }
 function ensureMap(){
@@ -3343,8 +3474,10 @@ function resolveLocation(query,near,geom){
   if(BYABBR[k])return Promise.resolve({lat:BYABBR[k].lat,lng:BYABBR[k].lng,label:BYABBR[k].n,st:BYABBR[k].s,state:BYABBR[k]});
   return geocodeMulti(query,near,geom).then(function(list){
     if(list.length===1)return list[0];
-    if(list.length>1&&hasStateToken(query))
-      return new Promise(function(resolve,reject){ showChooser(list,resolve,reject); });
+    if(list.length>1){
+      var bare=!hasStateToken(query);
+      return new Promise(function(resolve,reject){ showChooser(list,resolve,reject,bare?('Which '+query.trim()+' did you mean?'):undefined,bare?'The most likely one is first. Tap the one you mean.':undefined); });
+    }
     if(!list.length&&hasStateToken(query))return Promise.reject('notfound');
     return new Promise(function(resolve,reject){
       function finish(l3,where){
@@ -3648,37 +3781,122 @@ function fillVideos(el,s){
           '<span class="shviews">'+fmtViews(x.views)+' views</span>'+
           '<span class="shtitle">'+esc(deent(x.title))+'</span></button>';
       }).join('');
-      el.addEventListener('click',function(e){var c=e.target.closest('.shcard');if(!c)return;openShorts(vs,+c.getAttribute('data-k'),place);});
+      var si=+el.getAttribute('data-i');
+      el.addEventListener('click',function(e){var c=e.target.closest('.shcard');if(!c)return;openShorts(vs.map(function(x){return Object.assign({place:place,stopI:si},x);}),+c.getAttribute('data-k'),place);});
     });
   });
 }
-var shortsSt=null;
-var IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-function openShorts(list,k,place){
+var shortsSt=null,ytFrame=null,ytState=-1,ytStartT=0,vidLayer=null;
+var YT_ORIGIN='https://www.youtube-nocookie.com';
+function ytCmd(func,args){if(ytFrame&&ytFrame.contentWindow){try{ytFrame.contentWindow.postMessage(JSON.stringify({event:'command',func:func,args:args||[]}),YT_ORIGIN);}catch(e){}}}
+window.addEventListener('message',function(e){
+  if(e.origin!==YT_ORIGIN||!shortsSt)return;
+  var d;try{d=typeof e.data==='string'?JSON.parse(e.data):e.data;}catch(er){return;}
+  if(!d||!d.info||typeof d.info.playerState!=='number')return;
+  ytState=d.info.playerState;
+  var box=document.getElementById('shorts');
+  if(ytState===1){box.classList.remove('needtap','paused');box.classList.add('playing');}
+  else if(ytState===2)box.classList.add('paused');
+  else if(ytState===0){ytCmd('seekTo',[0,true]);ytCmd('playVideo');}
+});
+function shortSlide(x,i){
+  var added=isSaved(x.stopI,deent(x.title));
+  return '<section class="shslide" data-i="'+i+'"><div class="glass shglass">'+
+    '<b>'+esc(deent(x.title))+'</b><span class="shsub">'+(x.place?esc(x.place.split(',')[0])+' · ':'')+esc(x.channel)+' · '+fmtViews(x.views)+' views</span>'+
+    '<button type="button" class="shmapit" data-i="'+i+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Map it</button>'+
+    '<div class="shopts"><button type="button" class="shadd'+(added?' on':'')+'" data-i="'+i+'"><b>'+(added?'✓ Added to your trip':'Add it to my trip')+'</b><span>Saves it to your picks'+(x.place?' for '+esc(x.place.split(',')[0]):'')+', right now.</span></button>'+
+    '<button type="button" class="shsee" data-i="'+i+'"><b>See it on the map</b><span>Where it is and how far it sits from your route.</span></button></div>'+
+    '</div></section>';
+}
+function openShorts(list,k,title){
   var box=document.getElementById('shorts'),feed=document.getElementById('shFeed');if(!box||!feed)return;
-  shortsSt={list:list,place:place,cur:-1};
-  feed.innerHTML=list.map(function(x,i){
-    return '<section class="shslide" data-i="'+i+'">'+
-      '<div class="shframe'+(x.secs>180?' wide':'')+'" id="shf'+i+'"><span class="shposter" style="background-image:url(https://i.ytimg.com/vi/'+esc(x.id)+'/hqdefault.jpg)"></span></div>'+
-      '<div class="shcap"><b>'+esc(deent(x.title))+'</b><span>'+(x.place?esc(x.place)+' \u00b7 ':'')+esc(x.channel)+' \u00b7 '+fmtViews(x.views)+' views</span>'+
-      '<div class="shnav">'+(i>0?'<button type="button" class="shprev" data-go="'+(i-1)+'" aria-label="Previous video">\u2191</button>':'<span></span>')+
-      (i<list.length-1?'<button type="button" class="shnext" data-go="'+(i+1)+'">Next video \u2193</button>':'<button type="button" class="shnext shend" data-go="-1">Back to my trip</button>')+'</div></div></section>';
-  }).join('');
-  document.getElementById('shWhere').textContent=place;
-  document.getElementById('shorts').classList.toggle('ios',IOS);
-  box.classList.add('show');
-  var slide=feed.children[k];if(slide)feed.scrollTop=slide.offsetTop;
+  shortsSt={list:list,title:title,cur:-1,muted:false};
+  feed.innerHTML=list.map(shortSlide).join('');
+  document.getElementById('shWhere').textContent=title;
+  document.getElementById('shPlayer').innerHTML='';ytFrame=null;
+  box.className='shorts show'+(list.length<2?' single':'');
+  feed.scrollTop=k*feed.clientHeight;
   shortsShow(k);
 }
 function shortsShow(i){
   var st=shortsSt;if(!st||i===st.cur||!st.list[i])return;
-  if(st.cur>-1){var old=document.getElementById('shf'+st.cur);if(old)old.innerHTML='<span class="shposter" style="background-image:url(https://i.ytimg.com/vi/'+esc(st.list[st.cur].id)+'/hqdefault.jpg)"></span>';}
   st.cur=i;
-  var f=document.getElementById('shf'+i),id=st.list[i].id;
-  if(f)f.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+esc(id)+'?autoplay=1&playsinline=1&rel=0&loop=1&playlist='+esc(id)+(IOS?'&mute=1':'')+'" title="'+esc(deent(st.list[i].title))+'" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+  var box=document.getElementById('shorts'),pl=document.getElementById('shPlayer'),id=st.list[i].id;
+  if(!ytFrame){
+    pl.innerHTML='<iframe src="'+YT_ORIGIN+'/embed/'+esc(id)+'?enablejsapi=1&autoplay=1&playsinline=1&controls=0&rel=0&modestbranding=1&fs=0&iv_load_policy=3&origin='+encodeURIComponent(location.origin)+'" title="Traveler video" allow="autoplay; encrypted-media; picture-in-picture"></iframe>';
+    ytFrame=pl.firstChild;ytState=-1;
+    ytFrame.addEventListener('load',function(){var n=0,f=ytFrame,t=setInterval(function(){
+      if(f!==ytFrame||n++>14){clearInterval(t);return;}
+      try{f.contentWindow.postMessage(JSON.stringify({event:'listening',id:'voyage',channel:'widget'}),YT_ORIGIN);}catch(e){}
+    },250);});
+    clearTimeout(ytStartT);
+    ytStartT=setTimeout(function(){if(shortsSt&&ytState!==1)box.classList.add('needtap');},3000);
+  }else{
+    ytCmd('loadVideoById',[id]);
+    if(st.muted)ytCmd('mute');
+  }
+  box.classList.remove('paused');
   document.getElementById('shCount').textContent=(i+1)+' of '+st.list.length;
 }
-function closeShorts(){var box=document.getElementById('shorts');if(!box)return;box.classList.remove('show');document.getElementById('shFeed').innerHTML='';shortsSt=null;}
+function closeShorts(){
+  var box=document.getElementById('shorts');if(!box)return;
+  clearTimeout(ytStartT);
+  box.className='shorts';
+  document.getElementById('shFeed').innerHTML='';
+  document.getElementById('shPlayer').innerHTML='';
+  ytFrame=null;shortsSt=null;
+}
+function shortAdd(x){
+  var nm=deent(x.title),si=isFinite(x.stopI)?x.stopI:((tripCtx.recs||[]).length-1);
+  if(isSaved(si,nm))return false;
+  saved.push({stopI:si,name:nm,src:'trending',note:x.channel+' · '+fmtViews(x.views)+' views',lat:x.lat,lng:x.lng,short:{id:x.id,title:x.title,channel:x.channel,views:x.views,secs:x.secs}});
+  chime();markSavedTiles();renderNext();renderDoneStrip();drawPicks();
+  return true;
+}
+function routeGap(lat,lng){
+  var line=(tripCtx&&tripCtx.line)||[],best=Infinity,step=Math.max(1,Math.floor(line.length/600));
+  for(var i=0;i<line.length;i+=step){var d=miles(lat,lng,line[i][0],line[i][1]);if(d<best)best=d;}
+  return best;
+}
+function cleanTitle(t){
+  return deent(t).replace(/#[^\s#]+/g,' ').replace(/\([^)]*\)/g,' ').split(/[|:\u2013\u2014!?]| - /)[0].replace(/[^A-Za-z0-9'&. -]/g,' ').replace(/\s+/g,' ').trim().split(' ').slice(0,7).join(' ');
+}
+function mapVideo(i){
+  var st=shortsSt,x=st&&st.list[i];if(!x||!tripCtx||!stageMap)return;
+  var r=(tripCtx.recs||[])[isFinite(x.stopI)?x.stopI:((tripCtx.recs||[]).length-1)]||{};
+  ytCmd('pauseVideo');
+  document.getElementById('shorts').classList.add('away');
+  document.getElementById('panel').classList.add('peek');
+  if(!vidLayer)vidLayer=L.layerGroup().addTo(stageMap);
+  vidLayer.clearLayers();
+  function show(lat,lng,exact){
+    var gap=routeGap(lat,lng),city=(r.place||'your stop').split(',')[0];
+    var where=exact?((gap<1?'Right on your route':('About '+(gap<10?gap.toFixed(1):Math.round(gap))+' mi from your route'))+', near '+city+'.')
+      :('Filmed around '+city+'. The exact spot is not listed, so the pin sits at your stop.');
+    var m=L.marker([lat,lng],{icon:L.divIcon({className:'pkwrap',iconSize:[44,44],iconAnchor:[22,22],html:'<span class="pkpin vid"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>'})}).addTo(vidLayer);
+    m.bindPopup('<div class="pkcard"><b>'+esc(deent(x.title))+'</b><span class="pkwhere">'+esc(where)+'</span>'+
+      '<button type="button" class="pkmore" id="vidAdd" data-i="'+i+'">'+(isSaved(x.stopI,deent(x.title))?'✓ Added to your trip':'Add it to my trip')+'</button>'+
+      '<button type="button" class="pkback" id="vidBack">Back to the videos</button></div>',{maxWidth:260,minWidth:210,closeButton:false,autoPanPaddingTopLeft:[20,120],autoPanPaddingBottomRight:[20,peekH()+20],className:'pkpop'});
+    x.lat=exact?lat:undefined;x.lng=exact?lng:undefined;
+    var pts=[[lat,lng]];if(isFinite(r.lat))pts.push([r.lat,r.lng]);
+    stageMap.fitBounds(L.latLngBounds(pts).pad(0.6),{paddingTopLeft:[30,130],paddingBottomRight:[30,peekH()+40],maxZoom:exact?12:10});
+    setTimeout(function(){m.openPopup();},500);
+  }
+  var q=cleanTitle(x.title);
+  if(q.length<4||!isFinite(r.lat)){show(r.lat,r.lng,false);return;}
+  bfetch('/api/geocode?limit=1&near='+r.lat+','+r.lng+'&q='+encodeURIComponent(q+', '+(r.place||'')),9000).then(function(z){return z.ok?z.json():[];}).catch(function(){return [];}).then(function(l){
+    if(!shortsSt)return;
+    var h=l&&l[0],la=h?parseFloat(h.lat):NaN,lo=h?parseFloat(h.lon):NaN;
+    var named=h&&/^(tourism|leisure|amenity|historic|natural|shop|building|man_made|craft|aeroway|railway)$/.test(h.category||h.class||'');
+    if(isFinite(la)&&isFinite(lo)&&named&&miles(la,lo,r.lat,r.lng)<80)show(la,lo,true);else show(r.lat,r.lng,false);
+  });
+}
+function backToVideos(){
+  var box=document.getElementById('shorts');
+  if(vidLayer)vidLayer.clearLayers();
+  if(!shortsSt){box.classList.remove('away');return;}
+  box.classList.remove('away');ytCmd('playVideo');
+}
 (function(){
   var box=document.getElementById('shorts'),feed=document.getElementById('shFeed');if(!box||!feed)return;
   var t=0;
@@ -3686,21 +3904,38 @@ function closeShorts(){var box=document.getElementById('shorts');if(!box)return;
     clearTimeout(t);t=setTimeout(function(){
       if(!shortsSt)return;
       var i=Math.round(feed.scrollTop/Math.max(1,feed.clientHeight));
+      if(i>0)box.classList.add('scrolled');
       shortsShow(Math.max(0,Math.min(shortsSt.list.length-1,i)));
-    },140);
+    },130);
   },{passive:true});
   box.addEventListener('click',function(e){
-    if(e.target.closest('#shClose')){closeShorts();return;}
-    var g=e.target.closest('[data-go]');if(!g)return;
-    var i=+g.getAttribute('data-go');
-    if(i<0){closeShorts();return;}
-    var slide=feed.children[i];if(slide)feed.scrollTo({top:slide.offsetTop,behavior:RM.matches?'auto':'smooth'});
+    if(e.target.closest('#shClose')||e.target.closest('[data-go="-1"]')){closeShorts();return;}
+    if(!shortsSt)return;
+    if(e.target.closest('#shMute')){shortsSt.muted=!shortsSt.muted;ytCmd(shortsSt.muted?'mute':'unMute');box.classList.toggle('muted',shortsSt.muted);
+      document.getElementById('shMute').setAttribute('aria-label',shortsSt.muted?'Turn sound on':'Turn sound off');return;}
+    var mi=e.target.closest('.shmapit');
+    if(mi){mi.closest('.shglass').classList.toggle('open');return;}
+    var ad=e.target.closest('.shadd');
+    if(ad){var x=shortsSt.list[+ad.getAttribute('data-i')];if(x){shortAdd(x);ad.classList.add('on');ad.querySelector('b').textContent='✓ Added to your trip';}return;}
+    var se=e.target.closest('.shsee');
+    if(se){mapVideo(+se.getAttribute('data-i'));return;}
+    if(e.target.closest('.shglass,.shbar'))return;
+    if(ytState===1)ytCmd('pauseVideo');else ytCmd('playVideo');
+  });
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('#vidAdd,#vidBack');if(!a)return;
+    if(a.id==='vidBack'){backToVideos();return;}
+    var x=shortsSt&&shortsSt.list[+a.getAttribute('data-i')];if(!x)return;
+    shortAdd(x);a.textContent='✓ Added to your trip';
+    var sl=feed.querySelector('.shadd[data-i="'+a.getAttribute('data-i')+'"]');if(sl){sl.classList.add('on');sl.querySelector('b').textContent='✓ Added to your trip';}
   });
   document.addEventListener('keydown',function(e){
-    if(!box.classList.contains('show')||!shortsSt)return;
-    if(e.key==='Escape')closeShorts();
+    if(!box.classList.contains('show')||box.classList.contains('away'))return;
+    if(e.key==='Escape'){closeShorts();return;}
+    if(!shortsSt)return;
     var d=e.key==='ArrowDown'?1:(e.key==='ArrowUp'?-1:0);
-    if(d){var sl=feed.children[shortsSt.cur+d];if(sl){e.preventDefault();feed.scrollTo({top:sl.offsetTop,behavior:'smooth'});}}
+    if(d){var i=shortsSt.cur+d;if(i>=0&&i<shortsSt.list.length){e.preventDefault();feed.scrollTo({top:i*feed.clientHeight,behavior:RM.matches?'auto':'smooth'});}}
+    if(e.key===' '){e.preventDefault();if(ytState===1)ytCmd('pauseVideo');else ytCmd('playVideo');}
   });
 })();
 function flyToStop(lat,lng,label){

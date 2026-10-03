@@ -177,8 +177,11 @@ function tripClean(t){
   const stops = (Array.isArray(t.stops) ? t.stops : []).map(x => str(x, 120).trim()).filter(Boolean).slice(0, 6);
   if (stops.length < 2) return null;
   const p = t.prefs || {}, b = t.budget || {}, d = t.dates || {};
+  const pts = (Array.isArray(t.pts) ? t.pts : []).slice(0, 6).map(x => (x && isFinite(+x.lat) && isFinite(+x.lng) && x.lat !== null && x.lng !== null)
+    ? { lat: num(x.lat, -90, 90, 0), lng: num(x.lng, -180, 180, 0), label: str(x.label, 120), city: str(x.city, 80), st: /^[A-Z]{2}$/.test(x.st || '') ? x.st : '' } : null);
   const out = {
-    v: 1, mode, stops,
+    v: 1, mode, stops, by: str(t.by, 40).replace(/[<>]/g, '').trim(),
+    pts: (pts.length === stops.length && pts.every(Boolean)) ? pts : [],
     dates: { start: isoDay(d.start), end: isoDay(d.end) },
     prefs: { hrs: [4, 6, 8, 10].indexOf(+p.hrs) > -1 ? +p.hrs : 8, stay: ['airbnb', 'hotel', 'motel', 'any'].indexOf(p.stay) > -1 ? p.stay : 'any', see: (Array.isArray(p.see) ? p.see : []).filter(x => ['food', 'nature', 'history', 'nightlife', 'family', 'music', 'beaches', 'hikes'].indexOf(x) > -1) },
     style: t.style === 'flow' ? 'flow' : 'plan',
@@ -237,6 +240,30 @@ function handleTripGet(res, id){
   const rec = tripRead(id);
   if (!rec) return json(res, 404, { error: 'trip not found' });
   json(res, 200, { id: rec.id, created: rec.created, updated: rec.updated, trip: rec.trip });
+}
+
+function htmlEsc(v){ return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+let pageSrc = { m: 0, html: '' };
+function serveTripPage(id, req, res){
+  const rec = tripRead(id);
+  if (!rec) return serveStatic('/globe.html', res);
+  const file = path.join(ROOT, 'globe.html');
+  let st; try { st = fs.statSync(file); } catch (e){ return serveStatic('/globe.html', res); }
+  if (pageSrc.m !== st.mtimeMs) pageSrc = { m: st.mtimeMs, html: fs.readFileSync(file, 'utf8') };
+  const t = rec.trip, first = (t.stops[0] || '').split(',')[0], last = (t.stops[t.stops.length - 1] || '').split(',')[0];
+  const kind = t.mode === 'fly' ? 'Flight' : (t.mode === 'boat' ? 'Boat trip' : 'Road trip');
+  const title = htmlEsc((t.by ? t.by : 'Someone') + ' shared a trip with you: ' + first + ' to ' + last);
+  const bits = [kind, t.stops.length + ' stops'];
+  if (t.stays.length) bits.push(t.stays.length + (t.stays.length === 1 ? ' place to stay' : ' places to stay'));
+  if (t.picks.length) bits.push(t.picks.length + ' things to do');
+  const desc = htmlEsc(bits.join(' · ') + '. Open it to see the route and the plan on Voyage.');
+  const head = '<title>' + title + '</title><meta name="description" content="' + desc + '"><meta property="og:title" content="' + title + '"><meta property="og:description" content="' + desc + '"><meta property="og:type" content="website"><meta name="twitter:card" content="summary">';
+  const html = pageSrc.html.replace(/<title>[^<]*<\/title>(\s*<meta (name="description"|property="og:[a-z]+")[^>]*>)*/, head);
+  const h = Object.assign({ 'Content-Type': 'text/html;charset=utf-8', 'Cache-Control': 'no-cache', 'Vary': 'Accept-Encoding' }, SECURITY);
+  const ae = (req.headers['accept-encoding']) || '';
+  if (/\bgzip\b/.test(ae)){ h['Content-Encoding'] = 'gzip'; res.writeHead(200, h); return res.end(zlib.gzipSync(Buffer.from(html, 'utf8'), { level: 6 })); }
+  res.writeHead(200, h);
+  res.end(html);
 }
 
 const cache = new Map();
@@ -1347,6 +1374,7 @@ http.createServer((req, res) => {
     if (u.pathname === '/api/events')        return void guard(handleEvents(u, res), res);
     return json(res, 404, { error: 'unknown endpoint' });
   }
+  if ((u.pathname === '/' || u.pathname === '/globe.html') && /^[a-z0-9]{10}$/.test(u.searchParams.get('t') || '')) return serveTripPage(u.searchParams.get('t'), req, res);
   serveStatic(u.pathname, res);
  } catch (e) {
   try { json(res, 400, { error: 'bad request' }); } catch (e2) {}
