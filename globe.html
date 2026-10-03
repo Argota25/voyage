@@ -1392,6 +1392,19 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
   #panel.open:not(.peek) .pf{padding:7px 18px calc(7px + env(safe-area-inset-bottom));font-size:9px}
   #panel.open:not(.peek) .pftxt{display:none}
 }
+/* ===== textures (owner 1003): two shapes, each with a reason =====
+   hex cells = the same cells the globe is drawn in, on the dark green cards;
+   contour lines = a paper map, on the light grounds and sheets.
+   Kept under .06 alpha so text contrast is untouched. Set as background-image
+   with !important because several of these surfaces also use the background
+   shorthand (hover states), which would otherwise wipe the layer. */
+:root{--tex-hex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cpath fill='%23FFFFFF' fill-opacity='.06' d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/svg%3E");--tex-topo:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240' fill='none' stroke='%2313714C' stroke-opacity='.07' stroke-width='1'%3E%3Cpath d='M0 22 C40 12 80 34 120 22 S200 32 240 22'/%3E%3Cpath d='M0 48 C40 34 80 57 120 48 S200 62 240 48'/%3E%3Cpath d='M0 80 C40 71 80 95 120 80 S200 89 240 80'/%3E%3Cpath d='M0 116 C40 100 80 126 120 116 S200 132 240 116'/%3E%3Cpath d='M0 150 C40 139 80 163 120 150 S200 161 240 150'/%3E%3Cpath d='M0 186 C40 171 80 194 120 186 S200 201 240 186'/%3E%3Cpath d='M0 218 C40 210 80 229 120 218 S200 226 240 218'/%3E%3Cpath d='M168 96c12-9 31-7 36 5s-4 27-19 30-29-5-31-17 5-11 14-18z'/%3E%3Cpath d='M174 102c7-5 18-4 21 3s-2 16-11 18-17-3-18-10 3-7 8-11z'/%3E%3Cpath d='M44 160c10-8 27-6 32 4s-3 24-17 26-26-4-27-15 4-9 12-15z'/%3E%3C/svg%3E");--tex-topo-soft:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240' fill='none' stroke='%2313714C' stroke-opacity='.04' stroke-width='1'%3E%3Cpath d='M0 22 C40 12 80 34 120 22 S200 32 240 22'/%3E%3Cpath d='M0 48 C40 34 80 57 120 48 S200 62 240 48'/%3E%3Cpath d='M0 80 C40 71 80 95 120 80 S200 89 240 80'/%3E%3Cpath d='M0 116 C40 100 80 126 120 116 S200 132 240 116'/%3E%3Cpath d='M0 150 C40 139 80 163 120 150 S200 161 240 150'/%3E%3Cpath d='M0 186 C40 171 80 194 120 186 S200 201 240 186'/%3E%3Cpath d='M0 218 C40 210 80 229 120 218 S200 226 240 218'/%3E%3Cpath d='M168 96c12-9 31-7 36 5s-4 27-19 30-29-5-31-17 5-11 14-18z'/%3E%3Cpath d='M174 102c7-5 18-4 21 3s-2 16-11 18-17-3-18-10 3-7 8-11z'/%3E%3Cpath d='M44 160c10-8 27-6 32 4s-3 24-17 26-26-4-27-15 4-9 12-15z'/%3E%3C/svg%3E");
+  --lift:0 1px 0 rgba(18,54,38,.05),0 6px 14px -6px rgba(18,54,38,.14),0 26px 44px -28px rgba(18,54,38,.38)}
+.pricehero,#panel .stopcard .sh,#panel .cot>summary,.nextcard,.cheercard,.staypick{background-image:var(--tex-hex)!important;background-size:28px 49px!important;background-repeat:repeat!important}
+#panel .scroll{background-image:var(--tex-topo)!important;background-size:240px 240px!important;background-repeat:repeat!important}
+.actcard,.incard,.plancard,#panel .ph{background-image:var(--tex-topo-soft)!important;background-size:240px 240px!important;background-repeat:repeat!important}
+/* depth: three soft layers tinted to the dark green, instead of one blur */
+#panel .stopcard,#panel .cot,.nextcard{box-shadow:var(--lift)}
 </style>
 </head>
 <body>
