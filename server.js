@@ -567,7 +567,7 @@ async function ytSearch(q){
     thumb: (i.snippet.thumbnails && i.snippet.thumbnails.medium && i.snippet.thumbnails.medium.url) || '',
     views: parseInt((stats[i.id.videoId] || {}).viewCount || '0', 10),
   })).sort((a, b) => b.views - a.views);
-  cset(key, out, 6 * 3600 * 1000);
+  cset(key, out, 7 * 24 * 3600 * 1000);   // a week: the free quota is ~99 lookups a day, so every repeat must be a cache hit
   return out;
 }
 async function handleVideos(reqUrl, res){
