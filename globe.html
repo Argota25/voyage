@@ -1091,6 +1091,35 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
 .hslide{position:relative}
 .hsadd{position:absolute;top:7px;right:7px;width:24px;height:24px;border-radius:50%;background:#13714C;color:#fff;display:flex;align-items:center;justify-content:center;font:700 15px var(--body);line-height:1;cursor:pointer;box-shadow:0 3px 10px -3px rgba(12,54,36,.5);z-index:2}
 .hsadd.on{background:#3AB67D;font-size:9.5px;font-weight:700;letter-spacing:.04em}
+/* ===== phone: the open sheet is the whole screen (owner 1002) =====
+   Peek = map + route + price. Open = a full-screen itinerary: a compact
+   header (title, stats, price) sits just under the top buttons, and the
+   rest of the screen is content. */
+.pffb{color:#13714C;font-weight:700;text-decoration:none}
+.jbmap{display:none!important;align-items:center;gap:6px}
+.jbmap svg{width:16px;height:16px}
+@media (max-width:700px){#panel.open:not(.peek) .jbmap{display:inline-flex!important;background:#123626!important;color:#fff!important;border-color:#123626!important}}
+@media (max-width:700px){
+  #panel{height:100dvh;border-radius:0}
+  #panel.open.peek{border-radius:18px 18px 0 0}
+  #panel.open:not(.peek) .ph{display:flex;flex-direction:column;padding:74px 18px 10px;cursor:default}
+  #panel.open:not(.peek) .ph::before{display:none}
+  #panel.open:not(.peek) .sheethint,#panel.open:not(.peek) .badge,#panel.open:not(.peek) .count{display:none}
+  #panel.open:not(.peek) .ph h2{order:1;font-size:20px;margin-right:132px}
+  #panel.open:not(.peek) .ph .meta{order:2;margin-right:132px;margin-top:4px}
+  #panel.open:not(.peek) .editbtn{order:3;position:static;align-self:flex-start;margin-top:8px;padding:6px 12px}
+  #panel.open:not(.peek) .jumpbar{order:5;margin-top:10px}
+  /* price stays the loudest thing, compacted to the top-right of the header */
+  #panel.open:not(.peek) .pricehero{position:absolute;top:74px;right:18px;width:auto;margin:0;padding:10px 14px;flex-direction:column;align-items:flex-end;gap:2px;border-radius:14px}
+  #panel.open:not(.peek) .phamt{font-size:30px}
+  #panel.open:not(.peek) .phlbl{align-items:flex-end}
+  #panel.open:not(.peek) .phlbl b{font-size:11px}
+  #panel.open:not(.peek) .phlbl span,#panel.open:not(.peek) .phgo{display:none}
+  /* full-screen list: the beta pill would sit on the header, so feedback moves to the footer */
+  body.inarea:has(#panel.open:not(.peek)) .betafb{display:none}
+  #panel.open:not(.peek) .pf{padding:7px 18px calc(7px + env(safe-area-inset-bottom));font-size:9px}
+  #panel.open:not(.peek) .pftxt{display:none}
+}
 </style>
 </head>
 <body>
@@ -1181,7 +1210,7 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
     <div class="extra" id="extra"></div>
   </div>
   <div class="pf">
-    Routes, distances, and times are estimates from open map data, not live traffic, flights, or sailings. <a class="methodlink" href="#">How Voyage plans</a>
+    <span class="pftxt">Routes, distances, and times are estimates from open map data, not live traffic, flights, or sailings.</span> <a class="methodlink" href="#">How Voyage plans</a> <span class="pfsep">&middot;</span> <a class="pffb" href="https://form.jotform.com/262747271566062" target="_blank" rel="noopener">Send feedback</a>
   </div>
 </aside>
 
@@ -1636,6 +1665,8 @@ function pinEl(){
 function peekH(){var v=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--peek'));return isFinite(v)&&v>0?v:250;}
 function setPeek(){
   var ph=document.querySelector('#panel .ph');if(!ph)return;
+  var pe=document.getElementById('panel');
+  if(window.matchMedia('(max-width:700px)').matches&&pe&&!pe.classList.contains('peek'))return;
   var h=Math.round(ph.getBoundingClientRect().height)+6;
   if(h>120)document.documentElement.style.setProperty('--peek',h+'px');
 }
@@ -1653,7 +1684,9 @@ function buildJump(drive){
   var secs=[['cost','Trip cost'],['stay','Stays'],['do','Things to do'],['events','Events'],['videos','Videos']];
   if(drive)secs.push(['along','Along the way']);
   secs.push(['wps','What travelers say']);
-  jb.innerHTML=secs.map(function(x){return '<button type="button" data-jump="'+x[0]+'">'+esc(x[1])+'</button>';}).join('');
+  jb.innerHTML='<button type="button" class="jbmap" data-jump="map" aria-label="Back to the map">'+
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>Map</button>'+
+    secs.map(function(x){return '<button type="button" data-jump="'+x[0]+'">'+esc(x[1])+'</button>';}).join('');
   jb.scrollLeft=0;
   setTimeout(setPeek,0);
 }
@@ -1670,6 +1703,7 @@ function scrollToSec(k){
     var b=e.target.closest('button[data-jump]');if(!b)return;
     e.stopPropagation();
     var k=b.getAttribute('data-jump');
+    if(k==='map'){panelEl.classList.add('peek');if(lastFit)setTimeout(function(){fitWithUI(lastFit);},450);return;}
     markJump(k);
     if(window.matchMedia('(max-width:700px)').matches&&panelEl.classList.contains('peek')){
       panelEl.classList.remove('peek');
@@ -1699,6 +1733,7 @@ function scrollToSec(k){
         var el=jumpTarget(c.getAttribute('data-jump'));
         if(el&&el.getBoundingClientRect().top<=base)cur=c.getAttribute('data-jump');
       });
+      if(sc.scrollTop+sc.clientHeight>=sc.scrollHeight-4){var lastB=jb.lastElementChild;if(lastB)cur=lastB.getAttribute('data-jump');}   // at the bottom the last section is the one in view
       if(cur&&!(jb.querySelector('.on')&&jb.querySelector('.on').getAttribute('data-jump')===cur))markJump(cur);
       if(!cur)[].forEach.call(jb.children,function(c){c.classList.remove('on');});
     });
