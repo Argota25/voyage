@@ -1201,6 +1201,98 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
 .nextcard p{font:500 14px/1.45 var(--body);color:rgba(255,255,255,.9);margin-bottom:12px}
 .nxbtn{width:100%;min-height:50px;border:0;border-radius:14px;background:#fff;color:#123626;font:800 15px var(--body);cursor:pointer}
 .nxbtn:hover{background:#F0FAF3}
+/* ===== second accent (owner 1002): warm amber marks THE next thing to tap.
+   Green stays the brand and the "selected" color; amber is only for the
+   primary action on each screen and the step badges. ===== */
+:root{--sun:#F6B93B;--sun-deep:#E0A021;--sun-ink:#123626}
+#searchForm #tripBtn{background:var(--sun);color:var(--sun-ink);border-color:var(--sun);box-shadow:0 14px 28px -12px rgba(160,110,10,.65)}
+#searchForm #tripBtn:hover{background:var(--sun-deep)}
+.stepn{background:var(--sun);color:var(--sun-ink);box-shadow:0 6px 14px -6px rgba(160,110,10,.6)}
+.nxstep{background:var(--sun);color:var(--sun-ink)}
+.nxbtn{background:var(--sun);color:var(--sun-ink)}
+.nxbtn:hover{background:var(--sun-deep)}
+.phlbl b{color:var(--sun)}
+.phgo{color:var(--sun)}
+#panel .cot>summary .cottot{color:var(--sun)}
+.actadd{background:var(--sun);color:var(--sun-ink);box-shadow:0 12px 26px -12px rgba(160,110,10,.6)}
+.card .go{color:var(--sun)!important}
+/* plan / flow switch inside the next-step card */
+.nxseg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin-bottom:12px;border-radius:12px;background:rgba(0,0,0,.2)}
+.nxseg button{min-height:42px;border:0;border-radius:9px;background:none;color:rgba(255,255,255,.85);font:800 13.5px var(--body);cursor:pointer}
+.nxseg button.on{background:#fff;color:#123626}
+/* stay box in each stop */
+.staygo{width:100%;min-height:58px;border:0;border-radius:14px;background:var(--sun);color:var(--sun-ink);font:800 16px var(--body);cursor:pointer;box-shadow:0 12px 26px -12px rgba(160,110,10,.6)}
+.staygo:hover{background:var(--sun-deep)}
+.staygo.ghost{min-height:46px;background:#fff;border:1.5px solid rgba(19,113,76,.35);color:#123626;box-shadow:none;font-size:14px;margin-top:10px}
+.staysub{font:600 13px/1.4 var(--body);color:#3e5f4f;margin-top:8px}
+.stayflow{display:flex;flex-direction:column;gap:3px;padding:14px;border-radius:14px;background:#EAF5EE;border:1px dashed rgba(19,113,76,.45)}
+.stayflow b{font:800 16px var(--heading);color:#123626}
+.stayflow span{font:600 13px/1.4 var(--body);color:#3e5f4f}
+.staypick{padding:14px;border-radius:14px;background:#13714C;color:#fff;box-shadow:0 12px 26px -16px rgba(12,54,36,.7)}
+.spk{display:flex;align-items:center;gap:12px}
+.spk b{display:block;font:800 16.5px/1.25 var(--heading);color:#fff}
+.spk span{font:600 13px var(--body);color:#D8F3DF}
+.spcheck{flex:none;width:34px;height:34px;border-radius:50%;background:#fff;color:#13714C;display:flex;align-items:center;justify-content:center}
+.spcheck svg{width:18px;height:18px}
+.spk .spcheck{color:#13714C}
+.stdone .spcheck.big{color:#fff}
+.spcheck.big{width:46px;height:46px;background:#13714C;color:#fff}
+.spcheck.big svg{width:24px;height:24px}
+.spbtns{display:flex;gap:8px;margin-top:12px}
+.spbtns button{flex:1;min-height:44px;border-radius:11px;font:800 13.5px var(--body);cursor:pointer}
+.spchg{background:#fff;color:#123626;border:0}
+.sprm{background:none;color:#fff;border:1.5px solid rgba(255,255,255,.55)}
+/* picker sheet */
+.staycard{display:flex;flex-direction:column;max-height:92dvh;padding:14px 18px calc(14px + env(safe-area-inset-bottom))}
+.acthead,.inhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+.actclose{flex:none;width:42px;height:42px;border-radius:50%;border:0;background:#EAF1EC;color:#123626;font:700 24px/1 var(--body);cursor:pointer}
+#actBody{display:flex;flex-direction:column;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.stseg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 12px}
+.stseg button{min-height:46px;border-radius:12px;border:1.5px solid rgba(19,113,76,.25);background:#F3F8F5;color:#13714C;font:800 13.5px var(--body);cursor:pointer}
+.stseg button.on{background:#13714C;border-color:#13714C;color:#fff}
+.stctl{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stprice,.stnights{display:flex;flex-direction:column;gap:5px;font:700 12px var(--body);color:#3e5f4f}
+.stin{display:flex;align-items:center;gap:4px;height:50px;padding:0 12px;border-radius:12px;border:1.5px solid rgba(19,113,76,.4);background:#fff;font:800 20px var(--heading);color:#123626}
+.stin input{width:100%;border:0;background:none;font:800 20px var(--heading);color:#123626;min-width:0}
+.stin input:focus{outline:none}
+.stin:focus-within{border-color:#13714C;box-shadow:0 0 0 3px rgba(58,182,125,.25)}
+.stepper{display:flex;align-items:center;justify-content:space-between;height:50px;border-radius:12px;border:1.5px solid rgba(19,113,76,.4);background:#fff;padding:0 4px}
+.stepper button{width:42px;height:42px;border-radius:10px;border:0;background:#EAF5EE;color:#123626;font:800 22px/1 var(--body);cursor:pointer}
+.stepper b{font:800 20px var(--heading);color:#123626}
+.stnote{font:500 12.5px/1.45 var(--body);color:#5f7268;margin:10px 0}
+.stlist{display:flex;flex-direction:column;gap:8px}
+.strow{display:flex;align-items:center;gap:12px;width:100%;min-height:62px;padding:10px 12px 10px 14px;border-radius:14px;border:1.5px solid rgba(19,113,76,.2);background:#fff;text-align:left;cursor:pointer}
+.strow:hover{border-color:#13714C}
+.strany{background:#EAF5EE;border-style:dashed;border-color:rgba(19,113,76,.5)}
+.strt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.strt b{font:800 15px/1.25 var(--heading);color:#123626}
+.strt span{font:500 12.5px var(--body);color:#5f7268}
+.strpick{flex:none;font:800 13px var(--body);color:var(--sun-ink);background:var(--sun);border-radius:999px;padding:9px 16px}
+.stdone{display:flex;align-items:center;gap:14px;padding:14px;border-radius:14px;background:#EAF5EE;margin:6px 0 10px}
+.stdone b{display:block;font:800 17px/1.25 var(--heading);color:#123626}
+.stdone span{font:600 13px var(--body);color:#3e5f4f}
+.sttotal{font:600 15px var(--body);color:#123626;margin-bottom:6px}
+.sttotal b{font:800 20px var(--heading)}
+/* in-app viewer */
+.inapp{position:fixed;inset:0;z-index:50;display:none;align-items:flex-end;justify-content:center;background:rgba(8,26,18,.55);backdrop-filter:blur(2px)}
+.inapp.show{display:flex}
+.incard{display:flex;flex-direction:column;width:min(560px,100%);height:min(92dvh,760px);background:#fff;border-radius:22px 22px 0 0;padding:14px 16px calc(12px + env(safe-area-inset-bottom));animation:actup .26s cubic-bezier(.22,.9,.24,1)}
+@media (min-width:701px){.inapp{align-items:center}.incard{border-radius:22px}}
+.inhead h3{font:800 18px/1.25 var(--heading);color:#123626;min-width:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.inbody{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.invid{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000;margin-bottom:12px}
+.invid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.inlist{display:flex;flex-direction:column;gap:8px}
+.invrow{display:flex;align-items:center;gap:12px;width:100%;padding:8px;border-radius:14px;border:1.5px solid rgba(19,113,76,.18);background:#fff;text-align:left;cursor:pointer}
+.invth{flex:none;width:120px;aspect-ratio:16/9;border-radius:10px;background:#0c1a16 center/cover no-repeat}
+.invt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.invt b{font:700 14px/1.3 var(--body);color:#123626;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.invt span{font:500 12px var(--body);color:#5f7268}
+.inimg{width:100%;aspect-ratio:16/10;border-radius:14px;background:#E3F1E7 center/cover no-repeat;margin-bottom:12px}
+.intext{font:500 15px/1.55 var(--body);color:#2f4b3e;margin-bottom:14px}
+.innote{font:600 14px var(--body);color:#5f7268;padding:20px 4px}
+.insrc{font:500 11.5px var(--body);color:#7e8a84;margin-top:10px}
+.inframe{width:100%;height:100%;min-height:60dvh;border:0;border-radius:12px}
 /* stay sheet */
 .actsheet{position:fixed;inset:0;z-index:45;display:none;align-items:flex-end;justify-content:center;background:rgba(8,26,18,.45);backdrop-filter:blur(2px)}
 .actsheet.show{display:flex}
@@ -1208,7 +1300,7 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
 @keyframes actup{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
 @media (min-width:701px){.actsheet{align-items:center}.actcard{border-radius:22px}}
 .acthandle{width:44px;height:4px;border-radius:2px;background:rgba(19,113,76,.25);margin:0 auto 12px}
-.actcard h3{font:800 20px var(--heading);color:#123626}
+.actcard h3,.acthead h3{font:800 20px var(--heading);color:#123626}
 .actsub{font:500 13px/1.45 var(--body);color:#3e5f4f;margin:6px 0 12px}
 .actprice{display:flex;align-items:baseline;gap:8px;margin-bottom:14px}
 .actamt{font:800 36px/1 var(--heading);color:#123626;letter-spacing:-.02em}
@@ -1257,14 +1349,15 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
 <div class="loading" id="loading">Warming up your map…</div>
 <div class="planbar" aria-hidden="true"></div>
 <div class="actsheet" id="actsheet" role="dialog" aria-modal="true" aria-labelledby="actTitle">
-  <div class="actcard">
-    <div class="acthandle" aria-hidden="true"></div>
-    <h3 id="actTitle">Hotels</h3>
-    <p class="actsub" id="actSub"></p>
-    <div class="actprice"><span class="actamt" id="actAmt">--</span><span class="actlbl" id="actLbl">typical night</span></div>
-    <button type="button" class="actbtn actadd" id="actAdd">Add to my trip</button>
-    <a class="actbtn actgo" id="actGo" href="#" target="_blank" rel="noopener">Browse options</a>
-    <button type="button" class="actbtn actx" id="actX">Not now</button>
+  <div class="actcard staycard">
+    <div class="acthead"><h3 id="actTitle">Where will you sleep?</h3><button type="button" class="actclose" id="actClose" aria-label="Close">&times;</button></div>
+    <div id="actBody"></div>
+  </div>
+</div>
+<div class="inapp" id="inapp" role="dialog" aria-modal="true" aria-labelledby="inTitle">
+  <div class="incard">
+    <div class="inhead"><h3 id="inTitle"></h3><button type="button" class="actclose" id="inClose" aria-label="Close">&times;</button></div>
+    <div class="inbody" id="inBody"></div>
   </div>
 </div>
 <div class="planwrap" id="planwrap" role="status" aria-live="polite">
@@ -1743,12 +1836,14 @@ function estimate(){
   var td=tripDays(),ppl=Math.max(1,+budget.ppl||1),drive=!!(tripCtx&&tripCtx.travel==='drive');
   var stays=cart.filter(function(x){return x.kind==='stay';}),extras=cart.filter(function(x){return x.kind==='extra';});
   var pinned=stays.reduce(function(s,x){return s+(+x.cost||0);},0);
-  var Stay=pinned+Math.max(0,td.nights-stays.length)*(+budget.nightly||0);   // pinned stays + remaining nights at the estimate
+  var pinnedN=stays.reduce(function(s,x){return s+(+x.nights||1);},0);
+  pinned=stays.reduce(function(s,x){return s+(+x.cost||0)*(+x.nights||1);},0);
+  var Stay=pinned+Math.max(0,td.nights-pinnedN)*(+budget.nightly||0);   // picked stays + the nights still open at the estimate
   var Tix=extras.reduce(function(s,x){return s+((+x.cost||0)*(x.pp?ppl:1));},0);   // tickets are per person
   var Food=td.days*(+budget.foodDay||0)*ppl;
   var Gas=(drive&&budget.mpg>0)?(tripCtx.miles/budget.mpg*(+budget.gas||0)):0;
   var Car=drive?0:(td.days*(+budget.rental||0));   // fly/boat: rent a car at the destination
-  return {Stay:Stay,Tix:Tix,Food:Food,Gas:Gas,Car:Car,nights:td.nights,days:td.days,ppl:ppl,drive:drive,stays:stays,extras:extras,total:Stay+Tix+Food+Gas+Car};
+  return {Stay:Stay,Tix:Tix,Food:Food,Gas:Gas,Car:Car,pinnedN:pinnedN,openN:Math.max(0,td.nights-pinnedN),nights:Math.max(td.nights,pinnedN),days:td.days,ppl:ppl,drive:drive,stays:stays,extras:extras,total:Stay+Tix+Food+Gas+Car};
 }
 /* ===== typical prices: GSA per diem (FY2026), bundled in /vendor =====
    Lodging = the federal hotel-night benchmark for the stop's city or county
@@ -1796,7 +1891,7 @@ function applyPerDiem(recs,g){
     if(!budgetEdited.foodDay)budget.foodDay=pdInfo.food;
     // each stop's stay tiles show that stop's typical night
     (recs||[]).forEach(function(r,i){if(!r.pd)return;
-      [].forEach.call(document.querySelectorAll('.hslider[data-kind="stay"][data-i="'+i+'"] .staytile .hsp'),function(el){el.textContent='Typical hotel night ~'+usd(r.pd.lodging)+' \u00b7 '+r.pd.month;});
+
     });
     renderCost();
   });
@@ -1823,8 +1918,8 @@ function costBarHTML(e){
   return '<div class="cotbar" role="img" aria-label="Where the money goes">'+parts.map(function(x){return '<span style="flex:'+x[1].toFixed(2)+';background:'+COST_COL[x[0]]+'" title="'+esc(x[0])+' '+usd(x[1])+'"></span>';}).join('')+'</div>'+
     '<div class="cotlegend">'+parts.map(function(x){return '<span><i style="background:'+COST_COL[x[0]]+'"></i>'+esc(x[0])+' '+Math.round(x[1]/e.total*100)+'%</span>';}).join('')+'</div>';
 }
-function lineRow(it,ppl){var per=(it.pp&&ppl>1);var v=(+it.cost||0)*(it.pp?Math.max(1,ppl||1):1);
-  return '<div class="cotrow cotadd"><div class="cotl">'+esc(it.label)+(per?' <span class="cotpp">'+usd(it.cost)+' x '+ppl+'</span>':'')+'</div><div class="cotv">'+usd(v)+'</div><button type="button" class="cotx" data-rm="'+it.id+'" aria-label="Remove">&times;</button></div>';}
+function lineRow(it,ppl){var per=(it.pp&&ppl>1);var nn=(it.kind==='stay')?(+it.nights||1):1;var v=(+it.cost||0)*(it.pp?Math.max(1,ppl||1):1)*nn;
+  return '<div class="cotrow cotadd"><div class="cotl">'+esc(it.label)+(per?' <span class="cotpp">'+usd(it.cost)+' x '+ppl+'</span>':'')+(it.kind==='stay'?' <span class="cotpp">'+usd(it.cost)+' x '+nn+(nn===1?' night':' nights')+'</span>':'')+'</div><div class="cotv">'+usd(v)+'</div><button type="button" class="cotx" data-rm="'+it.id+'" aria-label="Remove">&times;</button></div>';}
 function adjIn(lbl,key,val,step){return '<label class="cotf"><span>'+esc(lbl)+'</span><input type="text" inputmode="decimal" autocomplete="off" data-bk="'+key+'" value="'+esc(String(val))+'"></label>';}
 function costHTML(){return '<details class="cot" id="cot" open><summary>Cost breakdown <span class="cottot" id="cotTot">--</span></summary><div class="cotbody" id="cotBody"></div></details>';}
 function renderCost(){
@@ -1838,7 +1933,7 @@ function renderCost(){
   var psub=document.getElementById('phSub');if(psub)psub.textContent=(e.ppl>1?('For '+e.ppl+' travelers. '):'')+'See the breakdown';
   var pn=e.ppl>1?(' x '+e.ppl+' travelers'):'';
   var html=costBarHTML(e);
-  if(e.stays.length){var rem=Math.max(0,e.nights-e.stays.length);html+=costRow('Stays',e.stays.length+' pinned'+(rem?(' + '+rem+' est night'+(rem===1?'':'s')):''),e.Stay);e.stays.forEach(function(it){html+=lineRow(it,e.ppl);});}
+  if(e.stays.length){var rem=e.openN;html+=costRow('Stays',e.pinnedN+(e.pinnedN===1?' night picked':' nights picked')+(rem?(' + '+rem+' open at '+usd(budget.nightly)):''),e.Stay);e.stays.forEach(function(it){html+=lineRow(it,e.ppl);});}
   else html+=costRow('Stays',e.nights+(e.nights===1?' night':' nights')+' x '+usd(budget.nightly),e.Stay);
   if(e.drive)html+=costRow('Gas',Math.round(tripCtx.miles)+' mi / '+budget.mpg+' mpg x $'+(+budget.gas).toFixed(2),e.Gas);
   else html+=costRow('Rental car',e.days+(e.days===1?' day':' days')+' x '+usd(budget.rental),e.Car);
@@ -1853,25 +1948,75 @@ function renderCost(){
   if(aek){var ni=b.querySelector('input[data-bk="'+aek+'"]');if(ni){ni.focus();if(aeSel!=null){try{ni.setSelectionRange(aeSel,aeSel);}catch(e2){}}}}
 }
 function addCart(kind,label,cost,pp){cart.push({id:'c'+(cartSeq++),kind:kind,label:label,cost:+cost||0,pp:!!pp});renderCost();}
-/* the itinerary always says what to do next, in one sentence and one button */
+/* the itinerary always says what to do next, in one sentence and one button.
+   Two ways to travel: plan every night, or go with the flow (nothing is
+   locked in; the estimate keeps a typical night set aside). */
+var tripStyle='plan';
+function stayStops(){   // stops where a night can be spent: every card on a drive, every city after the first on fly/boat
+  if(!tripCtx)return [];
+  var out=[];(tripCtx.recs||[]).forEach(function(r,i){if(tripCtx.travel==='drive'||!r.first)out.push(i);});
+  return out;
+}
+function stopPicks(i){return cart.filter(function(x){return x.kind==='stay'&&x.stopI===i;});}
+function nextOpenStop(){var ss=stayStops();for(var k=0;k<ss.length;k++){if(!stopPicks(ss[k]).length)return ss[k];}return -1;}
+function stopLabel(i){var r=(tripCtx.recs||[])[i]||{};var pl=r.place||'this stop';
+  if(tripCtx.travel==='drive')return r.dest?('your destination, '+pl):('Night '+r.night+' near '+pl);
+  return pl;}
 function renderNext(){
   var el=document.getElementById('nextCard');if(!el||!tripCtx)return;
   var e=estimate();
-  var needNights=Math.max(e.nights,0),picked=e.stays.length;
   var step,title,body,btn,go;
-  if(needNights>0&&picked<needNights){
-    step=1;title=picked?'Pick a place for your other nights':'First, pick where you will sleep';
-    body='You have '+needNights+(needNights===1?' night':' nights')+' on this trip. Tap Hotels, Motels, or Airbnb under each stop to add it.';
-    btn='Show me places to stay';go='stay';
+  var seg='<div class="nxseg" role="group" aria-label="How do you want to plan?"><button type="button" data-style="plan" class="'+(tripStyle==='plan'?'on':'')+'">Plan every night</button><button type="button" data-style="flow" class="'+(tripStyle==='flow'?'on':'')+'">Go with the flow</button></div>';
+  if(tripStyle==='flow'){
+    step=1;title='You are going with the flow';
+    body=(e.openN>0?('Nothing is locked in. We set aside '+usd(budget.nightly)+' a night for '+e.openN+(e.openN===1?' night':' nights')+' so your total stays honest. '):'Nothing is locked in. ')+'Pick a place any time, or change plans on the road.';
+    btn='Show me things to do';go='do';
+  }else if(e.openN>0&&nextOpenStop()>-1){
+    step=1;title=e.pinnedN?'Now pick your next night':'First, pick where you will sleep';
+    body='You have '+e.nights+(e.nights===1?' night':' nights')+' on this trip'+(e.pinnedN?(', '+e.openN+' still open'):'')+'. Tap the button and choose a place.';
+    btn='Pick a place to stay';go='pick';
   }else{
-    step=needNights>0?2:1;title='Now find things to do';
-    body='Open Things to do, Events, and Top videos at each stop. Tap any card to see it on the map.';
+    step=2;title='Now find things to do';
+    body='Tap To do, Events, or Videos at each stop. Everything opens right here in Voyage.';
     btn='Show me things to do';go='do';
   }
-  el.innerHTML='<div class="nxtop"><span class="nxstep">Step '+step+'</span><span class="nxtot">Trip so far: <b>'+usd(e.total)+'</b></span></div>'+
-    '<h3>'+esc(title)+'</h3><p>'+esc(body)+'</p><button type="button" class="nxbtn" data-jumpto="'+go+'">'+esc(btn)+' \u2193</button>';
+  el.innerHTML=seg+'<div class="nxtop"><span class="nxstep">Step '+step+'</span><span class="nxtot">Trip so far: <b>'+usd(e.total)+'</b></span></div>'+
+    '<h3>'+esc(title)+'</h3><p>'+esc(body)+'</p><button type="button" class="nxbtn" data-jumpto="'+go+'">'+esc(btn)+(go==='pick'?'':' \u2193')+'</button>';
+  refreshStayBoxes();
 }
-document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.nxbtn');if(!b)return;scrollToSec(b.getAttribute('data-jumpto'));});
+document.addEventListener('click',function(e){
+  var sb=e.target.closest&&e.target.closest('.nxseg button');
+  if(sb){tripStyle=sb.getAttribute('data-style');renderNext();return;}
+  var b=e.target.closest&&e.target.closest('.nxbtn');if(!b)return;
+  var go=b.getAttribute('data-jumpto');
+  if(go==='pick'){var i=nextOpenStop();if(i>-1){openStaySheet(i);return;}go='stay';}
+  scrollToSec(go);
+});
+/* each stop's Stay tab: the pick if there is one, otherwise one clear button */
+function stayBoxHTML(i){
+  var r=(tripCtx.recs||[])[i]||{},picks=stopPicks(i);
+  var typical=r.pd?('Typical hotel night here ~'+usd(r.pd.lodging)+' \u00b7 '+r.pd.month):('Typical night ~'+usd(budget.nightly));
+  if(picks.length){
+    return picks.map(function(x){var nn=+x.nights||1;
+      return '<div class="staypick"><div class="spk"><span class="spcheck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><div><b>'+esc(x.name||'A place here')+'</b><span>'+nn+(nn===1?' night':' nights')+' \u00b7 '+usd(x.cost)+' a night \u00b7 '+usd(x.cost*nn)+' total</span></div></div>'+
+        '<div class="spbtns"><button type="button" class="spchg" data-i="'+i+'" data-id="'+x.id+'">Change</button><button type="button" class="sprm" data-id="'+x.id+'">Remove</button></div></div>';
+    }).join('');
+  }
+  if(tripStyle==='flow')return '<div class="stayflow"><b>Going with the flow here</b><span>'+esc(typical)+' is set aside. Nothing is locked in.</span><button type="button" class="staygo ghost" data-i="'+i+'">Pick a place anyway</button></div>';
+  return '<button type="button" class="staygo" data-i="'+i+'">Pick a place to stay</button><div class="staysub">'+esc(typical)+'. Tap to choose a hotel, motel, or home rental.</div>';
+}
+function refreshStayBoxes(){
+  [].forEach.call(document.querySelectorAll('.hslider[data-kind="stay"]'),function(el){
+    if(!el.classList.contains('stayrows'))return;
+    el.innerHTML=stayBoxHTML(+el.getAttribute('data-i'));
+  });
+}
+document.addEventListener('click',function(e){
+  var t=e.target.closest&&e.target.closest('.staygo,.spchg');
+  if(t){openStaySheet(+t.getAttribute('data-i'),t.getAttribute('data-id'));return;}
+  var rm=e.target.closest&&e.target.closest('.sprm');
+  if(rm){var id=rm.getAttribute('data-id');cart=cart.filter(function(x){return x.id!==id;});renderCost();}
+});
 function addBtn(kind,label,cost,pp){var dc=(typeof cost==='number')?Math.round(cost):esc(cost);return '<span class="hsadd" role="button" tabindex="0" data-kind="'+kind+'" data-label="'+esc(label)+'"'+(pp?' data-pp="1"':'')+' data-cost="'+dc+'" title="Add to trip cost">+</span>';}
 var STAY_IC={Hotels:'<path d="M4 21V4h11v17M15 9h5v12M8 8h3M8 12h3M8 16h3"/>',Motels:'<path d="M3 18V8m0 6h18v4M21 18v-6a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="2"/>',Airbnb:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'};
 function stayTile(href,lbl,place){return '<a class="hslide hsmore staytile" href="'+href+'" target="_blank" rel="noopener" data-lbl="'+esc(lbl)+'" data-place="'+esc(place)+'">'+
@@ -1987,46 +2132,160 @@ function scrollToSec(k){
   },{passive:true});
 })();
 
-/* ===== stay sheet: tapping Hotels / Motels / Airbnb asks what to do with it ===== */
+/* ===== stay picker: real places near the stop (OpenStreetMap), a price you
+   can change, how many nights, and a way out ("go with the flow"). After a
+   pick it offers the next open night instead of making you hunt for it. ===== */
+var staySt=null;
+function stayDefaultNights(i){
+  var e=estimate(),r=(tripCtx.recs||[])[i]||{};
+  if(tripCtx.travel==='drive'){
+    if(!r.dest)return 1;
+    var enroute=(tripCtx.recs||[]).filter(function(x){return !x.dest;}).length;
+    return Math.max(1,tripDays().nights-enroute);
+  }
+  var ss=stayStops();
+  return (ss[ss.length-1]===i)?Math.max(1,e.openN):1;
+}
+function openStaySheet(i,editId){
+  var sh=document.getElementById('actsheet'),r=(tripCtx.recs||[])[i];if(!sh||!r)return;
+  var old=editId?cart.filter(function(x){return x.id===editId;})[0]:null;
+  staySt={i:i,type:(old&&old.type)||'hotel',price:old?old.cost:(r.pd?r.pd.lodging:(+budget.nightly||0)),nights:old?(+old.nights||1):stayDefaultNights(i),list:null,editId:editId||null};
+  document.getElementById('actTitle').textContent='Where will you sleep?';
+  stayRender();
+  sh.classList.add('show');
+  if(r._stayList){staySt.list=r._stayList;stayRender();}
+  else bfetch('/api/stays/osm?lat='+r.lat+'&lng='+r.lng,20000).then(function(x){return x.ok?x.json():[];}).catch(function(){return [];}).then(function(l){
+    r._stayList=l||[];if(staySt&&staySt.i===i){staySt.list=r._stayList;stayRender();}
+  });
+}
+function closeStaySheet(){var sh=document.getElementById('actsheet');if(sh)sh.classList.remove('show');staySt=null;}
+function stayRender(){
+  var st=staySt;if(!st)return;
+  var r=tripCtx.recs[st.i],b=document.getElementById('actBody');
+  var TYPES=[['hotel','Hotels'],['motel','Motels'],['rental','Home rental']];
+  var tname=st.type==='motel'?'motel':(st.type==='rental'?'home rental':'hotel');
+  var rows='';
+  var generic='<button type="button" class="strow strany" data-name=""><span class="strt"><b>Any '+tname+' here</b><span>I will choose the exact one later</span></span><span class="strpick">Pick</span></button>';
+  if(st.type==='rental'){
+    rows=generic+'<p class="stnote">Home rentals (Airbnb, Vrbo) do not share their listings with other apps, so Voyage cannot show them. Pick this to save the nights and your price.</p>';
+  }else if(st.list===null){
+    rows=generic+'<p class="stnote">Finding real '+tname+'s near this stop...</p>';
+  }else{
+    var want=st.type==='motel'?['motel']:['hotel','guest_house','hostel'];
+    var l=st.list.filter(function(x){return want.indexOf(x.kind)>-1;}).slice(0,14);
+    rows=generic+(l.length?l.map(function(x){
+      return '<button type="button" class="strow" data-name="'+esc(x.name)+'"><span class="strt"><b>'+esc(x.name)+'</b><span>'+(x.addr?esc(x.addr)+' \u00b7 ':'')+x.mi+' mi from your stop</span></span><span class="strpick">Pick</span></button>';
+    }).join(''):'<p class="stnote">No '+tname+'s are listed on the map near this stop. You can still pick "Any '+tname+' here".</p>');
+  }
+  b.innerHTML='<p class="actsub">'+esc(stopLabel(st.i).replace(/^./,function(c){return c.toUpperCase();}))+'</p>'+
+    '<div class="stseg" role="group" aria-label="Kind of place">'+TYPES.map(function(t){return '<button type="button" data-type="'+t[0]+'" class="'+(st.type===t[0]?'on':'')+'">'+t[1]+'</button>';}).join('')+'</div>'+
+    '<div class="stctl"><label class="stprice"><span>Price a night</span><span class="stin">$<input id="stPrice" type="text" inputmode="decimal" autocomplete="off" value="'+esc(String(st.price))+'"></span></label>'+
+    '<div class="stnights"><span>Nights here</span><div class="stepper"><button type="button" id="stMinus" aria-label="One night less">&minus;</button><b id="stN">'+st.nights+'</b><button type="button" id="stPlus" aria-label="One night more">+</button></div></div></div>'+
+    '<p class="stnote">'+(r.pd?('The price starts at a typical hotel night for '+esc(r.pd.area)+' in '+r.pd.month+' (federal per diem rate). Change it to what you plan to pay.'):'Change the price to what you plan to pay.')+'</p>'+
+    '<div class="stlist">'+rows+'</div>'+
+    '<button type="button" class="actbtn actx" id="stFlow">Skip this. I will go with the flow.</button>';
+}
+function stayDone(name){
+  var st=staySt,r=tripCtx.recs[st.i];
+  var pv=parseFloat(document.getElementById('stPrice').value);st.price=isFinite(pv)&&pv>=0?pv:st.price;
+  var tl=st.type==='motel'?'motel':(st.type==='rental'?'home rental':'hotel');
+  var nm=name||('A '+tl+' near '+(r.place||'this stop'));
+  if(st.editId)cart=cart.filter(function(x){return x.id!==st.editId;});
+  cart.push({id:'c'+(cartSeq++),kind:'stay',label:'Stay: '+nm,name:nm,type:st.type,cost:st.price,nights:st.nights,stopI:st.i,pp:false});
+  if(tripStyle==='flow')tripStyle='plan';
+  renderCost();
+  var e=estimate(),nx=nextOpenStop(),b=document.getElementById('actBody');
+  document.getElementById('actTitle').textContent='Added to your trip';
+  b.innerHTML='<div class="stdone"><span class="spcheck big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><div><b>'+esc(nm)+'</b><span>'+st.nights+(st.nights===1?' night':' nights')+' \u00b7 '+usd(st.price)+' a night</span></div></div>'+
+    '<p class="sttotal">Your trip total is now <b>'+usd(e.total)+'</b>.</p>'+
+    ((e.openN>0&&nx>-1)?('<p class="actsub">You still have '+e.openN+(e.openN===1?' night':' nights')+' without a place.</p>'+
+      '<button type="button" class="actbtn actadd" id="stNext" data-i="'+nx+'">Plan '+esc(stopLabel(nx))+'</button>'+
+      '<button type="button" class="actbtn actgo" id="stFlowRest">Go with the flow for the rest</button>'):'<p class="actsub">Every night has a place. Next, find things to do.</p>')+
+    '<button type="button" class="actbtn '+((e.openN>0&&nx>-1)?'actx':'actadd')+'" id="stDoneBtn">Done</button>';
+  staySt=null;
+}
 (function(){
   var sh=document.getElementById('actsheet');if(!sh)return;
-  var cur=null;
-  function close(){sh.classList.remove('show');cur=null;}
-  function open(tile){
-    var sl=tile.closest('.hslider'),i=sl?+sl.getAttribute('data-i'):0;
-    var r=(tripCtx&&tripCtx.recs||[])[i]||{},lbl=tile.getAttribute('data-lbl')||'Hotels',place=tile.getAttribute('data-place')||r.place||'this stop';
-    var nightly=r.pd?r.pd.lodging:(+budget.nightly||0);
-    cur={tile:tile,label:'Stay: '+lbl+' in '+place,cost:nightly};
-    document.getElementById('actTitle').textContent=lbl+' in '+place;
-    document.getElementById('actSub').textContent=r.pd?('Starting price: a typical hotel night here (the federal per diem rate for '+r.pd.area+' in '+r.pd.month+'). Change it any time in the cost breakdown.'):'Starting price: your nightly estimate. Change it any time in the cost breakdown.';
-    document.getElementById('actAmt').textContent=usd(nightly);
-    document.getElementById('actLbl').textContent=r.night?('a night · Night '+r.night):'a night';
-    var go=document.getElementById('actGo');go.href=tile.getAttribute('href');go.textContent='See '+lbl.toLowerCase()+' on '+(lbl==='Airbnb'?'Airbnb':'Google')+' ↗';
-    var added=tile.classList.contains('picked');
-    var ab=document.getElementById('actAdd');ab.textContent=added?'Remove from my trip':('Add to my trip · '+usd(nightly)+'/night');ab.classList.toggle('on',added);
-    sh.classList.add('show');setTimeout(function(){ab.focus();},50);
-  }
-  document.addEventListener('click',function(e){
-    var t=e.target.closest&&e.target.closest('.staytile');
-    if(!t||e.target.closest('.hsadd'))return;
-    e.preventDefault();e.stopPropagation();open(t);
-  },true);
-  document.getElementById('actAdd').addEventListener('click',function(){
-    if(!cur)return;
-    if(cur.tile.classList.contains('picked')){
-      var id=cur.tile.getAttribute('data-cart');cart=cart.filter(function(x){return x.id!==id;});
-      cur.tile.classList.remove('picked');cur.tile.removeAttribute('data-cart');
-      var sg2=cur.tile.querySelector('.stgo');if(sg2)sg2.textContent='Add';
-    }else{
-      addCart('stay',cur.label,cur.cost);cur.tile.classList.add('picked');cur.tile.setAttribute('data-cart',cart[cart.length-1].id);
-      var sg=cur.tile.querySelector('.stgo');if(sg)sg.textContent='Added';
-    }
-    renderCost();close();
+  sh.addEventListener('click',function(e){
+    if(e.target===sh||e.target.closest('#actClose')||e.target.closest('#stDoneBtn')){closeStaySheet();return;}
+    var ty=e.target.closest('.stseg button');
+    if(ty&&staySt){var pv=parseFloat(document.getElementById('stPrice').value);if(isFinite(pv))staySt.price=pv;staySt.type=ty.getAttribute('data-type');stayRender();return;}
+    if(e.target.closest('#stMinus')&&staySt){staySt.nights=Math.max(1,staySt.nights-1);document.getElementById('stN').textContent=staySt.nights;return;}
+    if(e.target.closest('#stPlus')&&staySt){staySt.nights=Math.min(30,staySt.nights+1);document.getElementById('stN').textContent=staySt.nights;return;}
+    var row=e.target.closest('.strow');
+    if(row&&staySt){stayDone(row.getAttribute('data-name'));return;}
+    if(e.target.closest('#stFlow')||e.target.closest('#stFlowRest')){tripStyle='flow';closeStaySheet();renderNext();return;}
+    var nx=e.target.closest('#stNext');
+    if(nx){openStaySheet(+nx.getAttribute('data-i'));return;}
   });
-  document.getElementById('actX').addEventListener('click',close);
-  document.getElementById('actGo').addEventListener('click',function(){setTimeout(close,100);});
-  sh.addEventListener('click',function(e){if(e.target===sh)close();});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&sh.classList.contains('show'))close();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&sh.classList.contains('show'))closeStaySheet();});
+})();
+
+/* ===== nothing opens outside Voyage =====
+   Every outbound link is caught here and shown in an in-app viewer: videos
+   play in place, places show their Wikipedia summary, feedback opens the
+   form inside the app. A link with no in-app version says so instead of
+   sending the traveler to another site. */
+var inApp=(function(){
+  var box=document.getElementById('inapp'),ttl=document.getElementById('inTitle'),body=document.getElementById('inBody');
+  function show(title,html){ttl.textContent=title;body.innerHTML=html;box.classList.add('show');body.scrollTop=0;}
+  function close(){box.classList.remove('show');body.innerHTML='';}
+  function player(id){return '<div class="invid"><iframe src="https://www.youtube-nocookie.com/embed/'+esc(id)+'?autoplay=1&playsinline=1" title="Video" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>';}
+  function video(id,title){show(title||'Video',player(id));}
+  function videos(q,title){
+    show(title||'Videos','<p class="innote">Finding videos...</p>');
+    bfetch('/api/social/videos?q='+encodeURIComponent(q),15000).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}).then(function(vs){
+      if(!box.classList.contains('show'))return;
+      if(!vs||!vs.length){body.innerHTML='<p class="innote">No videos came back for this right now. Try again in a bit.</p>';return;}
+      vs=vs.slice().sort(function(a,b){return (b.views||0)-(a.views||0);}).slice(0,10);
+      body.innerHTML='<div id="inPlayer"></div><div class="inlist">'+vs.map(function(x){
+        return '<button type="button" class="invrow" data-v="'+esc(x.id)+'"><span class="invth" style="'+(x.thumb?'background-image:url('+esc(urlOk(x.thumb))+')':'')+'"></span><span class="invt"><b>'+esc(deent(x.title))+'</b><span>'+fmtViews(x.views)+' views \u00b7 '+esc(x.channel)+'</span></span></button>';
+      }).join('')+'</div>';
+    });
+  }
+  function wiki(lang,title){
+    var nice=title.replace(/_/g,' ');
+    show(nice,'<p class="innote">Loading...</p>');
+    fetch('https://'+lang+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title)).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}).then(function(j){
+      if(!box.classList.contains('show'))return;
+      var img=j&&j.thumbnail&&j.thumbnail.source,ex=j&&j.extract;
+      body.innerHTML=(img?'<div class="inimg" style="background-image:url('+esc(urlOk(img))+')"></div>':'')+
+        '<p class="intext">'+esc(ex||'No description is available for this place yet.')+'</p>'+
+        '<button type="button" class="actbtn actadd" id="inVids" data-q="'+esc(nice)+' travel">Watch videos of this place</button>'+
+        (ex?'<p class="insrc">Description from Wikipedia.</p>':'');
+    });
+  }
+  function frame(url,title){show(title,'<iframe class="inframe" src="'+esc(urlOk(url))+'" title="'+esc(title)+'"></iframe>');}
+  function note(title,msg){show(title,'<p class="intext">'+esc(msg)+'</p>');}
+  box.addEventListener('click',function(e){
+    if(e.target===box||e.target.closest('#inClose')){close();return;}
+    var vr=e.target.closest('.invrow');
+    if(vr){var pl=document.getElementById('inPlayer');if(pl){pl.innerHTML=player(vr.getAttribute('data-v'));body.scrollTop=0;}return;}
+    var vb=e.target.closest('#inVids');if(vb){videos(vb.getAttribute('data-q'),ttl.textContent);}
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&box.classList.contains('show'))close();});
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[href]');if(!a)return;
+    var href=a.getAttribute('href')||'';if(!/^https?:/i.test(href))return;
+    var u;try{u=new URL(href);}catch(er){return;}
+    if(u.origin===location.origin)return;
+    e.preventDefault();e.stopPropagation();
+    var h=u.hostname.replace(/^www\./,''),label=(a.querySelector('.hst,.fname,.svt')||a).textContent.trim().slice(0,80);
+    if(h==='youtube.com'||h==='youtu.be'||h==='youtube-nocookie.com'){
+      var v=u.searchParams.get('v')||(h==='youtu.be'?u.pathname.slice(1):'');
+      if(v)return video(v,label);
+      var q=u.searchParams.get('search_query');if(q)return videos(q,label||'Videos');
+    }
+    if(/(^|\.)wikipedia\.org$/.test(h)&&u.pathname.indexOf('/wiki/')===0)return wiki(h.split('.')[0],decodeURIComponent(u.pathname.slice(6)));
+    if(h==='form.jotform.com'){   // the form gets the trip being planned, never personal data
+      var sp=new URLSearchParams(location.search),fq=new URLSearchParams();
+      if(sp.get('mode'))fq.set('mode',sp.get('mode'));if(sp.get('stops'))fq.set('stops',sp.get('stops'));
+      return frame('https://form.jotform.com'+u.pathname+(fq.toString()?'?'+fq.toString():''),'Send feedback');
+    }
+    if(h==='google.com'){var gq=u.searchParams.get('q');if(gq)return videos(gq+' travel',label||gq);}
+    note(label||'Not in Voyage yet','This lives on another site, and Voyage does not send you out of the app. We are working on bringing it in.');
+  },true);
+  return {video:video,videos:videos,wiki:wiki,frame:frame,note:note,close:close};
 })();
 
 /* ===== planning overlay: steps tick forward while the plan builds; the last
@@ -2289,14 +2548,7 @@ function aggCard(x){
     (x.thumb?'<img class="svthumb" src="'+esc(urlOk(x.thumb))+'" alt="" loading="lazy">':'<span class="svthumb svglyph">'+icon+'</span>')+
     '<div class="svb"><div class="svt">'+esc(deent(x.title))+'</div><div class="svm">'+icon+' '+esc(x.plat)+' · '+esc(eng)+(x.meta?' · '+esc(x.meta):'')+'</div></div></a>';
 }
-function wpsLinks(q){
-  var e=encodeURIComponent(q);
-  return '<div class="platrow">'+
-    ml('https://www.tiktok.com/search?q='+e,'♪ TikTok')+
-    ml('https://www.instagram.com/explore/search/keyword/?q='+e,'◍ Instagram')+
-    ml('https://www.facebook.com/search/posts/?q='+e,'f Facebook')+
-    ml('https://www.youtube.com/results?search_query='+e+'&sp=CAMSAhAB','▶ YouTube')+'</div>';
-}
+function wpsLinks(q){return '';}   // those were links out to other apps
 function wpsHTML(ph){
   return '<details class="wps" id="wps"><summary>What travelers say <span class="wpshint">shared experiences</span></summary>'+
     '<div class="wpsin"><input id="wpsq" placeholder="'+esc(ph)+'" autocomplete="off"><button type="button" id="wpsgo">Search</button></div>'+
@@ -2730,7 +2982,7 @@ function stopCardShell(title,meta,i){
   return '<div class="stopcard"><div class="sh"><div class="sn">'+esc(title)+'</div><div class="sm" data-smi="'+i+'">'+meta+'</div></div>'+
     '<div class="stabs" role="tablist">'+tab('stay','Stay',true)+tab('do','To do',false)+tab('events','Events',false)+tab('videos','Videos',false)+'</div>'+
     '<div class="spanes">'+
-    pane('stay','Places to stay','Tap one to add it to your trip.',true)+
+    pane('stay','Places to stay','Choose where you will sleep at this stop.',true)+
     pane('do','Things to do','Sights and spots near this stop.',false)+
     pane('events','Events','What is on while you are there.',false)+
     pane('videos','Top videos','What travelers filmed here.',false)+'</div></div>';
@@ -2742,27 +2994,15 @@ function stopCardShell(title,meta,i){
   }
 }
 /* ----- in-app browse sliders: real data in the app, "look further" opens the platform ----- */
-function hsMore(href,lbl){return '<a class="hslide hsmore" href="'+href+'" target="_blank" rel="noopener"><span>'+esc(lbl)+'</span><span class="hsarr">&#8599;</span></a>';}
+function hsMore(href,lbl){
+  // only links with an in-app version get a tile (videos); the rest would be dead ends
+  if(!/youtube\.com\/results/.test(href))return '';
+  return '<a class="hslide hsmore" href="'+href+'"><span>More videos</span><span class="hsarr">&#9654;</span></a>';}
 function hsTile(html){return '<div class="hslide hsinfo">'+html+'</div>';}
 function fillStay(el,s){
-  var place=s.place||'this area',p=encodeURIComponent(place);
-  var ab='https://www.airbnb.com/s/'+p+'/homes'+(s.ci?('?checkin='+s.ci+(s.co?('&checkout='+s.co):'')):'');
-  var gh='https://www.google.com/travel/search?q='+encodeURIComponent('hotels in '+place);
-  var gm='https://www.google.com/travel/search?q='+encodeURIComponent('motels in '+place);
-  getStatus().then(function(st){
-    if(!st.hotels){
-      el.classList.add('stayrows');
-      el.innerHTML=stayTile(gh,'Hotels',place)+stayTile(gm,'Motels',place)+stayTile(ab,'Airbnb',place);
-      return;
-    }
-    bfetch('/api/stays/hotels?lat='+s.lat+'&lng='+s.lng+(s.ci?('&in='+s.ci+(s.co?('&out='+s.co):'')):'')).then(function(r){return r.ok?r.json():[];}).catch(function(){return null;}).then(function(hs){
-      if(hs===null){el.innerHTML=hsTile('Didn’t load right now.')+hsMore(gh,'Hotels')+hsMore(ab,'Airbnb');return;}
-      var h=(hs||[]).filter(function(x){return x.name;}).slice(0,8).map(function(x){
-        return '<a class="hslide" href="'+gh+'" target="_blank" rel="noopener"><span class="hsimg hsglyph">🏨</span><span class="hst">'+esc(x.name)+'</span><span class="hsm">'+(x.price?('$'+esc(String(x.price))+' '+esc(x.currency||'')+' / night'):'see rates')+'</span>'+addBtn('stay','Stay: '+x.name+' in '+place,x.price||budget.nightly)+'</a>';
-      }).join('');
-      el.innerHTML=(h||hsTile('No live offers for this stop'))+hsMore(gh,'More hotels')+hsMore(ab,'Airbnb');
-    });
-  });
+  // one clear button per stop; the picker sheet holds the real places
+  el.classList.add('stayrows');
+  el.innerHTML=stayBoxHTML(+el.getAttribute('data-i'));
 }
 function doIcon(kind){
   var k=(kind||'').toLowerCase();
@@ -2808,7 +3048,7 @@ function fillEvents(el,s){
   var eb='https://www.eventbrite.com/d/'+slugify(place)+'/all-events/';
   getStatus().then(function(st){
     if(!st.events){
-      el.innerHTML=hsMore(eb,'Eventbrite');
+      el.innerHTML=hsTile('Event listings are not connected yet. They are on the way.');
       return;
     }
     bfetch('/api/events?lat='+s.lat+'&lng='+s.lng+(s.ci?('&start='+s.ci+(s.co?('&end='+s.co):'')):'')).then(function(r){return r.ok?r.json():[];}).catch(function(){return null;}).then(function(ev){
@@ -2834,14 +3074,14 @@ function fillVideos(el,s){
         var book='https://www.google.com/search?q='+encodeURIComponent(x.title+' '+place+' tickets booking info');
         return '<div class="hslide hsvid" data-v="'+esc(x.id)+'"><span class="hsimg" style="'+(x.thumb?'background-image:url('+esc(urlOk(x.thumb))+')':'')+'"></span><span class="hsplay">&#9654;</span><span class="hst">'+esc(deent(x.title))+'</span><span class="hsm">'+fmtViews(x.views)+' views · '+esc(x.channel)+'</span>'+
           '<span class="hsact"><button type="button" class="hsbtn hsloc" data-lat="'+s.lat+'" data-lng="'+s.lng+'" data-place="'+esc(place)+'">Map</button>'+
-          '<a class="hsbtn" href="'+book+'" target="_blank" rel="noopener">Book &#8599;</a></span></div>';
+          '</span></div>';
       }
       // top 5 by real view counts; most people settle in the first three
       vs=(vs||[]).slice().sort(function(a,b){return (b.views||0)-(a.views||0);});
       var top=vs.slice(0,5),rest=vs.slice(5,15);
       var h=top.map(vidCard).join('');
       var tail=(rest.length?'<button type="button" class="hslide hsmore hsexpand">'+rest.length+' more videos<span class="hsarr">&#8595;</span></button>':'')+
-        '<button type="button" class="hslide hsmore hscomm">Ask the community<span class="hsarr">&#8599;</span></button>'+
+        '<button type="button" class="hslide hsmore hscomm">Ask the community<span class="hsarr">&#8595;</span></button>'+
         hsMore(yt,'YouTube');
       el.innerHTML=(h||hsTile('No videos found for this stop'))+tail;
       var exb=el.querySelector('.hsexpand');

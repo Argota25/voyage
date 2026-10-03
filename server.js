@@ -115,7 +115,7 @@ const SECURITY = {
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https://*.tile.openstreetmap.org https://upload.wikimedia.org https://i.ytimg.com https://*.ticketm.net",
     "connect-src 'self' https://*.wikipedia.org",
-    "frame-src https://www.youtube-nocookie.com https://www.youtube.com",
+    "frame-src https://www.youtube-nocookie.com https://www.youtube.com https://form.jotform.com",
     "frame-ancestors 'none'",
     "base-uri 'self'"
   ].join('; ')
@@ -463,6 +463,37 @@ function nameVariants(name){
   if (area !== name) out.add(area);
   return [...out].slice(0, 3);
 }
+/* Real places to stay near a stop, from OpenStreetMap (keyless): hotels,
+   motels, guest houses, hostels with a name. No prices exist in OSM; the
+   app pairs these with its typical-night estimate. */
+async function handleStaysOsm(reqUrl, res){
+  const lat = parseFloat(reqUrl.searchParams.get('lat')), lng = parseFloat(reqUrl.searchParams.get('lng'));
+  if (!isFinite(lat) || !isFinite(lng)) return json(res, 400, { error: 'lat/lng required' });
+  const key = 'stayosm:' + lat.toFixed(2) + ',' + lng.toFixed(2);
+  const hit = cget(key);
+  if (hit) return json(res, 200, hit, true);
+  const ql = `[out:json][timeout:25];nwr(around:15000,${lat.toFixed(4)},${lng.toFixed(4)})["tourism"~"^(hotel|motel|guest_house|hostel)$"]["name"];out center 60;`;
+  try {
+    const j = await overpassRace(ql);
+    const seen = {}, out = [];
+    (j.elements || []).forEach(el => {
+      const t = el.tags || {};
+      const la = el.lat != null ? el.lat : (el.center && el.center.lat);
+      const lo = el.lon != null ? el.lon : (el.center && el.center.lon);
+      if (la == null || lo == null || !t.name) return;
+      const k = t.name.toLowerCase();
+      if (seen[k]) return; seen[k] = 1;
+      const mi = milesLL(lat, lng, la, lo);
+      out.push({ name: t.name, kind: t.tourism, lat: la, lng: lo, mi: Math.round(mi * 10) / 10,
+        stars: parseInt(t.stars, 10) || null, addr: [t['addr:housenumber'], t['addr:street']].filter(Boolean).join(' ') || null });
+    });
+    out.sort((a, b) => a.mi - b.mi);
+    const list = out.slice(0, 30);
+    if (list.length) cset(key, list, 24 * 3600 * 1000);   // never cache empties (throttle recovery)
+    json(res, 200, list);
+  } catch (e){ json(res, 502, { error: 'stays unavailable' }); }
+}
+
 async function handleStreet(reqUrl, res){
   const name = (reqUrl.searchParams.get('name') || '').trim();
   const lat = parseFloat(reqUrl.searchParams.get('lat')), lng = parseFloat(reqUrl.searchParams.get('lng'));
@@ -919,6 +950,7 @@ http.createServer((req, res) => {
     if (u.pathname === '/api/social/aggregate') return void guard(handleAggregate(u, res), res);
     if (u.pathname === '/api/social/google') return void guard(handleGoogle(u, res), res);
     if (u.pathname === '/api/stays/hotels')  return void guard(handleHotels(u, res), res);
+    if (u.pathname === '/api/stays/osm')     return void guard(handleStaysOsm(u, res), res);
     if (u.pathname === '/api/events')        return void guard(handleEvents(u, res), res);
     return json(res, 404, { error: 'unknown endpoint' });
   }
