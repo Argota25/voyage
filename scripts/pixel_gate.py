@@ -20,7 +20,7 @@ import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from mobile_shot import WS, CDP, find_chrome  # noqa: E402
+from mobile_shot import WS, CDP, find_chrome
 
 PORT = 9383
 
@@ -47,7 +47,7 @@ def capture(out, url):
             {"name": "prefers-reduced-motion", "value": "reduce"}]})
         cdp.call("Page.navigate", {"url": url})
         cdp.wait_event("Page.loadEventFired", timeout=60)
-        time.sleep(9)  # lazy boot + eval + init + full chunked tessellation
+        time.sleep(9)
         cdp.call("Runtime.evaluate", {"expression":
                  "var s=document.getElementById('stars');if(s)s.style.display='none';1"})
         time.sleep(0.6)

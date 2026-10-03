@@ -17,7 +17,6 @@ import urllib.request
 BASE = "http://127.0.0.1:8787"
 
 CASES = [
-    # (category, query, expect-substring-of-top-match lowercased, or None = any US hit)
     ("obscure", "Monowi NE", "monowi"),
     ("obscure", "Supai AZ", "supai"),
     ("obscure", "Chicken AK", "chicken"),
@@ -91,7 +90,7 @@ def main():
                 mark = "PASS"
             else:
                 weak += 1
-                mark = "WEAK"  # results, but top match is not the expected place
+                mark = "WEAK"
                 fails.append((cat, query, "top=" + top))
         else:
             fail += 1

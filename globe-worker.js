@@ -1,18 +1,5 @@
-/* SafeRoute USA - globe worker.
- *
- * Runs globe.gl (three.js + WebGL) on a worker thread against an
- * OffscreenCanvas so the main thread never pays script eval, WebGL init,
- * tessellation, or per-frame render. The page keeps a plain <canvas>;
- * pointer events are forwarded here; clickable pins stay as real DOM on
- * the main thread, positioned from projections posted back per frame.
- *
- * globe.gl expects a DOM. The shims below give it exactly as much
- * document/window as its init path touches and no more. If any of this
- * throws, the main thread falls back to the classic on-thread globe.
- */
 'use strict';
 
-/* ---------- DOM shims (before importScripts) ---------- */
 self.window = self;
 function fakeNode(tag){
   var listeners = {};
@@ -41,11 +28,6 @@ function fakeNode(tag){
     get offsetWidth(){ return W; }, get offsetHeight(){ return H; }
   };
 }
-/* three's ImageLoader wants an <img>. Workers have no Image, but an
-   OffscreenCanvas is a legal texture source AND a real EventTarget, so a
-   canvas that fills itself on src= and fires 'load' satisfies the whole
-   TextureLoader path (the globe stays hidden until this event fires -
-   this shim is what makes the worker globe visible at all). */
 function fakeImg(){
   var c = new OffscreenCanvas(1, 1);
   c.crossOrigin = '';
@@ -78,7 +60,6 @@ self.addEventListener('error', function(e){
 
 importScripts('vendor/globe.gl-2.34.4.min.js');
 
-/* ---------- state ---------- */
 var world = null, canvas = null, accentRGB = [58, 182, 125], RMreduce = false;
 var pins = [], pinTick = 0;
 
@@ -90,7 +71,6 @@ function init(msg){
   self.devicePixelRatio = msg.dpr || 1;
   accentRGB = hexRGB(msg.accent);
   RMreduce = !!msg.reducedMotion;
-  /* OrbitControls and the renderer expect element-ish surface on the canvas */
   canvas.style = {};
   try { Object.defineProperty(canvas, 'clientWidth', { get: function(){ return W; } }); } catch (e) {}
   try { Object.defineProperty(canvas, 'clientHeight', { get: function(){ return H; } }); } catch (e) {}
@@ -138,8 +118,6 @@ function init(msg){
   var readySent = false;
   function sendReady(){ if (!readySent){ readySent = true; post({ ev: 'ready' }); } }
   if (world.onGlobeReady) world.onGlobeReady(sendReady);
-  /* onGlobeReady can fire before we register (fast local texture load), so
-     also treat the first actually-rendered frame as proof of readiness */
   (function chk(n){
     if (readySent) return;
     try { var r = world.renderer(); if (r && r.info && r.info.render.frame > 0){ sendReady(); return; } } catch (e) {}
@@ -151,11 +129,10 @@ function init(msg){
 
 function rgbaAccent(a){ return 'rgba(' + accentRGB.join(',') + ',' + a + ')'; }
 
-/* ---------- pin projection: worker computes screen coords, main owns DOM ---------- */
 function pinLoop(){
   requestAnimationFrame(pinLoop);
   if (!world || !pins.length) return;
-  if ((pinTick = (pinTick + 1) % 2)) return;  /* 30Hz is plenty for labels */
+  if ((pinTick = (pinTick + 1) % 2)) return;
   var cam = world.camera();
   if (!cam) return;
   cam.updateMatrixWorld();
@@ -175,7 +152,7 @@ function pinLoop(){
   }
   post({ ev: 'pins', p: out });
 }
-function mat4mul(a, b){  /* column-major, a*b */
+function mat4mul(a, b){
   var o = new Array(16);
   for (var c = 0; c < 4; c++) for (var r = 0; r < 4; r++){
     o[c * 4 + r] = a[r] * b[c * 4] + a[4 + r] * b[c * 4 + 1] + a[8 + r] * b[c * 4 + 2] + a[12 + r] * b[c * 4 + 3];
@@ -191,7 +168,6 @@ function apply4(m, x, y, z){
 
 function post(o){ self.postMessage(o); }
 
-/* ---------- RPC ---------- */
 self.onmessage = function(e){
   var m = e.data;
   try {

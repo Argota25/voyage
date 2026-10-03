@@ -27,7 +27,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 BASE = "http://127.0.0.1:8787"
 sys.path.insert(0, HERE)
-from mobile_shot import WS, CDP, find_chrome  # noqa: E402
+from mobile_shot import WS, CDP, find_chrome
 
 RESULTS = []
 
@@ -52,7 +52,6 @@ def api(path):
     return get(path, {"Origin": BASE})
 
 
-# poll up to ~20s for the result panel, then report what rendered
 POLL = ("new Promise(function(done){var n=0;var iv=setInterval(function(){n++;"
         "if(document.body.classList.contains('inarea')||n>44){clearInterval(iv);done({"
         "inarea:document.body.classList.contains('inarea'),"

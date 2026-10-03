@@ -107,7 +107,7 @@ class WS(object):
             elif n == 127:
                 n = struct.unpack(">Q", self._read_exact(8))[0]
             data = self._read_exact(n)
-            if opcode == 0x9:                      # ping -> pong
+            if opcode == 0x9:
                 mask = os.urandom(4)
                 self.sock.sendall(b"\x8A" + bytes([0x80 | len(data)]) + mask +
                                   bytes(b ^ mask[i % 4] for i, b in enumerate(data)))
@@ -200,7 +200,7 @@ def main(argv):
         cdp.call("Emulation.setTouchEmulationEnabled", {"enabled": True})
         cdp.call("Page.navigate", {"url": url})
         cdp.wait_event("Page.loadEventFired", timeout=40)
-        time.sleep(4)   # globe/leaflet settle
+        time.sleep(4)
 
         if ev:
             params = {"expression": ev, "returnByValue": True}

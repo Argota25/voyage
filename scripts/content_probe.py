@@ -18,7 +18,7 @@ import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from mobile_shot import WS, CDP, find_chrome  # noqa: E402
+from mobile_shot import WS, CDP, find_chrome
 
 PORT = 9500 + (os.getpid() % 400)
 
@@ -87,8 +87,6 @@ try:
                 first["dbgx"] = t
                 print("  dbg eval exception: %r" % e)
             v = {}
-        # answer ambiguity choosers like a user would (first option), and
-        # record the decision cost separately
         try:
             picked = cdp.call("Runtime.evaluate", {"expression":
                 "(function(){var c=document.getElementById('chooser');"
@@ -98,7 +96,7 @@ try:
             if picked:
                 first.setdefault("chooser_answered", t)
                 last["choosers"] = last.get("choosers", 0) + 1
-                time.sleep(1.0)  # let the pick settle; never double-click a rebuilt chooser
+                time.sleep(1.0)
         except Exception:
             pass
         for k in ("panel", "stage"):
@@ -115,7 +113,6 @@ try:
             first.setdefault("skeletons", t)
         if v.get("skeletons", 0) == 0 and "skeletons" in first and "skeletons_gone" not in first:
             first["skeletons_gone"] = t
-        # done when the flow's terminal content exists and skeletons cleared
         done = {
             "accident": lambda: "rows" in first and "videos" in first,
             "commute": lambda: "routeCards" in first,

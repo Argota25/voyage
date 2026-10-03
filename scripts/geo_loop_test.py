@@ -24,25 +24,17 @@ if "--rounds" in sys.argv:
     ROUNDS = int(sys.argv[sys.argv.index("--rounds") + 1])
 
 GEOCODE_CASES = [
-    # cities, one per region sweep
     "Miami, FL", "Seattle, WA", "Bangor, Maine", "Boise, ID",
     "El Paso, TX", "Fargo, ND", "Honolulu, HI", "Anchorage, AK",
     "Burlington, VT", "Tulsa, OK", "Savannah, GA", "Reno, NV",
     "Kansas City, MO", "New Orleans, LA", "Brooklyn, NY", "Duluth, MN",
-    # streets (the accident journey's main input)
     "Van Nuys Boulevard, Los Angeles", "Peachtree Street, Atlanta",
     "Michigan Avenue, Chicago", "Las Vegas Boulevard, Las Vegas",
     "Ocean Drive, Miami Beach", "601 Van Nuys Blvd, Los Angeles, CA",
-    # quirks the app promises to handle
     "fsu tallahassee", "ucla westwood",
-    # typos (Photon's job; "Seatle WA" also exercises the comma-less
-    # state-expansion retry)
     "Chicgo, IL", "Seatle WA",
 ]
 
-# Gibberish contract: a clean 200 with an empty list, never a 5xx and never
-# a network error, so the UI shows its check-the-spelling guidance instead
-# of an outage message.
 EXPECTED_NO_MATCH = ["zzqx nowhereville xx"]
 
 ROUTE_PAIRS = [
@@ -52,9 +44,9 @@ ROUTE_PAIRS = [
     ("Burlington, VT", "Bangor, Maine"),
     ("Reno, NV", "Boise, ID"),
     ("Kansas City, MO", "Tulsa, OK"),
-    ("New Orleans, LA", "El Paso, TX"),   # ~1750km: over the public cap, exercises split-and-stitch
+    ("New Orleans, LA", "El Paso, TX"),
     ("Fargo, ND", "Duluth, MN"),
-    ("Miami, FL", "Seattle, WA"),         # coast to coast: the any-to-any proof
+    ("Miami, FL", "Seattle, WA"),
 ]
 
 

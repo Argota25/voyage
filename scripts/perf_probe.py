@@ -17,7 +17,7 @@ import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from mobile_shot import WS, CDP, find_chrome  # noqa: E402
+from mobile_shot import WS, CDP, find_chrome
 
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8787/globe.html"
 RUNS = int(sys.argv[2]) if len(sys.argv) > 2 else 5

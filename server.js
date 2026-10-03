@@ -1,23 +1,4 @@
 #!/usr/bin/env node
-/*
- * Voyage — local app server + privacy proxy  (zero dependencies)
- * --------------------------------------------------------------------
- * Two jobs:
- *   1. Serve the static app (globe.html, /vendor).
- *   2. Proxy ALL third-party geocode/route calls so the browser never
- *      sends the places a user is planning straight to Nominatim /
- *      Valhalla / Overpass. This is where caching, rate-limiting, and
- *      platform keys live.
- *
- *   GET /api/geocode?q=<query>&limit=<n>     -> Nominatim (US, addressdetails)
- *   GET /api/route?stops=lat,lng;lat,lng&costing=auto -> Valhalla (drive routing)
- *
- * Run:  node server.js        (then open http://localhost:8787/globe.html)
- *
- * NOTE: public Nominatim/Valhalla are still upstream here. This proxy makes
- * usage policy-compliant (proper UA, <=1 req/s to Nominatim, response cache)
- * and gives you ONE place to later swap in self-hosted/keyed providers.
- */
 'use strict';
 const http = require('http');
 const https = require('https');
@@ -26,36 +7,23 @@ const path = require('path');
 const { URL } = require('url');
 
 const PORT = process.env.PORT || 8787;
-// Local default: bind to this PC only (127.0.0.1). The public beta host sets
-// HOST=0.0.0.0 plus VOYAGE_ORIGINS=https://<domain>; see docs/DEPLOY.md.
-// On Railway (RAILWAY_ENVIRONMENT is set by the platform) public mode turns
-// on by itself; explicit env vars still win.
 const ON_RAILWAY = !!process.env.RAILWAY_ENVIRONMENT;
 const HOST = process.env.HOST || (ON_RAILWAY ? '0.0.0.0' : '127.0.0.1');
 const PUBLIC = HOST !== '127.0.0.1' && HOST !== 'localhost';
-// Behind a hosting proxy (Railway), the socket address is the proxy, so the
-// real client comes from X-Forwarded-For. Only trusted when TRUST_PROXY=1.
 const TRUST_PROXY = process.env.TRUST_PROXY ? process.env.TRUST_PROXY === '1' : ON_RAILWAY;
 const ROOT = __dirname;
 const zlib = require('zlib');
 const CONTACT = process.env.VOYAGE_CONTACT || 'https://github.com/Argota25/voyage';
 const UA = `Voyage/0.1 (+proxy; ${CONTACT})`;
 
-/* ---------- abuse controls: same-origin gate + per-IP rate limit ---------- */
-// Only our own app may use the proxy. Set VOYAGE_ORIGINS for production hosts.
 const ORIGINS = (process.env.VOYAGE_ORIGINS ||
   `http://localhost:${PORT},http://127.0.0.1:${PORT}`).split(',').map(s => s.trim()).filter(Boolean);
-// Railway's generated domain is always allowed, so the first deploy works
-// before VOYAGE_ORIGINS is set (it is still needed for a custom domain).
 if (process.env.RAILWAY_PUBLIC_DOMAIN) ORIGINS.push('https://' + process.env.RAILWAY_PUBLIC_DOMAIN);
 function originOk(req){
   const o = req.headers.origin || '', r = req.headers.referer || '';
-  if (!o && !r) return false;                          // no browser context -> scripted abuse
+  if (!o && !r) return false;
   return ORIGINS.some(a => o === a || r.indexOf(a) === 0);
 }
-// The proxy APPENDS the address it saw, so the rightmost entry is the real
-// client; anything to its left is client-supplied and spoofable. Without a
-// trusted proxy the header is ignored entirely.
 function clientIP(req){
   if (TRUST_PROXY){
     const xff = String(req.headers['x-forwarded-for'] || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -63,38 +31,24 @@ function clientIP(req){
   }
   return req.socket.remoteAddress || 'local';
 }
-const RL = new Map();                                   // ip -> { count, reset }
+const RL = new Map();
 function rateOk(ip){
-  const now = Date.now(), WIN = 60000, MAX = 90;        // 90 API calls / minute / IP
+  const now = Date.now(), WIN = 60000, MAX = 90;
   let b = RL.get(ip);
   if (!b || b.reset < now){ b = { count: 0, reset: now + WIN }; RL.set(ip, b); }
   return ++b.count <= MAX;
 }
-// public traffic means many IPs: drop expired buckets so the map can't grow forever
 setInterval(() => { const now = Date.now(); for (const [k, b] of RL) if (b.reset < now) RL.delete(k); }, 5 * 60000).unref();
 
-/* Daily budgets for keyed free tiers. YouTube gives 10,000 units/day and one
-   video lookup costs ~101 (search 100 + stats 1); Google Programmable Search
-   gives 100 queries/day. Cache hits are free and never count. Past the cap
-   the call fails like an outage, and the UI already degrades to deep links. */
 const BUDGET = { yt: 90, google: 95, tm: 4000 };
 const spent = {}; let spentDay = '';
 function spend(name){
-  const day = new Date().toISOString().slice(0, 10);   // resets at UTC midnight, like Google's quota (Pacific) roughly
+  const day = new Date().toISOString().slice(0, 10);
   if (day !== spentDay){ spentDay = day; for (const k in spent) delete spent[k]; }
   spent[name] = (spent[name] || 0) + 1;
   return spent[name] <= (BUDGET[name] || Infinity);
 }
 
-/* ---------- security headers (sent on every response) ---------- */
-// HSTS is intentionally omitted on this plain-http dev server (browsers ignore it
-// over http). Add it at your TLS terminator in production.
-/* Async route handlers used to be dispatched with their promise dropped,
-   so any internal async throw became an unhandled rejection - and modern
-   Node exits the process on those. An Overpass outage killed the server
-   exactly that way. guard() pins every route's promise, answers 500 if
-   nothing was sent, and the process-level nets below are the last resort:
-   this localhost app must log and keep serving, never die mid-session. */
 function guard(p, res){
   Promise.resolve(p).catch(err => {
     console.warn('[handler-error]', (err && err.message) || err);
@@ -121,26 +75,19 @@ const SECURITY = {
   ].join('; ')
 };
 
-/* ---------- optional social-platform credentials (env wins over secrets.json) ---------- */
 let SECRETS = {};
 try { SECRETS = JSON.parse(fs.readFileSync(path.join(ROOT, 'secrets.json'), 'utf8')); } catch (e) {}
 const YT_KEY    = process.env.YOUTUBE_API_KEY      || SECRETS.youtube       || '';
 const RD_ID     = process.env.REDDIT_CLIENT_ID     || SECRETS.reddit_id     || '';
 const RD_SECRET = process.env.REDDIT_CLIENT_SECRET || SECRETS.reddit_secret || '';
 
-/* ---------- tiny TTL cache ---------- */
 const cache = new Map();
 function cget(k){ const v = cache.get(k); if (v && v.exp > Date.now()) return v.data; if (v) cache.delete(k); return null; }
 function cset(k, data, ttlMs){
-  // bounded for public traffic: Map keeps insertion order, so evict the oldest
   if (cache.size >= 5000) cache.delete(cache.keys().next().value);
   cache.set(k, { data, exp: Date.now() + ttlMs });
 }
 
-/* ---------- Nominatim politeness queue (<= ~1 req/sec, serialized) ---------- */
-// Self-healing: one rejected call must not poison the chain, or every later
-// lookup would fail instantly until restart. Callers still see their own
-// rejection; the chain itself always settles clean.
 let nomChain = Promise.resolve(); let lastNom = 0;
 function nomQueue(url){
   const run = nomChain.then(async () => {
@@ -152,9 +99,6 @@ function nomQueue(url){
   nomChain = run.catch(() => {});
   return run;
 }
-/* Circuit breaker: when Nominatim fails twice in a row, skip it for 60s
-   instead of letting every queued lookup serially burn a 12s timeout.
-   Fallbacks (Photon, Census) take over instantly while it cools. */
 let nomFails = 0, nomSkipUntil = 0;
 function nomGuard(p){
   return p.then(up => { nomFails = 0; return up; },
@@ -169,8 +113,6 @@ function nominatimReverse(qs){
   return nomGuard(nomQueue('https://nominatim.openstreetmap.org/reverse?' + qs));
 }
 
-/* US Census geocoder: third leg, free, no key, US-only (this is a US app).
-   Handles street addresses; returns null when unhealthy, [] on no-match. */
 const ST_NAME = {AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',CT:'Connecticut',DE:'Delaware',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',NH:'New Hampshire',NJ:'New Jersey',NM:'New Mexico',NY:'New York',NC:'North Carolina',ND:'North Dakota',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvania',RI:'Rhode Island',SC:'South Carolina',SD:'South Dakota',TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginia',WA:'Washington',WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming',DC:'District of Columbia'};
 async function censusGeocode(qtext, limit){
   try {
@@ -187,12 +129,11 @@ async function censusGeocode(qtext, limit){
   } catch (e){ return null; }
 }
 
-/* ---------- Photon: typo-tolerant fallback geocoder (Nominatim-shaped output) ---------- */
 async function photon(q, limit, near){
   const bias = near ? ('&lat=' + near.lat + '&lon=' + near.lon) : '&lat=39.5&lon=-98.35';
   const url = 'https://photon.komoot.io/api/?lang=en&limit=' + (limit || 5) + bias + '&q=' + encodeURIComponent(q);
   const up = await upstream(url);
-  if (up.status !== 200) return null;   // unhealthy, not a no-match
+  if (up.status !== 200) return null;
   let j; try { j = JSON.parse(up.body); } catch(e){ return null; }
   const feats = (j.features || []).filter(f => f.properties && (!f.properties.countrycode || f.properties.countrycode === 'US'));
   return feats.map(f => {
@@ -204,8 +145,7 @@ async function photon(q, limit, near){
   });
 }
 
-/* ---------- generic https request (POST-capable, for OAuth token flows) ---------- */
-const UPSTREAM_TIMEOUT_MS = 12000;   // a hung upstream degrades one feature, never the app
+const UPSTREAM_TIMEOUT_MS = 12000;
 function httpsReq(url, method, headers, body){
   return new Promise((resolve, reject) => {
     const u = new URL(url);
@@ -219,7 +159,6 @@ function httpsReq(url, method, headers, body){
   });
 }
 
-/* ---------- generic upstream GET (https, follows one redirect) ---------- */
 function upstream(url, redirects = 0, timeoutMs = 0){
   return new Promise((resolve, reject) => {
     const req = https.get(url, { headers: { 'User-Agent': UA, 'Accept': 'application/json', 'Accept-Language': 'en-US' }, timeout: timeoutMs || UPSTREAM_TIMEOUT_MS }, res => {
@@ -236,8 +175,6 @@ function upstream(url, redirects = 0, timeoutMs = 0){
   });
 }
 
-/* ---------- API handlers ---------- */
-// Unambiguous abbreviations users type instead of full names (no city/street collisions).
 const ALIASES = { fsu:'Florida State University', fsw:'Florida SouthWestern State College',
   uf:'University of Florida', usf:'University of South Florida', ucf:'University of Central Florida',
   fiu:'Florida International University', fau:'Florida Atlantic University', fgcu:'Florida Gulf Coast University',
@@ -249,29 +186,19 @@ function expandAliases(q){
 }
 function parseNear(s){ const m=(s||'').split(','); const a=parseFloat(m[0]), b=parseFloat(m[1]); return (isFinite(a)&&isFinite(b))?{lat:a,lon:b}:null; }
 
-
 async function handleGeocode(reqUrl, res){
   const q = (reqUrl.searchParams.get('q') || '').trim();
   let limit = parseInt(reqUrl.searchParams.get('limit') || '1', 10);
   if (!q){ return json(res, 400, { error: 'missing q' }); }
   if (!(limit >= 1 && limit <= 10)) limit = 1;
-  const near = parseNear(reqUrl.searchParams.get('near'));   // bias results toward this lat,lng
-  const wantGeom = reqUrl.searchParams.get('geom') === '1';  // include street geometry (stop outline)
-  const eq = expandAliases(q);                               // "fsu port charlotte" -> "Florida State University port charlotte"
+  const near = parseNear(reqUrl.searchParams.get('near'));
+  const wantGeom = reqUrl.searchParams.get('geom') === '1';
+  const eq = expandAliases(q);
   const key = 'g:' + (wantGeom ? 'G:' : '') + limit + ':' + (near ? near.lat.toFixed(2)+','+near.lon.toFixed(2)+':' : '') + eq.toLowerCase();
   const hit = cget(key);
   if (hit){ return json(res, 200, hit, true); }
   const vb = near ? ('&bounded=0&viewbox=' + (near.lon-0.8)+','+(near.lat+0.8)+','+(near.lon+0.8)+','+(near.lat-0.8)) : '';
   const qs = 'format=jsonv2&addressdetails=1' + (wantGeom ? '&polygon_geojson=1' : '') + '&countrycodes=us&limit=' + limit + vb + '&q=' + encodeURIComponent(eq);
-  // Three providers in order: Nominatim (queued, breaker-guarded), Photon
-  // (typo-tolerant), Census (US addresses). "healthy" tracks whether ANY
-  // provider gave a real answer to distinguish a genuine no-match (200 [])
-  // from an outage (502): an empty answer only counts when someone healthy
-  // said it.
-  // "Chatanooga TN" must never fly to a literally-named street in Illinois:
-  // when the query carries a state token, wrong-state-only literal matches
-  // are discarded so the typo-tolerant provider gets its turn, and final
-  // results are ranked in-state first.
   const stTok = q.match(/[,\s]([A-Za-z]{2})$/);
   const stWant = stTok ? ST_NAME[stTok[1].toUpperCase()] : null;
   const inState = arr => arr.filter(d => d.address && d.address.state === stWant);
@@ -288,8 +215,6 @@ async function handleGeocode(reqUrl, res){
     try { const p2 = await photon(q, limit, near); if (p2 !== null){ healthy = true; if (p2.length) data = p2; } } catch (e){}
   }
   if (!data.length){
-    // comma-less "Town ST" form: expand the state and give Photon a
-    // properly-shaped query before giving up
     const m = q.match(/^(.*[^,\s])[,\s]+([A-Za-z]{2})$/);
     const full = m && ST_NAME[m[2].toUpperCase()];
     if (full){
@@ -298,12 +223,10 @@ async function handleGeocode(reqUrl, res){
   }
   if (!data.length){
     const cz = await censusGeocode(eq, limit);
-    if (cz && cz.length){ data = cz; healthy = true; }   // census only proves matches, never no-matches
+    if (cz && cz.length){ data = cz; healthy = true; }
   }
   if (data.length){
     if (stWant){ const inSt = inState(data); if (inSt.length) data = inSt; }
-    // cache answers only: an empty result during a throttle blip must not
-    // become the stored truth for 24 hours (same rule sights/street follow)
     cset(key, data, 24 * 3600 * 1000);
     return json(res, 200, data);
   }
@@ -311,7 +234,6 @@ async function handleGeocode(reqUrl, res){
   return json(res, 502, { error: 'geocoder unavailable' });
 }
 
-// reverse geocode (name an overnight stop along a road-trip route)
 async function censusReverse(lat, lon){
   try {
     const up = await upstream('https://geocoding.geo.census.gov/geocoder/geographies/coordinates?benchmark=Public_AR_Current&vintage=Current_Current&format=json&x=' + lon + '&y=' + lat);
@@ -336,29 +258,20 @@ async function handleReverse(reqUrl, res){
     const up = await nominatimReverse(qs);
     if (up.status !== 200) throw new Error('reverse ' + up.status);
     const data = JSON.parse(up.body);
-    // cache real answers only; a throttled {} must not stick for 7 days
     if (data && (data.display_name || data.address)) cset(key, data, 7 * 24 * 3600 * 1000);
     json(res, 200, data);
   } catch (e){
-    const cz = await censusReverse(lat, lon);   // county/state naming still beats a blank
+    const cz = await censusReverse(lat, lon);
     if (cz){ cset(key, cz, 7 * 24 * 3600 * 1000); return json(res, 200, cz); }
     json(res, 502, { error: 'reverse geocoder unavailable' });
   }
 }
 
-// sights along a route: notable tourist places near sample points (OpenStreetMap via
-// Overpass). Strict mode requires a Wikipedia tag (photo-worthy, used for the route story
-// markers). loose=1 adds a fallback sweep for rural stops: named attractions, historic
-// sites, and parks WITHOUT the Wikipedia requirement, at a wider radius.
-/* Overpass politeness queue: the trip UI fires one sights call per stop, so
-   uncoordinated parallel hits are rate-ban bait. Serialize every Overpass
-   round (sights AND street) with a small gap. Self-healing like nomQueue:
-   a rejected round never poisons the chain. */
 const sleepMs = ms => new Promise(r => setTimeout(r, ms));
 let opChain = Promise.resolve(); let lastOp = 0;
 function opQueue(fn){
   const run = opChain.then(async () => {
-    const wait = Math.max(0, 1000 - (Date.now() - lastOp));   // ~1 req/s, Overpass etiquette
+    const wait = Math.max(0, 1000 - (Date.now() - lastOp));
     if (wait) await sleepMs(wait);
     lastOp = Date.now();
     return fn();
@@ -367,10 +280,6 @@ function opQueue(fn){
   return run;
 }
 function overpassRace(ql){
-  // Sequential fallback, NOT a parallel race: this IP has been throttled by
-  // Overpass before, and racing doubles request volume on every round. The
-  // healthy case costs one request; the mirror only sees traffic when the
-  // primary fails.
   const data = 'data=' + encodeURIComponent(ql);
   const mirrors = ['https://overpass-api.de/api/interpreter?' + data,
                    'https://overpass.kumi.systems/api/interpreter?' + data];
@@ -379,19 +288,10 @@ function overpassRace(ql){
     for (let mi = 0; mi < mirrors.length; mi++){
       const m = mirrors[mi];
       try {
-        // Overpass legitimately needs 20-35s on dense metros (measured 32s
-        // for one LA street); the global 12s budget starved it and read
-        // every slow answer as an outage
         const up = await upstream(m, 0, 40000);
         if (up.status !== 200) throw new Error('overpass ' + up.status);
         const j = JSON.parse(up.body);
-        // Overpass reports its own timeouts/overload as HTTP 200 with zero
-        // elements plus a remark. That is an outage wearing a no-match
-        // costume; surfacing it as [] poisoned the honesty of every caller.
         if (j && j.remark && /error|timed? out|load/i.test(j.remark)) throw new Error('overpass remark: ' + j.remark);
-        // A fallback mirror answering "nothing" while the primary is down is
-        // not evidence of a no-match (kumi serves 200-empty when unhealthy).
-        // Only the primary's empty answer counts as a genuine empty.
         if (mi > 0 && !(j.elements || []).length) throw new Error('fallback empty, distrusted');
         return j;
       } catch (e){ lastErr = e; }
@@ -438,19 +338,14 @@ async function handleSights(reqUrl, res){
         `nwr(around:${R2},${p[0]},${p[1]})["historic"]["name"];` +
         `nwr(around:${R2},${p[0]},${p[1]})["leisure"~"^(park|nature_reserve|garden)$"]["name"];`).join('');
       out = await overpassSights(`[out:json][timeout:25];(${fb});out center 120;`);
-      // prefer photo-worthy (wikipedia-tagged) first, then the rest
       out.sort((a, b) => (b.wp ? 1 : 0) - (a.wp ? 1 : 0));
     }
     const list = out.slice(0, 40);
-    if (list.length) cset(key, list, 24 * 3600 * 1000);   // never cache empties (throttle recovery)
+    if (list.length) cset(key, list, 24 * 3600 * 1000);
     json(res, 200, list);
   } catch (e){ json(res, 502, { error: 'sights service unavailable' }); }
 }
 
-// street outline: all road segments with this name near the point (OpenStreetMap
-// via Overpass). One union query tries the exact name, expanded suffix
-// abbreviations (Main St -> Main Street), alt_name, and ref, so a spelling
-// variant no longer means a silent blank.
 function nameVariants(name){
   const out = new Set([name]);
   const m = name.match(/^(.*)\s(St|Ave|Blvd|Rd|Dr|Hwy|Ln|Pkwy|Ct|Pl)\.?$/i);
@@ -463,9 +358,6 @@ function nameVariants(name){
   if (area !== name) out.add(area);
   return [...out].slice(0, 3);
 }
-/* Real places to stay near a stop, from OpenStreetMap (keyless): hotels,
-   motels, guest houses, hostels with a name. No prices exist in OSM; the
-   app pairs these with its typical-night estimate. */
 async function handleStaysOsm(reqUrl, res){
   const lat = parseFloat(reqUrl.searchParams.get('lat')), lng = parseFloat(reqUrl.searchParams.get('lng'));
   if (!isFinite(lat) || !isFinite(lng)) return json(res, 400, { error: 'lat/lng required' });
@@ -489,7 +381,7 @@ async function handleStaysOsm(reqUrl, res){
     });
     out.sort((a, b) => a.mi - b.mi);
     const list = out.slice(0, 30);
-    if (list.length) cset(key, list, 24 * 3600 * 1000);   // never cache empties (throttle recovery)
+    if (list.length) cset(key, list, 24 * 3600 * 1000);
     json(res, 200, list);
   } catch (e){ json(res, 502, { error: 'stays unavailable' }); }
 }
@@ -502,10 +394,6 @@ async function handleStreet(reqUrl, res){
   const hit = cget(key);
   if (hit) return json(res, 200, hit, true);
   const variants = nameVariants(name).map(v => v.replace(/[\\"]/g, ' '));
-  // 20 km radius so the WHOLE street outlines, however long it runs.
-  // One exact-name clause per round: measured on dense LA, a single clause
-  // completes (~21s) while any union of around-clauses times out server-side.
-  // Variants run as sequential polite rounds; first hit wins.
   const around = `way(around:20000,${lat},${lng})["highway"]`;
   let sawOutage = false;
   for (const v of variants){
@@ -514,22 +402,18 @@ async function handleStreet(reqUrl, res){
       const j = await overpassRace(ql);
       const lines = (j.elements || []).filter(e => e.geometry && e.geometry.length).map(e => e.geometry.map(g => [g.lat, g.lon]));
       if (lines.length){
-        cset(key, lines, 24 * 3600 * 1000);   // only cache real hits, never empties
+        cset(key, lines, 24 * 3600 * 1000);
         return json(res, 200, lines);
       }
     } catch (e){ sawOutage = true; }
   }
-  if (sawOutage) return json(res, 503, { error: 'street outline service busy' });   // outage, distinct from no-match
-  return json(res, 200, []);   // a genuine no-match for every variant
+  if (sawOutage) return json(res, 503, { error: 'street outline service busy' });
+  return json(res, 200, []);
 }
 
-/* ===================== social + booking platform layer =====================
-   Each integration is credential-gated: it activates the moment keys exist in
-   secrets.json (or env) and the server restarts. /api/social/status tells the
-   UI what is connected so it never fakes a connection. */
 const TM_KEY     = process.env.TICKETMASTER_KEY      || SECRETS.ticketmaster  || '';
 const G_CX       = process.env.GOOGLE_CSE_CX         || SECRETS.google_cx     || '';
-const G_KEY      = process.env.GOOGLE_API_KEY        || SECRETS.google_key    || YT_KEY;  // same Google key works once Custom Search API is enabled
+const G_KEY      = process.env.GOOGLE_API_KEY        || SECRETS.google_key    || YT_KEY;
 const AMA_ID     = process.env.AMADEUS_CLIENT_ID     || SECRETS.amadeus_id     || '';
 const AMA_SECRET = process.env.AMADEUS_CLIENT_SECRET || SECRETS.amadeus_secret || '';
 const AMA_BASE   = (process.env.AMADEUS_ENV || SECRETS.amadeus_env || 'test') === 'production'
@@ -539,15 +423,14 @@ function handleSocialStatus(res){
   json(res, 200, {
     youtube:  !!YT_KEY,
     reddit:   !!(RD_ID && RD_SECRET),
-    hotels:   !!(AMA_ID && AMA_SECRET),        // Amadeus self-service (free tier)
-    events:   !!TM_KEY,                        // Ticketmaster Discovery (free key)
-    google:   !!(G_KEY && G_CX),               // Programmable Search (web + forums + reddit threads)
+    hotels:   !!(AMA_ID && AMA_SECRET),
+    events:   !!TM_KEY,
+    google:   !!(G_KEY && G_CX),
     instagram: false, facebook: false, tiktok: false, airbnb: false,
     note: 'instagram/facebook need a Meta developer app + review; tiktok needs developer approval; airbnb has no public API. See docs/SOCIAL-APIS.md.'
   });
 }
 
-// YouTube Data API v3: real videos sorted by view count (free key)
 async function ytSearch(q){
   const key = 'yt:' + q.toLowerCase();
   const hit = cget(key); if (hit) return hit;
@@ -567,14 +450,10 @@ async function ytSearch(q){
     thumb: (i.snippet.thumbnails && i.snippet.thumbnails.medium && i.snippet.thumbnails.medium.url) || '',
     views: parseInt((stats[i.id.videoId] || {}).viewCount || '0', 10),
   })).sort((a, b) => b.views - a.views);
-  if (out.length) cset(key, out, 7 * 24 * 3600 * 1000);   // a week: the free quota is ~99 lookups a day, so every repeat must be a cache hit (never cache empties)
+  if (out.length) cset(key, out, 7 * 24 * 3600 * 1000);
   return out;
 }
 
-/* Short vertical videos for one stop (YouTube Shorts). One search per place:
-   relevance order pulls travel shorts, then we keep only the ones that name
-   the city (or, failing that, the state) so a "Dallas" search does not serve
-   football clips, and rank what is left by real view counts. */
 function isoSecs(d){ const m = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(d || ''); return m ? (+(m[1] || 0) * 3600 + +(m[2] || 0) * 60 + +(m[3] || 0)) : 9999; }
 async function ytShorts(place){
   const key = 'yts:' + place.toLowerCase();
@@ -619,7 +498,6 @@ async function handleVideos(reqUrl, res){
   catch (e){ json(res, 502, { error: 'youtube unavailable' }); }
 }
 
-// Reddit app-only OAuth (free app at reddit.com/prefs/apps)
 let rdTok = null, rdExp = 0;
 async function redditToken(){
   if (rdTok && rdExp > Date.now()) return rdTok;
@@ -655,7 +533,6 @@ async function handleReddit(reqUrl, res){
   catch (e){ json(res, 502, { error: 'reddit unavailable' }); }
 }
 
-// Google Programmable Search: top web results (news, forums, reddit threads via Google's index)
 async function gSearch(q){
   const key = 'gs:' + q.toLowerCase();
   const hit = cget(key); if (hit) return hit;
@@ -677,12 +554,6 @@ async function handleGoogle(reqUrl, res){
   catch (e){ json(res, 502, { error: 'google unavailable' }); }
 }
 
-/* ---------- "What people are saying" aggregator ----------
-   Takes a natural question ("trip to North Carolina, safe stays, fun stops"),
-   extracts the meaningful terms, fans out to every CONNECTED platform, and
-   ranks all results on one scale (log engagement, so 1M views doesn't bury a
-   5k-upvote thread). Unconnected platforms are reported so the UI can offer
-   honest deep links instead of fake results. */
 const STOPWORDS = new Set(('i im a an the to by car for of in on at is are was were be been where what when which who how why want wanting taking take trip going go my we our you your and or with some any that this these those there here places place get find good best like really so just about between').split(' '));
 function condenseQuery(q){
   const words = q.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
@@ -696,8 +567,6 @@ async function handleAggregate(reqUrl, res){
   const key = 'agg:' + q.toLowerCase();
   const hit = cget(key); if (hit) return json(res, 200, hit, true);
   const cq = condenseQuery(q);
-  // trip-shaped questions get travel context for video search, else "safe stay" reads as
-  // "stay safe" and returns storm warnings instead of travel content
   const ytq = /\b(trip|travel|vacation|visit|route|drive|driving|road)\b/i.test(q) ? cq + ' road trip travel guide' : cq;
   const jobs = [];
   if (YT_KEY) jobs.push(ytSearch(ytq).then(v => v.map(x => ({
@@ -708,7 +577,6 @@ async function handleAggregate(reqUrl, res){
     plat: 'reddit', title: x.title, url: x.url, thumb: '',
     meta: 'r/' + x.sub + ' · ' + x.comments + ' comments', engagement: x.ups, kind: 'upvotes',
   }))).catch(() => []));
-  // Google web results are relevance-ordered (no engagement metric) -> separate band
   const webJob = (G_KEY && G_CX) ? gSearch(cq).catch(() => []) : Promise.resolve([]);
   const [parts, web] = await Promise.all([Promise.all(jobs), webJob]);
   const all = [].concat(...parts);
@@ -724,7 +592,6 @@ async function handleAggregate(reqUrl, res){
   json(res, 200, out);
 }
 
-// Ticketmaster Discovery: real events near a point (free key; Eventbrite's public search API is gone)
 async function handleEvents(reqUrl, res){
   if (!TM_KEY) return json(res, 501, { error: 'events not configured' });
   const lat = parseFloat(reqUrl.searchParams.get('lat')), lng = parseFloat(reqUrl.searchParams.get('lng'));
@@ -733,7 +600,7 @@ async function handleEvents(reqUrl, res){
   const ds = dISO.test(reqUrl.searchParams.get('start') || '') ? reqUrl.searchParams.get('start') : '';
   const de = dISO.test(reqUrl.searchParams.get('end') || '') ? reqUrl.searchParams.get('end') : '';
   const win = (ds ? '&startDateTime=' + ds + 'T00:00:00Z' : '') + (de ? '&endDateTime=' + de + 'T23:59:59Z' : '');
-  const key = 'ev:' + lat.toFixed(2) + ',' + lng.toFixed(2) + ':' + ds + '-' + de;   // key mirrors the upstream URL exactly (both dates or neither)
+  const key = 'ev:' + lat.toFixed(2) + ',' + lng.toFixed(2) + ':' + ds + '-' + de;
   const hit = cget(key); if (hit) return json(res, 200, hit, true);
   if (!spend('tm')) return json(res, 502, { error: 'events unavailable' });
   try {
@@ -746,14 +613,13 @@ async function handleEvents(reqUrl, res){
       date: ((e.dates || {}).start || {}).localDate || '',
       venue: ((((e._embedded || {}).venues) || [])[0] || {}).name || '',
       img: ((e.images || []).sort((a, b) => (b.width || 0) - (a.width || 0))[0] || {}).url || '',
-      price: ((e.priceRanges || [])[0] || {}).min || null,   // ticket floor, when Ticketmaster gives one
+      price: ((e.priceRanges || [])[0] || {}).min || null,
     }));
     cset(key, out, 6 * 3600 * 1000);
     json(res, 200, out);
   } catch (e){ json(res, 502, { error: 'events unavailable' }); }
 }
 
-// Amadeus self-service hotel search (free tier) — real hotels + live offers near a point
 let amaTok = null, amaExp = 0;
 async function amadeusToken(){
   if (amaTok && amaExp > Date.now()) return amaTok;
@@ -772,7 +638,7 @@ async function handleHotels(reqUrl, res){
   const dISO = /^\d{4}-\d{2}-\d{2}$/;
   const ci = dISO.test(reqUrl.searchParams.get('in') || '') ? reqUrl.searchParams.get('in') : '';
   const co = dISO.test(reqUrl.searchParams.get('out') || '') ? reqUrl.searchParams.get('out') : '';
-  const key = 'ht:' + lat.toFixed(2) + ',' + lng.toFixed(2) + ':' + ci + '-' + co;   // key mirrors the upstream URL exactly (both dates or neither)
+  const key = 'ht:' + lat.toFixed(2) + ',' + lng.toFixed(2) + ':' + ci + '-' + co;
   const hit = cget(key); if (hit) return json(res, 200, hit, true);
   try {
     const tok = await amadeusToken();
@@ -806,7 +672,7 @@ async function handleRoute(reqUrl, res){
   let costing = reqUrl.searchParams.get('costing') || 'auto';
   if (!COSTINGS[costing]) costing = 'auto';
   let locations;
-  const stopsParam = reqUrl.searchParams.get('stops');     // road trip: "lat,lng;lat,lng;..."
+  const stopsParam = reqUrl.searchParams.get('stops');
   if (stopsParam){
     locations = stopsParam.split(';').map(parseLatLng).filter(Boolean);
     if (locations.length < 2){ return json(res, 400, { error: 'need >=2 stops' }); }
@@ -826,20 +692,15 @@ async function handleRoute(reqUrl, res){
   } catch (e){ json(res, 502, { error: 'router unavailable' }); }
 }
 
-/* The public Valhalla caps the TOTAL path at 1,500 km (verified: through-
-   waypoints do not lift it). Any-distance routing: recursively bisect long
-   segments at great-circle midpoints, route each sub-leg as its own
-   request, stitch the trips. A coast-to-coast trip is ~4 polite calls. */
 function gcMiles(a, b){ return milesLL(a.lat, a.lon, b.lat, b.lon); }
 function milesLL(a, b, c, d){ const R = 3959, t = Math.PI / 180, dl = (c - a) * t, dn = (d - b) * t;
   const x = Math.sin(dl/2)**2 + Math.cos(a*t) * Math.cos(c*t) * Math.sin(dn/2)**2;
   return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x)); }
-const LEG_CAP_MI = 780;   // gc miles; ~1.25 road factor keeps legs under the 1500km cap
+const LEG_CAP_MI = 780;
 function splitChain(locs){
   const out = [locs[0]];
   for (let i = 1; i < locs.length; i++){
     let seg = [locs[i - 1], locs[i]];
-    // bisect until every gap is under the cap (depth-bounded)
     for (let guard = 0; guard < 4; guard++){
       const next = [seg[0]];
       let grew = false;
@@ -866,10 +727,8 @@ async function valhallaOnce(locs, costing, alternates){
 async function routeAnyDistance(locations, costing){
   const chain = splitChain(locations);
   if (chain.length === locations.length){
-    // short enough for one request (alternates preserved for simple A-B)
     try { return await valhallaOnce(locations, costing, locations.length > 2 ? 0 : 2); }
     catch (e){ if (e.status !== 400) throw e; }
-    // 400 despite the estimate (mountain routing overshoot): fall through to legs
   }
   const trips = [];
   for (let i = 1; i < chain.length; i++){
@@ -883,15 +742,9 @@ async function routeAnyDistance(locations, costing){
   return { trip: { legs, summary: sum, status: 0 } };
 }
 
-/* ---------- static files ---------- */
 const MIME = { '.html':'text/html;charset=utf-8', '.js':'text/javascript;charset=utf-8', '.css':'text/css;charset=utf-8',
   '.json':'application/json;charset=utf-8', '.geojson':'application/json;charset=utf-8', '.png':'image/png', '.jpg':'image/jpeg',
   '.jpeg':'image/jpeg', '.svg':'image/svg+xml', '.ico':'image/x-icon', '.webp':'image/webp', '.map':'application/json' };
-// Never serve these even though they sit in ROOT: secrets, project docs,
-// build tooling, retired data, dotfiles. The app needs globe.html and
-// /vendor only.
-// case-insensitive: Windows/macOS filesystems are case-insensitive, so /SECRETS.JSON
-// must be denied exactly like /secrets.json (the deny is compared lowercased too).
 const STATIC_DENY = /^(secrets\.json|server\.js|docs|scripts|graphify-out|data|data-backup-0821)([\/\\]|$)|(^|[\/\\])\./i;
 function serveStatic(pathname, res){
   let rel;
@@ -899,7 +752,6 @@ function serveStatic(pathname, res){
   catch (e){ return json(res, 400, { error: 'bad path' }); }
   if (rel === '/' || rel === '') rel = '/globe.html';
   const full = path.normalize(path.join(ROOT, rel));
-  // ROOT + sep, so a sibling folder like saferoute-usa-x can't pass the check
   if (!full.startsWith(ROOT + path.sep)){ return json(res, 403, { error: 'forbidden' }); }
   if (STATIC_DENY.test(path.relative(ROOT, full).toLowerCase())){ return json(res, 403, { error: 'forbidden' }); }
   fs.stat(full, (serr, st) => {
@@ -907,15 +759,10 @@ function serveStatic(pathname, res){
     fs.readFile(full, (err, buf) => {
       if (err){ return json(res, 404, { error: 'not found' }); }
       const ext = path.extname(full).toLowerCase();
-      // Vendor files carry their version in the filename, so a year-long
-      // immutable cache is safe; a version bump is a new URL. App files stay
-      // no-cache so edits show up on refresh.
       const cc = full.indexOf(path.sep + 'vendor' + path.sep) >= 0
         ? 'public, max-age=31536000, immutable' : 'no-cache';
       const h = Object.assign({ 'Content-Type': MIME[ext] || 'application/octet-stream', 'Cache-Control': cc, 'Vary': 'Accept-Encoding' }, SECURITY);
       const ae = (res.req && res.req.headers['accept-encoding']) || '';
-      // Brotli beats gzip ~25% on these assets; q10 is slow to make but each
-      // file is compressed once per mtime and served from cache after that.
       const enc = /\bbr\b/.test(ae) ? 'br' : (/\bgzip\b/.test(ae) ? 'gzip' : '');
       if (buf.length > 1024 && GZ_EXT.test(ext) && enc){
         const key = enc + ':' + full, hit = gzCache.get(key);
@@ -954,10 +801,6 @@ function json(res, status, obj, cached){
   res.end(body);
 }
 
-/* ---------- router ---------- */
-// Host allowlist: a DNS-rebound hostname resolving to 127.0.0.1 sends its
-// own Host header; refuse anything that is not literally local.
-// In public mode the hosts named in VOYAGE_ORIGINS are allowed too.
 const PUBLIC_HOSTS = ORIGINS.map(o => { try { return new URL(o).host.toLowerCase(); } catch (e) { return ''; } }).filter(Boolean);
 function hostOk(req){
   const h = String(req.headers.host || '').toLowerCase();
@@ -967,16 +810,11 @@ function hostOk(req){
 }
 http.createServer((req, res) => {
  try {
-  // liveness probe for the host platform; answered before the host check
-  // because the platform's checker sends its own Host header
   if (req.url === '/healthz') return json(res, 200, { ok: true });
   if (!hostOk(req)) return json(res, 403, { error: 'forbidden host' });
-  // TLS ends at the platform edge; tell browsers to stay on https
   if (TRUST_PROXY && req.headers['x-forwarded-proto'] === 'https') res.setHeader('Strict-Transport-Security', 'max-age=15552000');
   const u = new URL(req.url, 'http://localhost');
-  // operator visibility: endpoint + status only, never query contents
   res.on('finish', () => { if (res.statusCode >= 500) console.warn(`[fail] ${res.statusCode} ${u.pathname}`); });
-  // privacy: never log query contents (they contain the places a user plans)
   if (u.pathname.startsWith('/api/')) {
     if (!originOk(req)) return json(res, 403, { error: 'forbidden origin' });
     if (!rateOk(clientIP(req))) return json(res, 429, { error: 'rate limited; slow down' });
@@ -998,7 +836,6 @@ http.createServer((req, res) => {
   }
   serveStatic(u.pathname, res);
  } catch (e) {
-  // one malformed request must never take the process down
   try { json(res, 400, { error: 'bad request' }); } catch (e2) {}
  }
 }).listen(PORT, HOST, () => {

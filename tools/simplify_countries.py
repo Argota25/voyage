@@ -17,9 +17,9 @@ import os
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, '..', 'vendor', 'countries-110m.geojson')
 DST = os.path.join(HERE, '..', 'vendor', 'countries-110m.min.geojson')
-TOL = 0.1        # degrees, Douglas-Peucker
-DECIMALS = 2     # ~1.1km at the equator
-MIN_KM2 = 1000.0  # strict tier: only rings far below hex size are dropped
+TOL = 0.1
+DECIMALS = 2
+MIN_KM2 = 1000.0
 
 
 def dp(points, tol):
@@ -114,8 +114,6 @@ def main():
                 new_polys.append(rings)
                 verts_out += sum(len(r) for r in rings)
         if not new_polys:
-            # a feature must never disappear: fall back to its largest
-            # outer ring, quantized but unsimplified
             best = max(polys_of(f['geometry']), key=lambda p: ring_km2(p[0]))
             fb = clean_ring(best[0])
             new_polys = [[fb if fb else best[0]]]
