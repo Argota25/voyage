@@ -589,6 +589,7 @@ a.svcard:hover{border-color:var(--accent)}
 .dmk .dmpin.ev{background:#3aa0ff;color:#fff}
 .dmk:hover .dmpin{transform:scale(1.1)}
 .dmsthumb.dmglyph{display:flex;align-items:center;justify-content:center;font-size:18px}
+.sheethint{display:none}
 @media (prefers-reduced-motion:reduce){.card,.gate h1,.gate .lead,#stars .tw,.loading::before{animation:none}}
 /* phones: the Change-intent pill and the search bar both start at top:20px
    and collide below ~700px; drop the search bar under the pill */
@@ -631,8 +632,9 @@ body::after{opacity:.035}
 .reset,.switch{background:rgba(255,255,255,.94);color:#123626;border-color:rgba(19,113,76,.3);box-shadow:0 14px 34px -14px rgba(16,58,40,.42)}
 .stchip{background:rgba(255,255,255,.8)}
 /* floating re-center control: one tap puts the route back in frame */
-.recenter{position:fixed;right:16px;bottom:180px;z-index:12;width:58px;height:58px;border-radius:50%;background:#13714C;border:2px solid rgba(255,255,255,.9);color:#FFFFFF;display:none;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 16px 36px -12px rgba(12,54,36,.6)}
-.recenter svg{width:26px;height:26px}
+.recenter{position:fixed;right:16px;bottom:232px;z-index:12;height:48px;padding:0 16px 0 12px;gap:8px;border-radius:999px;font:700 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;background:#13714C;border:2px solid rgba(255,255,255,.9);color:#FFFFFF;display:none;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 16px 36px -12px rgba(12,54,36,.6)}
+.recenter svg{width:22px;height:22px}
+@media (max-width:700px){#panel.open:not(.peek)~.recenter{display:none!important}}
 .recenter:hover{background:#1E8A5F;box-shadow:0 18px 40px -12px rgba(12,54,36,.7)}
 .recenter:active{transform:translateY(1px)}
 body.inarea .recenter.show{display:flex}
@@ -893,6 +895,8 @@ i,em,.panel .ph .meta,.row .ct{font-style:normal}
 /* landing-zone label on the map */
 .zonetip{background:#FFFFFF;border:1px solid rgba(19,113,76,.3);border-radius:999px;color:#13714C;font:700 9.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;box-shadow:0 8px 20px -10px rgba(16,58,40,.35)}
 .zonetip::before{display:none}
+.stoptip{background:#123626;border:0;border-radius:999px;color:#fff;font:700 11px var(--body);padding:4px 10px;box-shadow:0 6px 16px -6px rgba(12,54,36,.55)}
+.stoptip::before{display:none}
 /* map story bubble -> hover video card: expands above the bubble and
    autoplays (muted) so the route feels alive */
 .snapwrap{overflow:visible!important}
@@ -941,7 +945,17 @@ i,em,.panel .ph .meta,.row .ct{font-style:normal}
      peek (badge + title + count) and back. */
   .panel{top:auto;bottom:0;left:0;right:0;width:100%;height:min(72dvh,640px);border-left:0;border-top:1px solid var(--rule);border-radius:18px 18px 0 0;transform:translateY(102%)}
   .panel.open{transform:translateY(0)}
-  .panel.open.peek{transform:translateY(calc(100% - 158px))}
+  .panel.open.peek{transform:translateY(calc(100% - 214px))}
+  .panel.dragging{transition:none!important}
+  /* the header is the drag handle: the finger moves the sheet, not the page */
+  .panel .ph{touch-action:none;-webkit-user-select:none;user-select:none}
+  .sheethint{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;font:700 12.5px/1.3 var(--body);color:#13714C;background:rgba(58,182,125,.13);border:1px solid rgba(19,113,76,.24);border-radius:999px;padding:9px 14px;text-align:center}
+  .sheethint svg{flex:none;width:16px;height:16px;animation:shnudge 1.5s ease-in-out infinite}
+  .sheethint .sh-down{display:none}
+  .panel:not(.peek) .sheethint .sh-up{display:none}
+  .panel:not(.peek) .sheethint .sh-down{display:inline}
+  .panel:not(.peek) .sheethint svg{transform:rotate(180deg);animation:none}
+  @keyframes shnudge{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
   .panel .ph{cursor:pointer;position:relative;padding:26px 24px 14px}
   .panel .ph::before{content:"";position:absolute;top:10px;left:50%;transform:translateX(-50%);width:44px;height:4px;border-radius:2px;background:var(--rule-2)}
   .reset{bottom:auto;top:20px;left:auto;right:24px}      /* stays reachable above the sheet */
@@ -962,7 +976,7 @@ i,em,.panel .ph .meta,.row .ct{font-style:normal}
 .card.drive .go,.card.fly .go,.card.boat .go{color:#E9EBED;text-shadow:0 1px 6px rgba(8,42,28,.55)}
 .tmseg{margin-bottom:10px}
 .search:not(.tm-drive) .prefrow.hrs{display:none}
-.daterow{display:flex;gap:8px;margin-bottom:8px}
+.daterow{display:flex;gap:10px;margin:14px 0 12px}
 .datefield{position:relative;flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;background:#fff;border:1.5px solid rgba(19,113,76,.38);border-radius:12px;padding:8px 44px 9px 12px;cursor:pointer;box-shadow:0 4px 14px -8px rgba(12,54,36,.4);transition:border-color .15s,box-shadow .15s,transform .15s}
 /* calendar badge on the right: reads as a button on every browser (iOS shows no native icon) */
 .datefield::before{content:"";position:absolute;right:9px;top:50%;width:28px;height:28px;transform:translateY(-50%);border-radius:8px;background:#13714C url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22white%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%225%22%20width%3D%2218%22%20height%3D%2216%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M16%203v4M8%203v4M3%2011h18%22%2F%3E%3C%2Fsvg%3E') center/16px no-repeat;pointer-events:none}
@@ -978,6 +992,28 @@ i,em,.panel .ph .meta,.row .ct{font-style:normal}
 .datefield.empty::after{content:"Pick a date";position:absolute;left:12px;bottom:9px;font:700 16px var(--body);color:#13714C;pointer-events:none}
 .datefield.empty:focus-within input[type=date]{color:#123626}
 .datefield.empty:focus-within::after{content:none}
+/* ----- planning in progress: a bar along the top plus a step card, so a
+   tap on "Map the drive" never looks like a dead screen ----- */
+.planbar{position:fixed;top:0;left:0;right:0;height:4px;z-index:60;overflow:hidden;opacity:0;pointer-events:none;transition:opacity .2s}
+.planbar::before{content:"";position:absolute;top:0;bottom:0;left:-40%;width:40%;background:linear-gradient(90deg,transparent,#3AB67D,#A2E494,transparent);animation:planbar 1.1s ease-in-out infinite}
+@keyframes planbar{to{left:100%}}
+.planwrap{position:fixed;inset:0;z-index:36;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(226,238,231,.55);backdrop-filter:blur(3px)}
+.plancard{width:min(360px,100%);background:#fff;border:1px solid rgba(19,113,76,.22);border-radius:20px;padding:22px 22px 18px;box-shadow:0 30px 70px -28px rgba(12,54,36,.45);text-align:left}
+.plancard h3{font:800 19px var(--heading);color:#123626;margin-bottom:4px}
+.plancard p{font:500 13px var(--body);color:#3e5f4f;margin-bottom:14px}
+.plansteps{list-style:none;display:flex;flex-direction:column;gap:10px}
+.plansteps li{display:flex;align-items:center;gap:11px;font:600 14px var(--body);color:#9aa8a1;transition:color .25s}
+.plansteps li i{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid rgba(19,113,76,.2);display:flex;align-items:center;justify-content:center;font:800 11px var(--body);font-style:normal;color:#fff}
+.plansteps li.on{color:#123626}
+.plansteps li.on i{border-color:rgba(19,113,76,.18);border-top-color:#13714C;animation:planspin .8s linear infinite}
+.plansteps li.done{color:#3e5f4f}
+.plansteps li.done i{background:#13714C;border-color:#13714C;animation:none}
+.plansteps li.done i::after{content:"\2713"}
+@keyframes planspin{to{transform:rotate(360deg)}}
+body.planning .planbar{opacity:1}
+body.planning .planwrap{display:flex}
+body.planning:has(.chooser.show) .planwrap{display:none}
+@media (prefers-reduced-motion:reduce){.planbar::before,.plansteps li.on i{animation:none}}
 /* ----- trip cost estimator ----- */
 .cot{margin:0 0 6px;border:1px solid rgba(19,113,76,.2);border-radius:14px;background:#fff;box-shadow:0 10px 30px -18px rgba(12,54,36,.3);overflow:hidden}
 .cot>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;font:800 15px var(--heading);color:#123626}
@@ -1019,12 +1055,20 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
 <div id="globe" aria-hidden="true"></div>
 <div id="stage"><div id="smap"></div><div id="smapfx"></div></div>
 <div class="loading" id="loading">Warming up your map…</div>
+<div class="planbar" aria-hidden="true"></div>
+<div class="planwrap" id="planwrap" role="status" aria-live="polite">
+  <div class="plancard">
+    <h3 id="planTitle">Planning your trip</h3>
+    <p>Building your itinerary from open map data and what travelers have filmed and posted.</p>
+    <ul class="plansteps" id="planSteps"></ul>
+  </div>
+</div>
 <a class="betafb" id="betafb" href="https://form.jotform.com/262747271566062" target="_blank" rel="noopener"><b>Beta</b><span class="fbw">Send&nbsp;</span>feedback</a>
 
 <div class="gate" id="gate">
   <div class="glogo">Voyage</div>
   <h1>Plan the trip, <i>made easy.</i></h1>
-  <p class="lead">How are you getting there?</p>
+  <p class="lead">Pick a trip type. We build the itinerary, with what other travelers filmed and posted along the way.</p>
   <div class="cards">
     <button class="card drive" data-mode="drive" type="button">
       <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l1.6-4.6A2 2 0 0 1 6.5 7h11a2 2 0 0 1 1.9 1.4L21 13v5h-2.5"/><path d="M3 18v-5M5.5 18h3M15 18h3.5"/><circle cx="7" cy="18" r="1.9"/><circle cx="17" cy="18" r="1.9"/></svg></div>
@@ -1085,6 +1129,7 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
     <h2 id="pTitle"></h2>
     <div class="meta" id="pMeta"></div>
     <div class="count" id="pCount"></div>
+    <div class="sheethint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg><span class="sh-up">Swipe up for your itinerary: stays, things to do, what travelers say</span><span class="sh-down">Swipe down to see the map</span></div>
   </div>
   <div class="scroll">
     <div class="rows" id="rows"></div>
@@ -1098,7 +1143,7 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
 <button class="ui reset" id="reset">&larr; Back to globe</button>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="waterink" color-interpolation-filters="sRGB"><feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -9 -1 10 0 -0.05" result="wmask"/><feColorMatrix in="SourceGraphic" type="saturate" values="0.12" result="sat"/><feColorMatrix in="sat" type="matrix" values="1 0 0 0 0.012  0 1 0 0 0.008  0 0 0.955 0 0  0 0 0 1 0" result="base"/><feFlood flood-color="#16382C" result="ink"/><feComposite in="ink" in2="wmask" operator="in" result="waterfill"/><feMerge><feMergeNode in="base"/><feMergeNode in="waterfill"/></feMerge></filter></svg>
 <div class="stchip" id="stChip" role="status" aria-live="polite"></div>
-<button class="recenter" id="recenter" type="button" title="Re-center the route" aria-label="Re-center the route"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg></button>
+<button class="recenter" id="recenter" type="button" title="Show the whole route"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg><span>Show route</span></button>
 <div class="ui disc" id="disc">
   Routes and distances are estimates from open map data. Fly and boat trips are drawn as direct-line estimates, not booked routes. <a class="methodlink" href="#">How Voyage plans</a> &middot; <b>Voyage</b>
 </div>
@@ -1323,7 +1368,7 @@ function hideLoad(){var l=document.getElementById('loading');if(l)l.classList.ad
 
 /* ===== travel mode + trip planner ===== */
 var travelMode='drive', form=document.getElementById('searchForm');
-function defHint(){return travelMode==='fly'?'List the cities you want to hit. We draw the route and gather stays and things to do for each.':(travelMode==='boat'?'List your ports and coastal stops. We map the water route and what to do at each landing.':'Add your stops. We map the road route, pace your stays, and surface things to do along the way.');}
+function defHint(){return travelMode==='fly'?'List the cities you want to hit. We build your itinerary: stays, things to do, and what other travelers filmed at each stop.':(travelMode==='boat'?'List your ports and coastal stops. We build your itinerary: the water route, what to do at each landing, and what other travelers filmed there.':'Add your stops. We build your itinerary: the road route, paced stays, and what other travelers filmed and posted along the way.');}
 function configTravel(tm){
   travelMode=(tm==='fly'||tm==='boat')?tm:'drive';
   form.classList.add('roadtrip');                                   // planner is always visible
@@ -1539,9 +1584,34 @@ function pinEl(){
   return el;
 }
 
+/* ===== planning overlay: steps tick forward while the plan builds; the last
+   step keeps spinning until the result opens (or an error clears it) ===== */
+var planTimer=null,planFailsafe=null;
+var PLAN_STEPS={
+  drive:['Finding your road route','Pacing your overnight stays','Pulling in what other travelers filmed and posted','Building your itinerary'],
+  fly:['Drawing your route between cities','Gathering stays and things to do at each stop','Pulling in what other travelers filmed and posted','Building your itinerary'],
+  boat:['Charting your route between ports','Gathering stays and things to do at each landing','Pulling in what other travelers filmed and posted','Building your itinerary']
+};
+function planBusy(on){
+  clearInterval(planTimer);clearTimeout(planFailsafe);
+  document.body.classList.toggle('planning',!!on);
+  if(!on)return;
+  var steps=PLAN_STEPS[travelMode]||PLAN_STEPS.drive;
+  document.getElementById('planTitle').textContent=travelMode==='fly'?'Planning your flight':(travelMode==='boat'?'Planning your boat trip':'Planning your drive');
+  var ul=document.getElementById('planSteps');
+  ul.innerHTML=steps.map(function(t){return '<li><i></i>'+esc(t)+'</li>';}).join('');
+  var lis=ul.children,k=0;lis[0].className='on';
+  planTimer=setInterval(function(){
+    if(k>=lis.length-1){clearInterval(planTimer);return;}
+    lis[k].className='done';k++;lis[k].className='on';
+  },1300);
+  planFailsafe=setTimeout(function(){planBusy(false);},60000);   // never strand the overlay
+}
+
 /* ===== rendering the trip result ===== */
 var current=[], selRow=null;
 function renderArea(opts){
+  planBusy(false);
   // opts: {title, meta, badge, center, travel}
   current=[];
   document.body.classList.add('inarea');
@@ -1581,14 +1651,42 @@ document.getElementById('editTrip').addEventListener('click',function(e){e.stopP
   ph.setAttribute('role','button');
   ph.setAttribute('aria-label','Toggle results sheet between peek and expanded');
   ph.tabIndex=0;
+  var dragEnded=0;
   function toggle(){
     if(!mqPhone.matches)return;
+    if(Date.now()-dragEnded<350)return;   // the click that trails a drag
     panelEl.classList.toggle('peek');
     // collapsing back to the footer restores the centered route
     if(panelEl.classList.contains('peek')&&lastFit)setTimeout(function(){fitWithUI(lastFit);},500);
   }
   ph.addEventListener('click',function(e){if(e.target.closest('.methodlink'))return;toggle();});
   ph.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+  // finger drag: the sheet follows the finger, then snaps open or back to peek
+  var y0=null,dy=0,base=0,maxOff=0;
+  ph.addEventListener('pointerdown',function(e){
+    if(!mqPhone.matches||(e.button&&e.button>0)||e.target.closest('button,a'))return;
+    y0=e.clientY;dy=0;
+    maxOff=panelEl.offsetHeight-214;
+    base=panelEl.classList.contains('peek')?maxOff:0;
+    panelEl.classList.add('dragging');
+    try{ph.setPointerCapture(e.pointerId);}catch(er){}
+  });
+  ph.addEventListener('pointermove',function(e){
+    if(y0===null)return;
+    dy=e.clientY-y0;
+    panelEl.style.transform='translateY('+Math.max(0,Math.min(maxOff,base+dy))+'px)';
+  });
+  function dragEnd(){
+    if(y0===null)return;
+    y0=null;panelEl.classList.remove('dragging');panelEl.style.transform='';
+    if(Math.abs(dy)<8)return;              // a tap: the click handler toggles
+    dragEnded=Date.now();
+    var peek=panelEl.classList.contains('peek');
+    if(peek&&dy<-30)panelEl.classList.remove('peek');
+    else if(!peek&&dy>30){panelEl.classList.add('peek');if(lastFit)setTimeout(function(){fitWithUI(lastFit);},500);}
+  }
+  ph.addEventListener('pointerup',dragEnd);
+  ph.addEventListener('pointercancel',dragEnd);
 })();
 /* data methodology modal (reachable from the footer and the panel) */
 function showMethod(){document.getElementById('method').classList.add('show');}
@@ -1630,10 +1728,11 @@ form.addEventListener('submit',function(e){
   var vals=[].map.call(document.querySelectorAll('#stops .stopin'),function(i){return i.value.trim();}).filter(Boolean);
   if(vals.length<2){hint.textContent=travelMode==='fly'?'Add at least a departure and destination city.':(travelMode==='boat'?'Add at least a departure and destination port.':'Add at least a start and a destination.');hint.classList.add('err');return;}
   hint.textContent=travelMode==='drive'?'Mapping your route, stops, and stays...':'Drawing your route and gathering each stop...';
+  planBusy(true);
   var pts=[],chain=Promise.resolve(null);
   vals.forEach(function(v){chain=chain.then(function(prev){return resolveLocation(v,prev?prev.lat+','+prev.lng:undefined,travelMode==='drive').then(function(r){pts.push(r);return r;});});});
   chain.then(function(){return GLOBE_READY;}).then(function(){planTrip(pts);hint.textContent=defHint();})
-    .catch(function(er){if(er==='cancel'){hint.textContent=defHint();}else if(er&&er.kind){hint.textContent=netErrMsg(er);hint.classList.add('err');}else{hint.textContent='We could not find one of those stops. Add a city or state.';hint.classList.add('err');}});
+    .catch(function(er){planBusy(false);if(er==='cancel'){hint.textContent=defHint();}else if(er&&er.kind){hint.textContent=netErrMsg(er);hint.classList.add('err');}else{hint.textContent='We could not find one of those stops. Add a city or state.';hint.classList.add('err');}});
 });
 
 /* ===== reset ===== */
@@ -1821,7 +1920,7 @@ function fitWithUI(bounds){
   var rc=document.getElementById('recenter');if(rc)rc.classList.add('show');
   var phone=window.matchMedia('(max-width:700px)').matches;
   var opts=phone
-    ?{paddingTopLeft:[24,104],paddingBottomRight:[24,184]}
+    ?{paddingTopLeft:[24,124],paddingBottomRight:[24,240]}
     :{paddingTopLeft:[450,90],paddingBottomRight:[40,60]};
   m.fitBounds(bounds,opts);
 }
@@ -1877,6 +1976,10 @@ function geocodeMulti(qq,near,geom){
 }
 var chooserPick=null, chooserCancel=null;
 function showChooser(list,onPick,onCancel,title,subtitle){
+  // geocoders can return the same place twice ("Tulsa, Oklahoma" x2): drop
+  // exact repeats, and skip the question when only one real choice is left
+  var seen={};list=(list||[]).filter(function(c){var k=((c.label||'')+'|'+(c.sub||'')).toLowerCase();if(seen[k])return false;seen[k]=1;return true;});
+  if(list.length===1&&onPick){onPick(list[0]);return;}
   chooserPick=onPick||null; chooserCancel=onCancel||null;
   document.getElementById('chh').textContent=title||'Which one did you mean?';
   document.getElementById('chsub').textContent=subtitle||'Pick the exact one: street, city, and county shown, so nothing is ambiguous';
@@ -2103,7 +2206,7 @@ function streetDrawInto(g,lines,fit){
   lines.forEach(function(pts){streetSegInto(g,pts);all=all.concat(pts);});
   if(fit&&all.length&&stageMap)stageMap.fitBounds(L.latLngBounds(all).pad(0.3),
     Object.assign({maxZoom:16},window.matchMedia('(max-width:700px)').matches
-      ?{paddingTopLeft:[24,104],paddingBottomRight:[24,184]}
+      ?{paddingTopLeft:[24,124],paddingBottomRight:[24,240]}
       :{paddingTopLeft:[450,90],paddingBottomRight:[40,60]}));
   return true;
 }
@@ -2410,7 +2513,7 @@ function planDrive(pts,g){
         if(el)el.textContent=st.place+' \u00b7 ~'+st.afterMi+' mi \u00b7 about '+((tripCtx&&tripCtx.hrs?tripCtx.hrs:8)*st.night)+'h of driving in'+(st.date?(' \u00b7 '+fmtDate(st.date)):'');
       });
     });
-  }).catch(function(er){if(g!==planGen)return;var hn=document.getElementById('hint');
+  }).catch(function(er){if(g!==planGen)return;planBusy(false);var hn=document.getElementById('hint');
     hn.textContent=(er&&er.kind)?netErrMsg(er):'We could not map that drive. Check the stops and try again.';
     hn.classList.add('err');});
 }
@@ -2448,7 +2551,7 @@ function drawTrip(){
     });
   }
   tripCtx.pts.forEach(function(p,i){var last=i===tripCtx.pts.length-1;
-    L.circleMarker([p.lat,p.lng],{radius:7,color:'#0C2F20',weight:2,fillColor:i===0?'#E9EBED':(last?accent:'#A2E494'),fillOpacity:1}).addTo(rLayer).bindTooltip(i===0?(travelMode==='boat'?'Departure port':(travelMode==='fly'?'Departure':'Start')):(last?'Destination':(travelMode==='boat'?('Port '+(i+1)):(travelMode==='fly'?('City '+(i+1)):('Stop '+(i+1))))));
+    L.circleMarker([p.lat,p.lng],{radius:7,color:'#0C2F20',weight:2,fillColor:i===0?'#E9EBED':(last?accent:'#A2E494'),fillOpacity:1}).addTo(rLayer).bindTooltip(esc((p.label||'').split(',')[0])||(i===0?'Start':(last?'Destination':'Stop '+(i+1))),{permanent:true,direction:i===0?'left':'right',offset:[i===0?-8:8,0],className:'stoptip'});
   });
 }
 
