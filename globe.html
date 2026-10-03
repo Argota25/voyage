@@ -1273,6 +1273,34 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
 .stdone span{font:600 13px var(--body);color:#3e5f4f}
 .sttotal{font:600 15px var(--body);color:#123626;margin-bottom:6px}
 .sttotal b{font:800 20px var(--heading)}
+/* wizard chrome */
+.staycard .acthead{margin-bottom:8px}
+.actback{display:inline-flex;align-items:center;gap:4px;min-height:42px;padding:0 14px 0 8px;border-radius:999px;border:1.5px solid rgba(19,113,76,.3);background:#fff;color:#123626;font:800 14px var(--body);cursor:pointer}
+.actback svg{width:20px;height:20px}
+.actback:hover{border-color:#13714C}
+.wizprog{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+.wizprog .wp{display:inline-flex;align-items:center;gap:5px;font:700 11px var(--body);color:#8a988f;white-space:nowrap}
+.wizprog .wp i{width:22px;height:22px;border-radius:50%;background:#E3ECE6;color:#5f7268;font:800 11px var(--body);font-style:normal;display:inline-flex;align-items:center;justify-content:center}
+.wizprog .wp.on{color:#123626}
+.wizprog .wp.on i{background:var(--sun);color:var(--sun-ink)}
+.wizprog .wp.done{color:#13714C}
+.wizprog .wp.done i{background:#13714C;color:#fff}
+.wizprog em{flex:1;height:2px;min-width:8px;background:#DDE7E1;border-radius:2px}
+.staycard>h3{margin-bottom:2px}
+.wizfoot{margin-top:6px;padding-top:10px;border-top:1px solid rgba(19,113,76,.14);display:flex;justify-content:center}
+.wizrestart{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;border:0;background:none;color:#5f7268;font:700 14px var(--body);cursor:pointer}
+.wizrestart svg,.nxrestart svg{width:17px;height:17px}
+.wizrestart:hover{color:#123626;background:#EEF4F0}
+.wizconfirm{width:100%;display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:14px;background:#FFF6E0;border:1.5px solid rgba(224,160,33,.6)}
+.wizconfirm b{font:800 16px var(--heading);color:#123626}
+.wizconfirm span{font:500 13px/1.45 var(--body);color:#4b4630}
+.wizconfirm div{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.wizconfirm button{min-height:46px;border-radius:12px;font:800 14px var(--body);cursor:pointer}
+#wizYes{background:#fff;color:#9b2c1c;border:1.5px solid rgba(155,44,28,.4)}
+#wizNo{background:#13714C;color:#fff;border:0}
+.nxrestart{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:44px;margin-top:8px;border-radius:12px;border:0;background:none;color:rgba(255,255,255,.85);font:700 13.5px var(--body);cursor:pointer}
+.nxrestart:hover{background:rgba(0,0,0,.14);color:#fff}
+.nxrestart.arm{background:rgba(0,0,0,.25);color:#FFE7A8}
 /* cheer pop-up */
 .cheer{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(8,26,18,.5);backdrop-filter:blur(3px);cursor:pointer}
 .cheer.show{display:flex}
@@ -1374,7 +1402,9 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
 <div class="planbar" aria-hidden="true"></div>
 <div class="actsheet" id="actsheet" role="dialog" aria-modal="true" aria-labelledby="actTitle">
   <div class="actcard staycard">
-    <div class="acthead"><h3 id="actTitle">Where will you sleep?</h3><button type="button" class="actclose" id="actClose" aria-label="Close">&times;</button></div>
+    <div class="acthead"><button type="button" class="actback" id="actBack" aria-label="Go back one step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Back</button><button type="button" class="actclose" id="actClose" aria-label="Close">&times;</button></div>
+    <div class="wizprog" id="wizProg" aria-hidden="true"></div>
+    <h3 id="actTitle">Where will you sleep?</h3>
     <div id="actBody"></div>
   </div>
 </div>
@@ -2017,10 +2047,18 @@ function renderNext(){
     btn='Pick things to do';go='dowiz';
   }
   el.innerHTML=seg+'<div class="nxtop"><span class="nxstep">Step '+step+'</span><span class="nxtot">Trip so far: <b>'+usd(e.total)+'</b></span></div>'+
-    '<h3>'+esc(title)+'</h3><p>'+esc(body)+'</p><button type="button" class="nxbtn" data-jumpto="'+go+'">'+esc(btn)+'</button>';
+    '<h3>'+esc(title)+'</h3><p>'+esc(body)+'</p><button type="button" class="nxbtn" data-jumpto="'+go+'">'+esc(btn)+'</button>'+
+    ((e.pinnedN||saved.length||tripReady)?'<button type="button" class="nxrestart" id="nxRestart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg><span>Start over</span></button>':'');
   refreshStayBoxes();
 }
 document.addEventListener('click',function(e){
+  var rs=e.target.closest&&e.target.closest('#nxRestart');
+  if(rs){
+    if(rs.getAttribute('data-arm')==='1'){wizRestart();return;}
+    rs.setAttribute('data-arm','1');rs.classList.add('arm');rs.querySelector('span').textContent='Tap again to clear your picks and start over';
+    setTimeout(function(){if(rs.isConnected){rs.removeAttribute('data-arm');rs.classList.remove('arm');rs.querySelector('span').textContent='Start over';}},4000);
+    return;
+  }
   var sb=e.target.closest&&e.target.closest('.nxseg button');
   if(sb){tripStyle=sb.getAttribute('data-style');renderNext();return;}
   var b=e.target.closest&&e.target.closest('.nxbtn');if(!b)return;
@@ -2221,7 +2259,8 @@ function stayRender(){
     '<div class="stnights"><span>Nights here</span><div class="stepper"><button type="button" id="stMinus" aria-label="One night less">&minus;</button><b id="stN">'+st.nights+'</b><button type="button" id="stPlus" aria-label="One night more">+</button></div></div></div>'+
     '<p class="stnote">'+(r.pd?('The price starts at a typical hotel night for '+esc(r.pd.area)+' in '+r.pd.month+' (federal per diem rate). Change it to what you plan to pay.'):'Change the price to what you plan to pay.')+'</p>'+
     '<div class="stlist">'+rows+'</div>'+
-    '<button type="button" class="actbtn actx" id="stFlow">Skip this. I will go with the flow.</button>';
+    '<button type="button" class="actbtn actx" id="stFlow">Skip this. I will go with the flow.</button>'+wizFoot();
+  wizProg(1);wizBackShown(stayStops().indexOf(st.i)>0);
 }
 function stayDone(name){
   var st=staySt,r=tripCtx.recs[st.i];
@@ -2282,6 +2321,36 @@ function cheer(title,sub,then,big){
   b.addEventListener('click',function(){soundOn=!soundOn;try{localStorage.setItem('voyage-sound',soundOn?'on':'off');}catch(e3){}paint();if(soundOn)chime();});
 })();
 
+/* ===== wizard chrome: where you are, a way back, and a clean restart ===== */
+function wizProg(step){   // 1 = where you sleep, 2 = things to do
+  var el=document.getElementById('wizProg');if(!el)return;
+  var names=['Where you sleep','Things to do','Trip ready'];
+  el.innerHTML=names.map(function(n,i){var k=i+1;return '<span class="wp'+(k<step?' done':(k===step?' on':''))+'"><i>'+(k<step?'\u2713':k)+'</i>'+n+'</span>';}).join('<em></em>');
+}
+function wizFoot(){return '<div class="wizfoot" id="wizFoot"><button type="button" class="wizrestart" id="wizRestart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Start over</button></div>';}
+function wizBackShown(on){var b=document.getElementById('actBack');if(b)b.style.visibility=on?'visible':'hidden';}
+function lastPickFor(i){var pk=stopPicks(i);return pk.length?pk[pk.length-1].id:null;}
+function wizBack(){
+  var ss=stayStops();
+  if(doSt){
+    if(doSt.k>0){openDoSheet(doSt.k-1);return;}
+    doSt=null;var li=ss[ss.length-1];                    // first things-to-do stop: back to the last night
+    for(var k=ss.length-1;k>=0;k--){if(stopPicks(ss[k]).length){li=ss[k];break;}}
+    openStaySheet(li,lastPickFor(li));return;
+  }
+  if(staySt){
+    var idx=ss.indexOf(staySt.i);
+    if(idx>0){var pi=ss[idx-1];openStaySheet(pi,lastPickFor(pi));}
+  }
+}
+function wizRestart(){
+  cart=cart.filter(function(x){return x.kind!=='stay';});
+  saved=[];tripReady=false;tripStyle='plan';doSt=null;
+  renderCost();markSavedTiles();
+  var ss=stayStops();
+  if(ss.length)openStaySheet(ss[0]);else closeStaySheet();
+}
+
 /* ===== things-to-do picker: the same sheet, one stop at a time, then a finish ===== */
 var saved=[],tripReady=false,doSt=null;
 function isSaved(i,name){return saved.some(function(x){return x.stopI===i&&x.name===name;});}
@@ -2310,7 +2379,8 @@ function doRender(){
   b.innerHTML='<p class="actsub">'+esc(stopLabel(st.i).replace(/^./,function(c){return c.toUpperCase();}))+' \u00b7 stop '+(st.k+1)+' of '+ss.length+'</p>'+
     '<p class="stnote" style="margin-top:0">Tap anything that sounds good. It is saved to your trip.</p>'+
     '<div class="stlist">'+rows+'</div>'+
-    '<button type="button" class="actbtn actadd" id="doNext">'+(last?'Finish my trip':'Next stop \u2192')+'</button>';
+    '<button type="button" class="actbtn actadd" id="doNext">'+(last?'Finish my trip':'Next stop \u2192')+'</button>'+wizFoot();
+  wizProg(2);wizBackShown(true);
   if(d.loading&&st.tries<12){st.tries++;setTimeout(function(){if(doSt===st)doRender();},800);}
 }
 function finishTrip(){
@@ -2335,6 +2405,12 @@ function markSavedTiles(){
     if(ty&&staySt){var pv=parseFloat(document.getElementById('stPrice').value);if(isFinite(pv))staySt.price=pv;staySt.type=ty.getAttribute('data-type');stayRender();return;}
     if(e.target.closest('#stMinus')&&staySt){staySt.nights=Math.max(1,staySt.nights-1);document.getElementById('stN').textContent=staySt.nights;return;}
     if(e.target.closest('#stPlus')&&staySt){staySt.nights=Math.min(30,staySt.nights+1);document.getElementById('stN').textContent=staySt.nights;return;}
+    if(e.target.closest('#actBack')){wizBack();return;}
+    if(e.target.closest('#wizRestart')){
+      document.getElementById('wizFoot').innerHTML='<div class="wizconfirm"><b>Start over?</b><span>This clears the places and things you picked. Your route and dates stay.</span><div><button type="button" id="wizYes">Yes, start over</button><button type="button" id="wizNo">Keep going</button></div></div>';
+      document.getElementById('wizFoot').scrollIntoView({block:'nearest'});return;}
+    if(e.target.closest('#wizYes')){wizRestart();return;}
+    if(e.target.closest('#wizNo')){document.getElementById('wizFoot').outerHTML=wizFoot();return;}
     var drow=e.target.closest('.dorow');
     if(drow&&doSt){var nm=drow.getAttribute('data-name');
       if(isSaved(doSt.i,nm))saved=saved.filter(function(x){return !(x.stopI===doSt.i&&x.name===nm);});
