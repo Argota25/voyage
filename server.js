@@ -42,10 +42,16 @@ setInterval(() => { const now = Date.now(); for (const [k, b] of RL) if (b.reset
 
 const BUDGET = { yt: 90, google: 95, tm: 4000 };
 const spent = {}; let spentDay = '';
-function spend(name){
-  const day = new Date().toISOString().slice(0, 10);
+function quotaDay(){ return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' }); }
+function quotaHour(){ return parseInt(new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', hour12: false }), 10) % 24; }
+function spendRoll(){
+  const day = quotaDay();
   if (day !== spentDay){ spentDay = day; for (const k in spent) delete spent[k]; }
+}
+function spend(name){
+  spendRoll();
   spent[name] = (spent[name] || 0) + 1;
+  if (name === 'yt') storeSet('meta:spent', { day: spentDay, spent });
   return spent[name] <= (BUDGET[name] || Infinity);
 }
 
@@ -81,11 +87,68 @@ const YT_KEY    = process.env.YOUTUBE_API_KEY      || SECRETS.youtube       || '
 const RD_ID     = process.env.REDDIT_CLIENT_ID     || SECRETS.reddit_id     || '';
 const RD_SECRET = process.env.REDDIT_CLIENT_SECRET || SECRETS.reddit_secret || '';
 
+const crypto = require('crypto');
+const DATA_DIR = process.env.VOYAGE_DATA || process.env.RAILWAY_VOLUME_MOUNT_PATH || '';
+const STORE_DIR = DATA_DIR ? path.join(DATA_DIR, 'v1') : '';
+const STORE_MAX = 300 * 1024 * 1024;
+let storeOn = false, storeCount = 0;
+function storeFile(k){ return path.join(STORE_DIR, crypto.createHash('sha1').update(k).digest('hex') + '.json'); }
+function storeGet(k){
+  if (!storeOn) return null;
+  try { const j = JSON.parse(fs.readFileSync(storeFile(k), 'utf8')); return (j && j.k === k) ? j : null; } catch (e){ return null; }
+}
+function storeSet(k, data){
+  if (!storeOn) return;
+  const f = storeFile(k), tmp = f + '.' + process.pid + '.' + Date.now() + '.tmp';
+  if (!fs.existsSync(f)) storeCount++;
+  fs.writeFile(tmp, JSON.stringify({ k, t: Date.now(), data }), err => {
+    if (err) return void fs.unlink(tmp, () => {});
+    fs.rename(tmp, f, e2 => { if (e2) fs.unlink(tmp, () => {}); });
+  });
+}
+function storeTrim(){
+  if (!storeOn) return;
+  try {
+    const now = Date.now();
+    const files = fs.readdirSync(STORE_DIR).map(f => { const st = fs.statSync(path.join(STORE_DIR, f)); return { f, size: st.size, m: st.mtimeMs }; });
+    files.filter(x => x.f.endsWith('.tmp') && now - x.m > 3600000).forEach(x => { try { fs.unlinkSync(path.join(STORE_DIR, x.f)); } catch (e) {} });
+    const kept = files.filter(x => x.f.endsWith('.json'));
+    storeCount = kept.length;
+    let total = kept.reduce((a, x) => a + x.size, 0);
+    if (total <= STORE_MAX) return;
+    kept.sort((a, b) => a.m - b.m);
+    for (const x of kept){ if (total <= STORE_MAX * 0.8) break; try { fs.unlinkSync(path.join(STORE_DIR, x.f)); total -= x.size; storeCount--; } catch (e) {} }
+  } catch (e) {}
+}
+function storeInit(){
+  if (!STORE_DIR) return;
+  try {
+    fs.mkdirSync(STORE_DIR, { recursive: true });
+    fs.accessSync(STORE_DIR, fs.constants.W_OK);
+    storeOn = true;
+    storeTrim();
+    const sp = storeGet('meta:spent');
+    if (sp && sp.data && sp.data.day === quotaDay()){ spentDay = sp.data.day; Object.assign(spent, sp.data.spent || {}); }
+  } catch (e){ storeOn = false; console.warn('[store] off: ' + ((e && e.message) || e)); }
+}
+
 const cache = new Map();
-function cget(k){ const v = cache.get(k); if (v && v.exp > Date.now()) return v.data; if (v) cache.delete(k); return null; }
+const KEEP = /^(guide|places|stayosm|yt):/;
+function cget(k){
+  const v = cache.get(k);
+  if (v && v.exp > Date.now()) return v.data;
+  if (v) cache.delete(k);
+  if (KEEP.test(k)){
+    const j = storeGet(k);
+    if (j && j.data && j.data.exp > Date.now()){ cache.set(k, { data: j.data.data, exp: j.data.exp }); return j.data.data; }
+  }
+  return null;
+}
 function cset(k, data, ttlMs){
   if (cache.size >= 5000) cache.delete(cache.keys().next().value);
-  cache.set(k, { data, exp: Date.now() + ttlMs });
+  const exp = Date.now() + ttlMs;
+  cache.set(k, { data, exp });
+  if (KEEP.test(k)) storeSet(k, { data, exp });
 }
 
 let nomChain = Promise.resolve(); let lastNom = 0;
@@ -509,18 +572,20 @@ function handleSocialStatus(res){
     events:   !!TM_KEY,
     google:   !!(G_KEY && G_CX),
     instagram: false, facebook: false, tiktok: false, airbnb: false,
+    store: storeOn, stored: storeCount, videoSearches: { used: spent.yt || 0, max: BUDGET.yt },
     note: 'instagram/facebook need a Meta developer app + review; tiktok needs developer approval; airbnb has no public API. See docs/SOCIAL-APIS.md.'
   });
 }
 
 let ytDownUntil = 0;
+function limitedErr(){ const e = new Error('youtube limited'); e.limited = true; return e; }
 async function ytSearch(q){
   const key = 'yt:' + q.toLowerCase();
   const hit = cget(key); if (hit) return hit;
-  if (Date.now() < ytDownUntil) { const e = new Error('youtube limited'); e.limited = true; throw e; }
-  if (!spend('yt')) { const e = new Error('youtube limited'); e.limited = true; throw e; }
-  const s = await upstream('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&order=relevance&maxResults=15&regionCode=US&relevanceLanguage=en&q=' + encodeURIComponent(q) + '&key=' + YT_KEY);
-  if (s.status === 403 || s.status === 429){ ytDownUntil = Date.now() + 30 * 60000; const e = new Error('youtube limited'); e.limited = true; throw e; }
+  if (Date.now() < ytDownUntil) throw limitedErr();
+  if (!spend('yt')) throw limitedErr();
+  const s = await upstream('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&order=relevance&maxResults=25&regionCode=US&relevanceLanguage=en&q=' + encodeURIComponent(q) + '&key=' + YT_KEY);
+  if (s.status === 403 || s.status === 429){ ytDownUntil = Date.now() + 30 * 60000; throw limitedErr(); }
   if (s.status !== 200) throw new Error('youtube ' + s.status);
   const sj = JSON.parse(s.body);
   const ids = (sj.items || []).map(i => i.id && i.id.videoId).filter(Boolean);
@@ -535,22 +600,44 @@ async function ytSearch(q){
     thumb: (i.snippet.thumbnails && i.snippet.thumbnails.medium && i.snippet.thumbnails.medium.url) || '',
     views: parseInt((stats[i.id.videoId] || {}).viewCount || '0', 10),
   })).sort((a, b) => b.views - a.views);
-  if (out.length) cset(key, out, 7 * 24 * 3600 * 1000);
+  if (out.length) cset(key, out, 30 * 24 * 3600 * 1000);
   return out;
 }
 
 function isoSecs(d){ const m = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(d || ''); return m ? (+(m[1] || 0) * 3600 + +(m[2] || 0) * 60 + +(m[3] || 0)) : 9999; }
-async function ytShorts(place){
-  const key = 'yts:' + place.toLowerCase();
-  const hit = cget(key); if (hit) return hit;
-  if (Date.now() < ytDownUntil) { const e = new Error('youtube limited'); e.limited = true; throw e; }
-  if (!spend('yt')) { const e = new Error('youtube limited'); e.limited = true; throw e; }
+const PACK_FRESH = 30 * 864e5;
+const packBusy = {};
+let wanted = [];
+function packKey(place){ return 'ytp:' + place.toLowerCase().replace(/\s+/g, ' ').trim(); }
+function packRead(place){
+  const k = packKey(place), m = cache.get(k);
+  if (m) return m.data;
+  const j = storeGet(k);
+  if (!j) return null;
+  const v = { t: j.t, list: j.data || [] };
+  cache.set(k, { data: v, exp: Infinity });
+  return v;
+}
+function wantAdd(place){
+  const k = place.trim();
+  if (!k || wanted.some(x => x.toLowerCase() === k.toLowerCase())) return;
+  wanted.push(k); if (wanted.length > 500) wanted.shift();
+  storeSet('meta:wanted', wanted);
+}
+function wantDrop(place){
+  const n = wanted.length;
+  wanted = wanted.filter(x => x.toLowerCase() !== place.trim().toLowerCase());
+  if (wanted.length !== n) storeSet('meta:wanted', wanted);
+}
+async function packFetch(place){
+  if (Date.now() < ytDownUntil) throw limitedErr();
+  if (!spend('yt')) throw limitedErr();
   const parts = place.split(',').map(x => x.trim()).filter(Boolean);
   const city = (parts[0] || '').replace(/ county$/i, '').toLowerCase(), state = (parts[1] || '').toLowerCase();
   const after = new Date(Date.now() - 730 * 864e5).toISOString().slice(0, 10) + 'T00:00:00Z';
-  const s = await upstream('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoDuration=short&order=relevance&maxResults=25&regionCode=US&relevanceLanguage=en&publishedAfter=' + after +
+  const s = await upstream('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoDuration=short&order=relevance&maxResults=50&regionCode=US&relevanceLanguage=en&publishedAfter=' + after +
     '&q=' + encodeURIComponent(place + ' travel things to do #shorts') + '&key=' + YT_KEY);
-  if (s.status === 403 || s.status === 429){ ytDownUntil = Date.now() + 30 * 60000; const e = new Error('youtube limited'); e.limited = true; throw e; }
+  if (s.status === 403 || s.status === 429){ ytDownUntil = Date.now() + 30 * 60000; throw limitedErr(); }
   if (s.status !== 200) throw new Error('youtube ' + s.status);
   const items = (JSON.parse(s.body).items || []).filter(i => i.id && i.id.videoId);
   const ids = items.map(i => i.id.videoId);
@@ -559,17 +646,72 @@ async function ytShorts(place){
     const v = await upstream('https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails&id=' + ids.join(',') + '&key=' + YT_KEY);
     if (v.status === 200) JSON.parse(v.body).items.forEach(it => meta[it.id] = { views: parseInt((it.statistics || {}).viewCount || '0', 10), secs: isoSecs((it.contentDetails || {}).duration) });
   }
-  const all = items.map(i => {
+  const list = items.map(i => {
     const text = ((i.snippet.title || '') + ' ' + (i.snippet.description || '')).toLowerCase();
     const m = meta[i.id.videoId] || { views: 0, secs: 9999 };
-    return { id: i.id.videoId, title: i.snippet.title, channel: i.snippet.channelTitle, views: m.views, secs: m.secs,
+    return { id: i.id.videoId, title: i.snippet.title, channel: i.snippet.channelTitle, published: (i.snippet.publishedAt || '').slice(0, 10), views: m.views, secs: m.secs,
       tier: (city && text.indexOf(city) > -1) ? 0 : ((state && text.indexOf(state) > -1) ? 1 : 2) };
-  }).filter(x => x.secs <= 180 && x.tier < 2);
-  all.sort((a, b) => a.tier - b.tier || b.views - a.views);
-  const out = all.slice(0, 12).map(x => ({ id: x.id, title: x.title, channel: x.channel, views: x.views, secs: x.secs }));
-  if (out.length) cset(key, out, 7 * 24 * 3600 * 1000);
-  return out;
+  }).filter(x => x.tier < 2);
+  list.sort((a, b) => a.tier - b.tier || b.views - a.views);
+  const k = packKey(place);
+  cache.set(k, { data: { t: Date.now(), list }, exp: Infinity });
+  storeSet(k, list);
+  wantDrop(place);
+  return list;
 }
+function packOnce(place){
+  const k = packKey(place);
+  if (!packBusy[k]) packBusy[k] = packFetch(place).finally(() => { delete packBusy[k]; });
+  return packBusy[k];
+}
+async function ytPack(place){
+  const have = packRead(place);
+  if (have){
+    if (Date.now() - have.t > PACK_FRESH) packOnce(place).catch(() => {});
+    return have.list;
+  }
+  try { return await packOnce(place); }
+  catch (e){ if (e && e.limited) wantAdd(place); throw e; }
+}
+async function ytShorts(place){
+  const list = await ytPack(place);
+  return list.filter(x => x.secs <= 180).slice(0, 12).map(x => ({ id: x.id, title: x.title, channel: x.channel, views: x.views, secs: x.secs }));
+}
+
+const STATE_NAME = { AL:'Alabama', AK:'Alaska', AZ:'Arizona', AR:'Arkansas', CA:'California', CO:'Colorado', CT:'Connecticut', DE:'Delaware', DC:'District of Columbia', FL:'Florida', GA:'Georgia', HI:'Hawaii', ID:'Idaho', IL:'Illinois', IN:'Indiana', IA:'Iowa', KS:'Kansas', KY:'Kentucky', LA:'Louisiana', ME:'Maine', MD:'Maryland', MA:'Massachusetts', MI:'Michigan', MN:'Minnesota', MS:'Mississippi', MO:'Missouri', MT:'Montana', NE:'Nebraska', NV:'Nevada', NH:'New Hampshire', NJ:'New Jersey', NM:'New Mexico', NY:'New York', NC:'North Carolina', ND:'North Dakota', OH:'Ohio', OK:'Oklahoma', OR:'Oregon', PA:'Pennsylvania', RI:'Rhode Island', SC:'South Carolina', SD:'South Dakota', TN:'Tennessee', TX:'Texas', UT:'Utah', VT:'Vermont', VA:'Virginia', WA:'Washington', WV:'West Virginia', WI:'Wisconsin', WY:'Wyoming' };
+let seedPlaces = null;
+function seedList(){
+  if (seedPlaces) return seedPlaces;
+  seedPlaces = [];
+  try {
+    const j = JSON.parse(fs.readFileSync(path.join(ROOT, 'vendor', 'perdiem-fy2026.json'), 'utf8'));
+    const seen = {};
+    (j.rows || []).forEach(r => {
+      if (!r.c || r.c === 'Standard Rate' || !STATE_NAME[r.s]) return;
+      const place = r.c.split('/')[0].trim() + ', ' + STATE_NAME[r.s];
+      if (!seen[place]){ seen[place] = 1; seedPlaces.push(place); }
+    });
+  } catch (e) {}
+  return seedPlaces;
+}
+let seedAt = 0;
+function prefillTick(){
+  if (!storeOn || !YT_KEY || Date.now() < ytDownUntil) return;
+  spendRoll();
+  const reserve = quotaHour() >= 20 ? 5 : 50;
+  if ((spent.yt || 0) >= BUDGET.yt - reserve) return;
+  let place = wanted.find(x => !packRead(x));
+  if (!place){
+    const seeds = seedList();
+    for (let n = 0; n < seeds.length && !place; n++){
+      const c = seeds[(seedAt + n) % seeds.length];
+      const have = packRead(c);
+      if (!have || Date.now() - have.t > PACK_FRESH){ place = c; seedAt = (seedAt + n + 1) % seeds.length; }
+    }
+  }
+  if (place) packOnce(place).catch(() => {});
+}
+
 async function handleShorts(reqUrl, res){
   if (!YT_KEY) return json(res, 501, { error: 'youtube not configured' });
   const place = (reqUrl.searchParams.get('place') || '').trim().slice(0, 80);
@@ -657,6 +799,19 @@ async function handleAggregate(reqUrl, res){
   const ytq = q.replace(/\s+/g, ' ').slice(0, 120);
   let limited = false;
   const jobs = [];
+  const pm = /^fun things to do in (.+)$/i.exec(ytq);
+  if (YT_KEY && pm){
+    const place = pm[1].replace(/ USA$/i, '').trim();
+    let list = [];
+    try { list = await ytPack(place); } catch (e){ if (e && e.limited) limited = true; }
+    const results = list.slice().sort((a, b) => b.views - a.views).slice(0, 16).map(x => ({
+      plat: 'youtube', title: x.title, url: 'https://www.youtube.com/watch?v=' + x.id,
+      thumb: 'https://i.ytimg.com/vi/' + x.id + '/mqdefault.jpg', meta: x.channel + (x.published ? ' · ' + x.published : ''), engagement: x.views, kind: 'views',
+    }));
+    return json(res, 200, { query: q, used: ytq, limited, stored: true,
+      connected: { youtube: true, reddit: !!(RD_ID && RD_SECRET), google: !!(G_KEY && G_CX), tiktok: false, instagram: false, facebook: false },
+      results, web: [] });
+  }
   if (YT_KEY) jobs.push(ytSearch(ytq).then(v => v.map(x => ({
     plat: 'youtube', title: x.title, url: 'https://www.youtube.com/watch?v=' + x.id,
     thumb: x.thumb, meta: x.channel + (x.published ? ' · ' + x.published : ''), engagement: x.views, kind: 'views',
@@ -929,6 +1084,13 @@ http.createServer((req, res) => {
   try { json(res, 400, { error: 'bad request' }); } catch (e2) {}
  }
 }).listen(PORT, HOST, () => {
+  storeInit();
+  if (storeOn){
+    const w = storeGet('meta:wanted'); if (w && Array.isArray(w.data)) wanted = w.data;
+    setInterval(prefillTick, 3 * 60000).unref();
+    setInterval(storeTrim, 6 * 3600000).unref();
+  }
+  console.log('Store: ' + (storeOn ? ('on at ' + STORE_DIR + ', ' + storeCount + ' saved') : 'off (memory only)'));
   if (PUBLIC){
     console.log(`Voyage PUBLIC on ${HOST}:${PORT}; origins: ${ORIGINS.join(', ')}; trust proxy: ${TRUST_PROXY}`);
   } else {
