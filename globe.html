@@ -1148,10 +1148,10 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
 .staytile.picked .stgo::before{content:"\2713  "}
 #panel .extra .stayrows .staytile.picked .hsp::before{content:none}
 /* things to do + videos: bigger cards, one and a bit per screen on phones */
-#panel .extra .sec .hslider:not(.stayrows) .hslide{width:min(76vw,290px);padding:10px}
-#panel .extra .sec .hslider:not(.stayrows) .hsimg{height:150px;border-radius:10px}
-#panel .extra .sec .hslider .hsvidplay{width:min(84vw,320px);padding:0}
-#panel .extra .sec .hst{font:700 15px/1.3 var(--body)}
+#panel .extra .spane .hslider:not(.stayrows) .hslide{width:min(76vw,290px);padding:10px}
+#panel .extra .spane .hslider:not(.stayrows) .hsimg{height:150px;border-radius:10px}
+#panel .extra .spane .hslider .hsvidplay{width:min(84vw,320px);padding:0}
+#panel .extra .spane .hst{font:700 15px/1.3 var(--body)}
 /* cost breakdown: the bar shows where the money goes at a glance */
 .cotbar{display:flex;height:14px;border-radius:999px;overflow:hidden;margin:14px 0 8px;background:#E3F1E7;gap:2px}
 .cotbar span{display:block;min-width:6px}
@@ -1169,6 +1169,38 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
 @media (max-width:400px){
   .switch,.reset{font-size:10px!important;letter-spacing:.1em!important;padding:11px 13px!important;gap:6px!important}
 }
+/* stop tabs: one section at a time, the chosen tab is the focal point */
+.stabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:12px 12px 4px}
+.stab{display:flex;flex-direction:column;align-items:center;gap:4px;min-height:58px;padding:8px 4px;border-radius:12px;border:1.5px solid rgba(19,113,76,.22);background:#F3F8F5;color:#13714C;font:800 12.5px var(--body);cursor:pointer;transition:background .18s,color .18s,border-color .18s}
+.stab svg{width:20px;height:20px}
+.stab.on{background:#13714C;border-color:#13714C;color:#fff;box-shadow:0 10px 20px -12px rgba(12,54,36,.7)}
+.stab:focus-visible{outline:3px solid #A2E494;outline-offset:2px}
+.spanes{padding:6px 12px 12px}
+.spane{display:none}
+.spane.on{display:block;animation:paneIn .2s ease}
+@keyframes paneIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+#panel .stopcard .spane .slbl{display:flex;flex-direction:column;gap:2px;margin:6px 2px 10px;text-transform:none;letter-spacing:0}
+.spane .slbl b{font:800 17px var(--heading);color:#123626}
+.spane .slbl span{font:600 12.5px var(--body);color:#3e5f4f}
+@media (prefers-reduced-motion:reduce){.spane.on{animation:none}}
+/* planner steps: a big number, a plain question, a one-line how-to */
+.stephd{display:flex;align-items:center;gap:12px;margin:16px 2px 10px;text-align:left}
+.trip>.stephd:first-of-type{margin-top:4px}
+.stepn{flex:none;width:32px;height:32px;border-radius:50%;background:#123626;color:#fff;font:800 16px var(--heading);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px -6px rgba(12,54,36,.6)}
+.stept{display:flex;flex-direction:column;gap:1px;min-width:0}
+.stept b{font:800 17px/1.2 var(--heading);color:#123626}
+.stept span{font:600 12.5px/1.3 var(--body);color:#3e5f4f}
+/* "what to do next": the first thing in the itinerary */
+.nextcard{margin:14px 0 4px;padding:16px;border-radius:16px;background:#13714C;color:#fff;box-shadow:0 16px 34px -20px rgba(12,54,36,.7)}
+.nextcard:empty{display:none}
+.nxtop{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.nxstep{font:800 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;background:#A2E494;color:#0B2E1F;border-radius:999px;padding:4px 10px}
+.nxtot{font:600 12.5px var(--body);color:rgba(255,255,255,.85)}
+.nxtot b{color:#fff;font-weight:800}
+.nextcard h3{font:800 20px/1.2 var(--heading);color:#fff;margin-bottom:4px}
+.nextcard p{font:500 14px/1.45 var(--body);color:rgba(255,255,255,.9);margin-bottom:12px}
+.nxbtn{width:100%;min-height:50px;border:0;border-radius:14px;background:#fff;color:#123626;font:800 15px var(--body);cursor:pointer}
+.nxbtn:hover{background:#F0FAF3}
 /* stay sheet */
 .actsheet{position:fixed;inset:0;z-index:45;display:none;align-items:flex-end;justify-content:center;background:rgba(8,26,18,.45);backdrop-filter:blur(2px)}
 .actsheet.show{display:flex}
@@ -1283,11 +1315,14 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
       <button type="button" data-tm="fly"><span class="vi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L3 10.6l6.4 2.5L12 20l3-6.2z"/><path d="M9.4 13.1L21 3"/></svg></span>Fly</button>
       <button type="button" data-tm="boat"><span class="vi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 14.5l1.5 4a1.5 1.5 0 0 0 1.4 1h11.8a1.5 1.5 0 0 0 1.4-1l1.5-4"/><path d="M5.2 14.5V9l6.8-2 6.8 2v5.5"/><path d="M12 3v4"/></svg></span>Boat</button>
     </div>
+    <div class="stephd"><span class="stepn">1</span><span class="stept"><b id="step1t">Where are you going?</b><span>Type a city or address in each box.</span></span></div>
     <div class="stops" id="stops"></div>
+    <div class="stephd"><span class="stepn">2</span><span class="stept"><b>When are you going?</b><span>Optional. Tap a box to pick a date.</span></span></div>
     <div class="daterow" id="daterow">
       <label class="datefield"><span>Leaving</span><input type="date" id="dStart" aria-label="Trip start date" autocomplete="off"></label>
       <label class="datefield"><span>Returning</span><input type="date" id="dEnd" aria-label="Trip return date" autocomplete="off"></label>
     </div>
+    <div class="stephd"><span class="stepn">3</span><span class="stept"><b>What do you like?</b><span>Optional. Tap any that fit you.</span></span></div>
     <div class="prefs" id="prefs">
       <div class="prefrow hrs"><span class="preflbl">Pace</span><div class="chips" data-pref="hrs"><button type="button" class="chip" data-v="4">4h/day</button><button type="button" class="chip" data-v="6">6h/day</button><button type="button" class="chip on" data-v="8">8h/day</button><button type="button" class="chip" data-v="10">10h/day</button></div></div>
       <div class="prefrow"><span class="preflbl">Stay</span><div class="chips" data-pref="stay"><button type="button" class="chip" data-v="airbnb">Airbnb</button><button type="button" class="chip" data-v="hotel">Hotels</button><button type="button" class="chip" data-v="motel">Motels</button><button type="button" class="chip on" data-v="any">Any</button></div></div>
@@ -1559,7 +1594,8 @@ function configTravel(tm){
   if(!document.getElementById('stops').children.length)buildStops();
   syncTmSeg();relabelStops();
   var btn=document.getElementById('tripBtn');
-  btn.textContent=travelMode==='fly'?'Plan my flights':(travelMode==='boat'?'Plan my boat trip':'Plan my drive');
+  btn.textContent=travelMode==='fly'?'Plan my flights \u2192':(travelMode==='boat'?'Plan my boat trip \u2192':'Plan my drive \u2192');
+  var s1=document.getElementById('step1t');if(s1)s1.textContent=travelMode==='fly'?'Which cities are you flying to?':(travelMode==='boat'?'Which ports are you going to?':'Where are you driving?');
   document.getElementById('hint').textContent=defHint();
 }
 function syncTmSeg(){var seg=document.getElementById('tmseg');if(!seg)return;[].forEach.call(seg.children,function(x){x.classList.toggle('on',x.dataset.tm===travelMode);});}
@@ -1813,9 +1849,29 @@ function renderCost(){
     (e.drive?(adjIn('MPG','mpg',budget.mpg,'1')+adjIn('Gas $','gas',budget.gas,'0.1')):adjIn('Car/day $','rental',budget.rental,'5'))+
     adjIn('Travelers','ppl',budget.ppl,'1')+'</div>';
   b.innerHTML=html;
+  renderNext();
   if(aek){var ni=b.querySelector('input[data-bk="'+aek+'"]');if(ni){ni.focus();if(aeSel!=null){try{ni.setSelectionRange(aeSel,aeSel);}catch(e2){}}}}
 }
 function addCart(kind,label,cost,pp){cart.push({id:'c'+(cartSeq++),kind:kind,label:label,cost:+cost||0,pp:!!pp});renderCost();}
+/* the itinerary always says what to do next, in one sentence and one button */
+function renderNext(){
+  var el=document.getElementById('nextCard');if(!el||!tripCtx)return;
+  var e=estimate();
+  var needNights=Math.max(e.nights,0),picked=e.stays.length;
+  var step,title,body,btn,go;
+  if(needNights>0&&picked<needNights){
+    step=1;title=picked?'Pick a place for your other nights':'First, pick where you will sleep';
+    body='You have '+needNights+(needNights===1?' night':' nights')+' on this trip. Tap Hotels, Motels, or Airbnb under each stop to add it.';
+    btn='Show me places to stay';go='stay';
+  }else{
+    step=needNights>0?2:1;title='Now find things to do';
+    body='Open Things to do, Events, and Top videos at each stop. Tap any card to see it on the map.';
+    btn='Show me things to do';go='do';
+  }
+  el.innerHTML='<div class="nxtop"><span class="nxstep">Step '+step+'</span><span class="nxtot">Trip so far: <b>'+usd(e.total)+'</b></span></div>'+
+    '<h3>'+esc(title)+'</h3><p>'+esc(body)+'</p><button type="button" class="nxbtn" data-jumpto="'+go+'">'+esc(btn)+' \u2193</button>';
+}
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.nxbtn');if(!b)return;scrollToSec(b.getAttribute('data-jumpto'));});
 function addBtn(kind,label,cost,pp){var dc=(typeof cost==='number')?Math.round(cost):esc(cost);return '<span class="hsadd" role="button" tabindex="0" data-kind="'+kind+'" data-label="'+esc(label)+'"'+(pp?' data-pp="1"':'')+' data-cost="'+dc+'" title="Add to trip cost">+</span>';}
 var STAY_IC={Hotels:'<path d="M4 21V4h11v17M15 9h5v12M8 8h3M8 12h3M8 16h3"/>',Motels:'<path d="M3 18V8m0 6h18v4M21 18v-6a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="2"/>',Airbnb:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'};
 function stayTile(href,lbl,place){return '<a class="hslide hsmore staytile" href="'+href+'" target="_blank" rel="noopener" data-lbl="'+esc(lbl)+'" data-place="'+esc(place)+'">'+
@@ -1872,10 +1928,16 @@ function buildJump(drive){
   jb.scrollLeft=0;
   setTimeout(setPeek,0);
 }
+function selectTab(card,kind){
+  if(!card)return;
+  [].forEach.call(card.querySelectorAll('.stab'),function(b){var on=b.getAttribute('data-tab')===kind;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false');});
+  [].forEach.call(card.querySelectorAll('.spane'),function(p){p.classList.toggle('on',p.getAttribute('data-pane')===kind);});
+}
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.stab');if(!b)return;selectTab(b.closest('.stopcard'),b.getAttribute('data-tab'));});
 function scrollToSec(k){
   var el=jumpTarget(k),sc=document.querySelector('#panel .scroll');if(!el||!sc)return;
   if(k==='wps'&&el.tagName==='DETAILS')el.open=true;
-  var dd=el.closest&&el.closest('details.sec');if(dd)dd.open=true;
+  var pn=el.closest&&el.closest('.spane');if(pn){selectTab(pn.closest('.stopcard'),pn.getAttribute('data-pane'));el=pn.closest('.stopcard').querySelector('.stabs')||el;}
   var top=el.getBoundingClientRect().top-sc.getBoundingClientRect().top+sc.scrollTop-10;
   sc.scrollTo({top:Math.max(0,top),behavior:'smooth'});
 }
@@ -1914,6 +1976,8 @@ function scrollToSec(k){
       var base=sc.getBoundingClientRect().top+60,cur=null;
       [].forEach.call(jb.children,function(c){
         var el=jumpTarget(c.getAttribute('data-jump'));
+        var pn=el&&el.closest&&el.closest('.spane');
+        if(pn){if(!pn.classList.contains('on'))return;el=pn;}
         if(el&&el.getBoundingClientRect().top<=base)cur=c.getAttribute('data-jump');
       });
       if(sc.scrollTop+sc.clientHeight>=sc.scrollHeight-4){var lastB=jb.lastElementChild;if(lastB)cur=lastB.getAttribute('data-jump');}   // at the bottom the last section is the one in view
@@ -2156,12 +2220,12 @@ function buildDetail(opts){
   var recsHtml=(rc.recs||[]).map(stopCardHTML).join('');
   var byWord=travelMode==='fly'?'by air':(travelMode==='boat'?'by sea':'by car');
   ex.className='extra';
-  ex.innerHTML=costHTML()+
+  ex.innerHTML='<div class="nextcard" id="nextCard"></div>'+costHTML()+
     (recsHtml||'<p class="note">Add another stop to build an itinerary.</p>')+
     (rc.travel==='drive'?('<div class="lbl" data-sec="along" style="margin-top:16px">Along the way</div>'+
       '<div id="sights"><div class="feedv"><div class="fslide fskel"></div><div class="fslide fskel" style="height:120px"></div></div></div>'):'')+
     wpsHTML('Taking this trip '+byWord+'. Great places to stay and things to do at each stop?');
-  bindCost(ex);renderCost();
+  bindCost(ex);renderCost();renderNext();
   buildJump(rc.travel==='drive');
   initWPS();
   // shared experiences load themselves: run the community search for this trip
@@ -2664,13 +2728,17 @@ var SEC_IC={stay:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 function stopCardShell(title,meta,i){
   function sl(kind){return '<div class="hslider" data-kind="'+kind+'" data-i="'+i+'"><div class="hslide hskel"></div><div class="hslide hskel"></div><div class="hslide hskel"></div></div>';}
   return '<div class="stopcard"><div class="sh"><div class="sn">'+esc(title)+'</div><div class="sm" data-smi="'+i+'">'+meta+'</div></div>'+
-    '<div class="secs">'+
-    sec('stay','Places to stay','Hotels, motels, and Airbnb',true)+
-    sec('do','Things to do','Sights and spots nearby',false)+
-    sec('events','Events','What is on while you are there',false)+
-    sec('videos','Top videos','What travelers filmed here',false)+'</div></div>';
-  function sec(kind,label,hint,open){
-    return '<details class="sec"'+(open?' open':'')+'><summary class="slbl" data-sec="'+kind+'"><span class="secic">'+SEC_IC[kind]+'</span><span class="sect"><b>'+label+'</b><span>'+hint+'</span></span><svg class="secch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></summary>'+sl(kind)+'</details>';
+    '<div class="stabs" role="tablist">'+tab('stay','Stay',true)+tab('do','To do',false)+tab('events','Events',false)+tab('videos','Videos',false)+'</div>'+
+    '<div class="spanes">'+
+    pane('stay','Places to stay','Tap one to add it to your trip.',true)+
+    pane('do','Things to do','Sights and spots near this stop.',false)+
+    pane('events','Events','What is on while you are there.',false)+
+    pane('videos','Top videos','What travelers filmed here.',false)+'</div></div>';
+  function tab(kind,label,on){
+    return '<button type="button" role="tab" class="stab'+(on?' on':'')+'" data-tab="'+kind+'" aria-selected="'+(on?'true':'false')+'">'+SEC_IC[kind]+'<span>'+label+'</span></button>';
+  }
+  function pane(kind,label,hint,on){
+    return '<div class="spane'+(on?' on':'')+'" role="tabpanel" data-pane="'+kind+'"><div class="slbl" data-sec="'+kind+'"><b>'+label+'</b><span>'+hint+'</span></div>'+sl(kind)+'</div>';
   }
 }
 /* ----- in-app browse sliders: real data in the app, "look further" opens the platform ----- */
