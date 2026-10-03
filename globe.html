@@ -1405,6 +1405,29 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
 .actcard,.incard,.plancard,#panel .ph{background-image:var(--tex-topo-soft)!important;background-size:240px 240px!important;background-repeat:repeat!important}
 /* depth: three soft layers tinted to the dark green, instead of one blur */
 #panel .stopcard,#panel .cot,.nextcard{box-shadow:var(--lift)}
+/* ===== top controls as a matched pair (owner 1003) =====
+   Same height, same type, same icon size. On the trip screen they sit side by
+   side at equal width: Back on the left, Change trip type on the right. */
+.switch,.reset{height:44px!important;padding:0 16px!important;gap:8px!important;justify-content:center;border-radius:999px;
+  font:800 13px/1 var(--body)!important;letter-spacing:0!important;text-transform:none!important;color:#123626;white-space:nowrap;
+  background:rgba(255,255,255,.96);border:1.5px solid rgba(19,113,76,.28);box-shadow:0 10px 24px -14px rgba(16,58,40,.5)}
+.switch svg,.reset svg{flex:none;width:18px;height:18px}
+.switch:hover,.reset:hover{border-color:#13714C;color:#13714C}
+.switch:focus-visible,.reset:focus-visible{outline:3px solid #A2E494;outline-offset:2px}
+@media (min-width:701px){
+  /* desktop: a pair in the top-right corner of the map */
+  .switch{top:20px;right:24px;left:auto;width:190px}
+  .reset{top:20px;bottom:auto;left:auto;right:222px;width:190px}
+}
+@media (max-width:700px){
+  .switch{top:16px;left:16px;right:auto}
+  /* trip screen: two equal halves across the top */
+  body.inarea .reset{top:16px;bottom:auto;left:16px;right:auto;width:calc(50% - 20px)}
+  body.inarea .switch{left:auto;right:16px;width:calc(50% - 20px)}
+}
+/* phones pinch to zoom; the +/- box only peeked out from under the Back button */
+@media (max-width:700px){.leaflet-top.leaflet-left .leaflet-control-zoom{display:none}}
+@media (max-width:380px){.switch,.reset{font-size:11.5px!important;padding:0 10px!important;gap:5px!important}.switch svg,.reset svg{width:16px;height:16px}}
 </style>
 </head>
 <body>
@@ -1474,7 +1497,7 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
   <div class="logo">VOY<span>AGE</span></div>
   <div class="name">Voyage</div>
 </div>
-<button class="switch" id="switch" type="button">&#8646; Change trip type</button>
+<button class="switch" id="switch" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg><span>Change trip type</span></button>
 
 <form class="ui search" id="searchForm" autocomplete="off">
   <div class="trip" id="trip">
@@ -1524,7 +1547,7 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
   </div>
 </aside>
 
-<button class="ui reset" id="reset">&larr; Back to globe</button>
+<button class="ui reset" id="reset" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg><span>Back to planner</span></button>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="waterink" color-interpolation-filters="sRGB"><feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -9 -1 10 0 -0.05" result="wmask"/><feColorMatrix in="SourceGraphic" type="saturate" values="0.12" result="sat"/><feColorMatrix in="sat" type="matrix" values="1 0 0 0 0.012  0 1 0 0 0.008  0 0 0.955 0 0  0 0 0 1 0" result="base"/><feFlood flood-color="#16382C" result="ink"/><feComposite in="ink" in2="wmask" operator="in" result="waterfill"/><feMerge><feMergeNode in="base"/><feMergeNode in="waterfill"/></feMerge></filter></svg>
 <div class="stchip" id="stChip" role="status" aria-live="polite"></div>
 <button class="recenter" id="recenter" type="button" title="Show the whole route"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg><span>Show route</span></button>
