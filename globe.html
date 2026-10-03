@@ -1273,6 +1273,30 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
 .stdone span{font:600 13px var(--body);color:#3e5f4f}
 .sttotal{font:600 15px var(--body);color:#123626;margin-bottom:6px}
 .sttotal b{font:800 20px var(--heading)}
+/* cheer pop-up */
+.cheer{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(8,26,18,.5);backdrop-filter:blur(3px);cursor:pointer}
+.cheer.show{display:flex}
+.cheercard{position:relative;width:min(340px,100%);padding:30px 24px 26px;border-radius:24px;background:#123626;color:#fff;text-align:center;box-shadow:0 30px 70px -24px rgba(0,0,0,.6);animation:cheerin .42s cubic-bezier(.2,1.3,.3,1)}
+@keyframes cheerin{from{transform:scale(.7);opacity:0}to{transform:none;opacity:1}}
+.cheerck{display:inline-flex;align-items:center;justify-content:center;width:76px;height:76px;border-radius:50%;background:var(--sun);color:var(--sun-ink);margin-bottom:14px;animation:cheerpop .5s .08s cubic-bezier(.2,1.6,.3,1) both}
+.cheerck svg{width:40px;height:40px;stroke-dasharray:30;stroke-dashoffset:30;animation:cheerdraw .4s .28s ease forwards}
+@keyframes cheerpop{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes cheerdraw{to{stroke-dashoffset:0}}
+.cheercard h3{font:800 24px/1.2 var(--heading);color:#fff;margin-bottom:6px}
+.cheercard p{font:600 14.5px/1.45 var(--body);color:#D8F3DF}
+.cheerfx{position:absolute;left:50%;top:68px;width:0;height:0;pointer-events:none}
+.cheerfx i{position:absolute;width:9px;height:9px;border-radius:2px;opacity:0;animation:cheerbit .9s ease-out forwards}
+@keyframes cheerbit{0%{opacity:1;transform:rotate(var(--a)) translateY(0) scale(1)}100%{opacity:0;transform:rotate(var(--a)) translateY(calc(var(--d) * -1)) scale(.4)}}
+@media (prefers-reduced-motion:reduce){.cheercard,.cheerck,.cheerck svg{animation:none}.cheerck svg{stroke-dashoffset:0}}
+.pfsnd{background:none;border:0;padding:0;font:inherit;color:#13714C;font-weight:700;cursor:pointer}
+/* things-to-do picker rows + saved tiles */
+.dorow.on{background:#13714C;border-color:#13714C}
+.dorow.on .strt b{color:#fff}
+.dorow.on .strt span{color:#D8F3DF}
+.dorow.on .strpick{background:#fff;color:#13714C}
+#panel .extra .hslide.savedtile{border-color:#13714C;box-shadow:0 0 0 2px #13714C}
+#panel .extra .hslide.savedtile .hst::before{content:"\2713  Saved \00b7  ";color:#13714C;font-weight:800}
+#doNext{margin-top:14px}
 /* in-app viewer */
 .inapp{position:fixed;inset:0;z-index:50;display:none;align-items:flex-end;justify-content:center;background:rgba(8,26,18,.55);backdrop-filter:blur(2px)}
 .inapp.show{display:flex}
@@ -1352,6 +1376,14 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
   <div class="actcard staycard">
     <div class="acthead"><h3 id="actTitle">Where will you sleep?</h3><button type="button" class="actclose" id="actClose" aria-label="Close">&times;</button></div>
     <div id="actBody"></div>
+  </div>
+</div>
+<div class="cheer" id="cheer" role="status" aria-live="polite">
+  <div class="cheercard">
+    <div class="cheerfx" id="cheerFx" aria-hidden="true"></div>
+    <span class="cheerck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span>
+    <h3 id="cheerT"></h3>
+    <p id="cheerS"></p>
   </div>
 </div>
 <div class="inapp" id="inapp" role="dialog" aria-modal="true" aria-labelledby="inTitle">
@@ -1445,7 +1477,7 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
     <div class="extra" id="extra"></div>
   </div>
   <div class="pf">
-    <span class="pftxt">Routes, distances, and times are estimates from open map data, not live traffic, flights, or sailings.</span> <a class="methodlink" href="#">How Voyage plans</a> <span class="pfsep">&middot;</span> <a class="pffb" href="https://form.jotform.com/262747271566062" target="_blank" rel="noopener">Send feedback</a>
+    <span class="pftxt">Routes, distances, and times are estimates from open map data, not live traffic, flights, or sailings.</span> <a class="methodlink" href="#">How Voyage plans</a> <span class="pfsep">&middot;</span> <a class="pffb" href="https://form.jotform.com/262747271566062" target="_blank" rel="noopener">Send feedback</a> <span class="pfsep">&middot;</span> <button type="button" class="pfsnd" id="sndBtn">Sound on</button>
   </div>
 </aside>
 
@@ -1967,21 +1999,25 @@ function renderNext(){
   var e=estimate();
   var step,title,body,btn,go;
   var seg='<div class="nxseg" role="group" aria-label="How do you want to plan?"><button type="button" data-style="plan" class="'+(tripStyle==='plan'?'on':'')+'">Plan every night</button><button type="button" data-style="flow" class="'+(tripStyle==='flow'?'on':'')+'">Go with the flow</button></div>';
-  if(tripStyle==='flow'){
+  if(tripReady){
+    step=3;title='Your trip is ready';
+    body=e.pinnedN+(e.pinnedN===1?' night':' nights')+' planned'+(saved.length?(', '+saved.length+(saved.length===1?' thing':' things')+' to do saved'):'')+'. Change anything any time. Your total keeps up.';
+    btn='See my route on the map';go='map';
+  }else if(tripStyle==='flow'){
     step=1;title='You are going with the flow';
     body=(e.openN>0?('Nothing is locked in. We set aside '+usd(budget.nightly)+' a night for '+e.openN+(e.openN===1?' night':' nights')+' so your total stays honest. '):'Nothing is locked in. ')+'Pick a place any time, or change plans on the road.';
-    btn='Show me things to do';go='do';
+    btn='Pick things to do';go='dowiz';
   }else if(e.openN>0&&nextOpenStop()>-1){
     step=1;title=e.pinnedN?'Now pick your next night':'First, pick where you will sleep';
     body='You have '+e.nights+(e.nights===1?' night':' nights')+' on this trip'+(e.pinnedN?(', '+e.openN+' still open'):'')+'. Tap the button and choose a place.';
     btn='Pick a place to stay';go='pick';
   }else{
-    step=2;title='Now find things to do';
-    body='Tap To do, Events, or Videos at each stop. Everything opens right here in Voyage.';
-    btn='Show me things to do';go='do';
+    step=2;title='Now pick things to do';
+    body='We go stop by stop. Tap what sounds good and it is saved to your trip.';
+    btn='Pick things to do';go='dowiz';
   }
   el.innerHTML=seg+'<div class="nxtop"><span class="nxstep">Step '+step+'</span><span class="nxtot">Trip so far: <b>'+usd(e.total)+'</b></span></div>'+
-    '<h3>'+esc(title)+'</h3><p>'+esc(body)+'</p><button type="button" class="nxbtn" data-jumpto="'+go+'">'+esc(btn)+(go==='pick'?'':' \u2193')+'</button>';
+    '<h3>'+esc(title)+'</h3><p>'+esc(body)+'</p><button type="button" class="nxbtn" data-jumpto="'+go+'">'+esc(btn)+'</button>';
   refreshStayBoxes();
 }
 document.addEventListener('click',function(e){
@@ -1990,6 +2026,8 @@ document.addEventListener('click',function(e){
   var b=e.target.closest&&e.target.closest('.nxbtn');if(!b)return;
   var go=b.getAttribute('data-jumpto');
   if(go==='pick'){var i=nextOpenStop();if(i>-1){openStaySheet(i);return;}go='stay';}
+  if(go==='dowiz'){openDoSheet(0);return;}
+  if(go==='map'){var pe=document.getElementById('panel');pe.classList.add('peek');if(lastFit)setTimeout(function(){fitWithUI(lastFit);},450);return;}
   scrollToSec(go);
 });
 /* each stop's Stay tab: the pick if there is one, otherwise one clear button */
@@ -2158,7 +2196,7 @@ function openStaySheet(i,editId){
     r._stayList=l||[];if(staySt&&staySt.i===i){staySt.list=r._stayList;stayRender();}
   });
 }
-function closeStaySheet(){var sh=document.getElementById('actsheet');if(sh)sh.classList.remove('show');staySt=null;}
+function closeStaySheet(){var sh=document.getElementById('actsheet');if(sh)sh.classList.remove('show');staySt=null;doSt=null;}
 function stayRender(){
   var st=staySt;if(!st)return;
   var r=tripCtx.recs[st.i],b=document.getElementById('actBody');
@@ -2194,15 +2232,100 @@ function stayDone(name){
   cart.push({id:'c'+(cartSeq++),kind:'stay',label:'Stay: '+nm,name:nm,type:st.type,cost:st.price,nights:st.nights,stopI:st.i,pp:false});
   if(tripStyle==='flow')tripStyle='plan';
   renderCost();
-  var e=estimate(),nx=nextOpenStop(),b=document.getElementById('actBody');
-  document.getElementById('actTitle').textContent='Added to your trip';
-  b.innerHTML='<div class="stdone"><span class="spcheck big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><div><b>'+esc(nm)+'</b><span>'+st.nights+(st.nights===1?' night':' nights')+' \u00b7 '+usd(st.price)+' a night</span></div></div>'+
-    '<p class="sttotal">Your trip total is now <b>'+usd(e.total)+'</b>.</p>'+
-    ((e.openN>0&&nx>-1)?('<p class="actsub">You still have '+e.openN+(e.openN===1?' night':' nights')+' without a place.</p>'+
-      '<button type="button" class="actbtn actadd" id="stNext" data-i="'+nx+'">Plan '+esc(stopLabel(nx))+'</button>'+
-      '<button type="button" class="actbtn actgo" id="stFlowRest">Go with the flow for the rest</button>'):'<p class="actsub">Every night has a place. Next, find things to do.</p>')+
-    '<button type="button" class="actbtn '+((e.openN>0&&nx>-1)?'actx':'actadd')+'" id="stDoneBtn">Done</button>';
+  var e=estimate(),nx=nextOpenStop(),lbl=stopLabel(st.i),more=(e.openN>0&&nx>-1);
   staySt=null;
+  document.getElementById('actsheet').classList.remove('show');
+  // autopilot: cheer, then the next open night opens by itself; when every
+  // night is set, the things-to-do picker opens for the first stop
+  cheer(more?pickLine(lbl):'Every night has a place.',
+        more?(usd(e.total)+' so far. Next up: '+stopLabel(nx)+'.'):('This trip is taking shape. '+usd(e.total)+' so far.'),
+        function(){if(more)openStaySheet(nx);else openDoSheet(0);});
+}
+/* ===== small wins: a check, a burst, a two-note chime, one confident line ===== */
+var CHEER_LINES=['sorted.','locked in.','handled.','done. One less thing to figure out.'];
+var cheerN=0;
+function pickLine(lbl){var l=lbl.replace(/^./,function(c){return c.toUpperCase();}).replace(/ near .*/,'');return l+', '+CHEER_LINES[(cheerN++)%CHEER_LINES.length];}
+var soundOn=true;try{soundOn=localStorage.getItem('voyage-sound')!=='off';}catch(e0){}
+var audioCtx=null;
+function chime(big){
+  if(!soundOn)return;
+  try{
+    audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+    var t=audioCtx.currentTime,notes=big?[660,880,1320]:[784,1175];
+    notes.forEach(function(f,i){
+      var o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.type='sine';o.frequency.value=f;
+      g.gain.setValueAtTime(0.0001,t+i*0.11);g.gain.exponentialRampToValueAtTime(0.09,t+i*0.11+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+i*0.11+0.42);
+      o.connect(g);g.connect(audioCtx.destination);o.start(t+i*0.11);o.stop(t+i*0.11+0.45);
+    });
+  }catch(e1){}
+}
+var cheerTimer=null;
+function cheer(title,sub,then,big){
+  var el=document.getElementById('cheer');if(!el){if(then)then();return;}
+  document.getElementById('cheerT').textContent=title;document.getElementById('cheerS').textContent=sub||'';
+  var fx=document.getElementById('cheerFx'),cols=['#F6B93B','#3AB67D','#A2E494','#13714C','#FFFFFF'],h='';
+  if(!RM.matches){for(var i=0;i<(big?26:16);i++){var a=(360/(big?26:16))*i,d=70+Math.round(Math.random()*70);
+    h+='<i style="--a:'+a+'deg;--d:'+d+'px;background:'+cols[i%cols.length]+';animation-delay:'+(Math.random()*0.08).toFixed(2)+'s"></i>';}}
+  fx.innerHTML=h;
+  el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
+  chime(big);
+  if(navigator.vibrate){try{navigator.vibrate(big?[20,40,30]:18);}catch(e2){}}
+  clearTimeout(cheerTimer);
+  var done=false,finish=function(){if(done)return;done=true;clearTimeout(cheerTimer);el.classList.remove('show');el.onclick=null;if(then)then();};
+  el.onclick=finish;                                  // a tap skips the wait
+  cheerTimer=setTimeout(finish,big?2300:1500);
+}
+(function(){var b=document.getElementById('sndBtn');if(!b)return;
+  function paint(){b.textContent=soundOn?'Sound on':'Sound off';}
+  paint();
+  b.addEventListener('click',function(){soundOn=!soundOn;try{localStorage.setItem('voyage-sound',soundOn?'on':'off');}catch(e3){}paint();if(soundOn)chime();});
+})();
+
+/* ===== things-to-do picker: the same sheet, one stop at a time, then a finish ===== */
+var saved=[],tripReady=false,doSt=null;
+function isSaved(i,name){return saved.some(function(x){return x.stopI===i&&x.name===name;});}
+function doItems(i){
+  var card=document.querySelectorAll('#extra .stopcard')[i];if(!card)return {loading:false,items:[]};
+  var tiles=card.querySelectorAll('.spane[data-pane="do"] .hslide');
+  var loading=[].some.call(tiles,function(t){return t.classList.contains('hskel');});
+  var items=[];[].forEach.call(tiles,function(t){var n=t.querySelector('.hst');if(!n)return;var k=t.querySelector('.hsm');items.push({name:n.textContent.trim(),kind:k?k.textContent.trim():''});});
+  return {loading:loading,items:items};
+}
+function openDoSheet(k){
+  var ss=stayStops();
+  if(k>=ss.length){finishTrip();return;}
+  doSt={k:k,i:ss[k],tries:0};
+  document.getElementById('actTitle').textContent='What do you want to do?';
+  doRender();
+  document.getElementById('actsheet').classList.add('show');
+}
+function doRender(){
+  var st=doSt;if(!st)return;
+  var ss=stayStops(),r=tripCtx.recs[st.i],b=document.getElementById('actBody'),d=doItems(st.i),last=st.k===ss.length-1;
+  var rows=d.items.slice(0,12).map(function(x){var on=isSaved(st.i,x.name);
+    return '<button type="button" class="strow dorow'+(on?' on':'')+'" data-name="'+esc(x.name)+'"><span class="strt"><b>'+esc(x.name)+'</b><span>'+esc(x.kind||'Sight')+'</span></span><span class="strpick">'+(on?'\u2713 Saved':'Save')+'</span></button>';
+  }).join('');
+  if(!rows)rows='<p class="stnote">'+(d.loading?'Looking for things to do near this stop...':'Nothing is tagged on the map near this stop yet. The Videos tab still shows what travelers filmed here.')+'</p>';
+  b.innerHTML='<p class="actsub">'+esc(stopLabel(st.i).replace(/^./,function(c){return c.toUpperCase();}))+' \u00b7 stop '+(st.k+1)+' of '+ss.length+'</p>'+
+    '<p class="stnote" style="margin-top:0">Tap anything that sounds good. It is saved to your trip.</p>'+
+    '<div class="stlist">'+rows+'</div>'+
+    '<button type="button" class="actbtn actadd" id="doNext">'+(last?'Finish my trip':'Next stop \u2192')+'</button>';
+  if(d.loading&&st.tries<12){st.tries++;setTimeout(function(){if(doSt===st)doRender();},800);}
+}
+function finishTrip(){
+  doSt=null;tripReady=true;
+  document.getElementById('actsheet').classList.remove('show');
+  renderNext();
+  var e=estimate();
+  cheer('Your trip is ready.','This is going to be a good one. '+usd(e.total)+' estimated, and every number is yours to change.',function(){
+    var sc=document.querySelector('#panel .scroll');if(sc)sc.scrollTo({top:0,behavior:'smooth'});
+  },true);
+}
+function markSavedTiles(){
+  [].forEach.call(document.querySelectorAll('#extra .stopcard'),function(card,i){
+    [].forEach.call(card.querySelectorAll('.spane[data-pane="do"] .hslide'),function(t){var n=t.querySelector('.hst');if(n)t.classList.toggle('savedtile',isSaved(i,n.textContent.trim()));});
+  });
 }
 (function(){
   var sh=document.getElementById('actsheet');if(!sh)return;
@@ -2212,11 +2335,15 @@ function stayDone(name){
     if(ty&&staySt){var pv=parseFloat(document.getElementById('stPrice').value);if(isFinite(pv))staySt.price=pv;staySt.type=ty.getAttribute('data-type');stayRender();return;}
     if(e.target.closest('#stMinus')&&staySt){staySt.nights=Math.max(1,staySt.nights-1);document.getElementById('stN').textContent=staySt.nights;return;}
     if(e.target.closest('#stPlus')&&staySt){staySt.nights=Math.min(30,staySt.nights+1);document.getElementById('stN').textContent=staySt.nights;return;}
+    var drow=e.target.closest('.dorow');
+    if(drow&&doSt){var nm=drow.getAttribute('data-name');
+      if(isSaved(doSt.i,nm))saved=saved.filter(function(x){return !(x.stopI===doSt.i&&x.name===nm);});
+      else{saved.push({stopI:doSt.i,name:nm});chime();}
+      doRender();markSavedTiles();return;}
+    if(e.target.closest('#doNext')&&doSt){openDoSheet(doSt.k+1);return;}
     var row=e.target.closest('.strow');
     if(row&&staySt){stayDone(row.getAttribute('data-name'));return;}
-    if(e.target.closest('#stFlow')||e.target.closest('#stFlowRest')){tripStyle='flow';closeStaySheet();renderNext();return;}
-    var nx=e.target.closest('#stNext');
-    if(nx){openStaySheet(+nx.getAttribute('data-i'));return;}
+    if(e.target.closest('#stFlow')){tripStyle='flow';closeStaySheet();renderNext();openDoSheet(0);return;}
   });
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&sh.classList.contains('show'))closeStaySheet();});
 })();
@@ -2429,7 +2556,7 @@ function netErrMsg(e){
 }
 
 form.addEventListener('submit',function(e){
-  e.preventDefault();pushURL();hint.classList.remove('err');cart=[];closeEdit();   // a fresh search starts an empty cart
+  e.preventDefault();pushURL();hint.classList.remove('err');cart=[];saved=[];tripReady=false;tripStyle='plan';closeEdit();   // a fresh search starts an empty cart
   var vals=[].map.call(document.querySelectorAll('#stops .stopin'),function(i){return i.value.trim();}).filter(Boolean);
   if(vals.length<2){hint.textContent=travelMode==='fly'?'Add at least a departure and destination city.':(travelMode==='boat'?'Add at least a departure and destination port.':'Add at least a start and a destination.');hint.classList.add('err');return;}
   hint.textContent=travelMode==='drive'?'Planning your route, stops, and stays...':'Planning your trip...';
