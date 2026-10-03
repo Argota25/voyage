@@ -1431,6 +1431,25 @@ body.tripdone #panel.peek .jumpbar{display:none}
 .shslide.shmsg .shnext{min-height:52px;padding:0 24px;border:0;border-radius:14px;font:800 15px var(--body);cursor:pointer}
 .shsound{display:none;flex:none;margin:0 14px 8px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.12);color:#fff;font:700 12.5px var(--body);text-align:center}
 .shorts.ios .shsound{display:block}
+.savebar{display:flex;align-items:center;gap:10px;margin-top:12px}
+.savebar:empty{display:none}
+.svsave{flex:1;min-height:46px;border:1.5px solid rgba(70,127,103,.4);border-radius:14px;background:#fff;color:#27493D;font:800 14.5px var(--body);cursor:pointer}
+.svsave.hot{min-height:50px;border:0;background:var(--pop);color:var(--pop-ink);box-shadow:0 12px 24px -14px rgba(150,56,28,.7)}
+.svsave:disabled{opacity:.7}
+.svok{flex:1;display:inline-flex;align-items:center;gap:8px;font:700 13.5px var(--body);color:#467F67}
+.svok svg{width:18px;height:18px;flex:none}
+.svshare{flex:none;min-height:44px;padding:0 20px;border:0;border-radius:999px;background:var(--pop);color:var(--pop-ink);font:800 14px var(--body);cursor:pointer}
+#panel.open:not(.peek) .savebar{order:4;margin-top:8px}
+.sharelink{width:100%;min-height:50px;padding:0 14px;margin-bottom:10px;border-radius:12px;border:1.5px solid rgba(70,127,103,.4);background:#F8F6F0;color:#27493D;font:600 16px var(--body)}
+.mytrips{width:min(1040px,100%);margin:26px auto 0;text-align:left}
+.mytrips:empty{display:none}
+.mytrips h2{font:800 20px var(--heading);color:#fff;margin-bottom:10px;text-shadow:0 2px 10px rgba(0,0,0,.4)}
+.mtlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.mtrow{display:flex;align-items:stretch;border-radius:16px;background:rgba(255,255,255,.95);overflow:hidden;box-shadow:0 14px 30px -18px rgba(0,0,0,.6)}
+.mytrip{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;min-height:64px;padding:12px 14px;border:0;background:none;text-align:left;cursor:pointer}
+.mytrip b{font:800 16px/1.25 var(--heading);color:#27493D;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mytrip span{font:600 13px var(--body);color:#467F67}
+.mytripx{flex:none;width:48px;border:0;border-left:1px solid rgba(70,127,103,.18);background:none;color:#5f7268;font:700 22px/1 var(--body);cursor:pointer}
 </style>
 </head>
 <body>
@@ -1500,6 +1519,7 @@ body.tripdone #panel.peek .jumpbar{display:none}
       <div class="go">Plan a boat trip &rarr;</div>
     </button>
   </div>
+  <div class="mytrips" id="myTrips"></div>
 </div>
 
 <div class="ui brand">
@@ -1568,6 +1588,7 @@ body.tripdone #panel.peek .jumpbar{display:none}
     <h2 id="pTitle"></h2>
     <div class="meta" id="pMeta"></div>
     <div class="count" id="pCount"></div>
+    <div class="savebar" id="saveBar"></div>
     <div class="donestrip" id="doneStrip"></div>
     <button class="pricehero" id="priceHero" type="button" aria-label="Estimated trip total. Show the cost breakdown"><span class="phamt" id="phAmt">--</span><span class="phlbl"><b>Estimated trip total</b><span id="phSub">See the breakdown</span></span><svg class="phgo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="sheethint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg><span class="sh-up">Swipe up for the full itinerary</span><span class="sh-down">Swipe down to see the map</span></div>
@@ -1833,6 +1854,7 @@ document.getElementById('addStop').addEventListener('click',function(){var s=doc
 var restoring=false;
 function pushURL(){
   if(restoring)return;
+  if(tripId&&document.body.classList.contains('chosen')){if(location.search!=='?t='+tripId)history.pushState(null,'','?t='+tripId);return;}
   var sp=new URLSearchParams();
   if(document.body.classList.contains('chosen')){
     sp.set('mode',travelMode);
@@ -1849,6 +1871,8 @@ document.getElementById('betafb').addEventListener('click',function(){
   this.href='https://form.jotform.com/262747271566062'+(q.toString()?'?'+q.toString():'');
 });
 function applyParams(sp){
+  var tid=sp.get('t');
+  if(tid&&/^[a-z0-9]{10}$/.test(tid)){loadTrip(tid);return;}
   var m=sp.get('mode')||sp.get('intent');
   if(!m){openGate();return;}
   if(['drive','fly','boat'].indexOf(m)<0)m='drive';
@@ -2099,6 +2123,7 @@ function renderCost(){
   var e=estimate();
   var t=document.getElementById('cotTot');if(t)t.textContent=usd(e.total);
   var hm=document.getElementById('metaEst');if(hm)hm.textContent=' · est '+usd(e.total);
+  tripDirty();
   var pa=document.getElementById('phAmt');if(pa)pa.textContent=usd(e.total);
   var psub=document.getElementById('phSub');if(psub)psub.textContent=(e.ppl>1?('For '+e.ppl+' travelers. '):'')+'See the breakdown';
   var pn=e.ppl>1?(' x '+e.ppl+' travelers'):'';
@@ -2603,7 +2628,7 @@ function loadIdeas(st){
 function finishTrip(){
   doSt=null;ideaView='';tripReady=true;
   document.getElementById('actsheet').classList.remove('show');
-  renderNext();
+  renderNext();renderSaveBar();tripDirty();
   var n=saved.length;
   cheer('Your trip is ready.',n?('This is going to be a good one. '+n+(n===1?' pick':' picks')+' on your map.'):'This is going to be a good one.',function(){showTripMap();},true);
 }
@@ -2656,6 +2681,111 @@ function focusPick(i){
   stageMap.setView(x._ll,Math.max(stageMap.getZoom(),14),{animate:true});
   setTimeout(function(){pickZoom();x._m.openPopup();},450);
 }
+var tripId='',tripKey='',tripSavedAt=0,tripSaveT=0,pendingRestore=null,tripSaving=false;
+function myTrips(){try{var l=JSON.parse(localStorage.getItem('voyage-trips')||'[]');return Array.isArray(l)?l:[];}catch(e){return [];}}
+function myTripsPut(rec){var l=myTrips().filter(function(x){return x.id!==rec.id;});l.unshift(rec);try{localStorage.setItem('voyage-trips',JSON.stringify(l.slice(0,30)));}catch(e){}}
+function myTripsDrop(id){try{localStorage.setItem('voyage-trips',JSON.stringify(myTrips().filter(function(x){return x.id!==id;})));}catch(e){}}
+function stopVals(){return [].map.call(document.querySelectorAll('#stops .stopin'),function(i){return i.value.trim();}).filter(Boolean);}
+function tripTitle(){var v=stopVals();if(v.length<2)return 'My trip';return v[0].split(',')[0]+' to '+v[v.length-1].split(',')[0]+(v.length>2?(' (+'+(v.length-2)+')'):'');}
+function tripState(){
+  return {mode:travelMode,stops:stopVals(),dates:{start:tripDates.start,end:tripDates.end},prefs:{hrs:tripPrefs.hrs,stay:tripPrefs.stay,see:tripPrefs.see},
+    style:tripStyle,ready:tripReady,budget:budget,edited:budgetEdited,
+    stays:cart.filter(function(x){return x.kind==='stay';}).map(function(x){return {name:x.name||x.label,type:x.type||'hotel',cost:x.cost,nights:x.nights||1,stopI:x.stopI||0};}),
+    picks:saved.map(function(x){return {stopI:x.stopI,name:x.name,src:x.src,note:x.note||'',lat:x.lat,lng:x.lng,wp:x.wp||null,short:x.short||null};})};
+}
+function tripLink(){return location.origin+location.pathname+'?t='+tripId;}
+function saveTrip(){
+  if(!tripCtx||tripSaving)return Promise.resolve(tripId||null);
+  tripSaving=true;
+  var body={trip:tripState()},url='/api/trips',method='POST';
+  if(tripId&&tripKey){url+='/'+tripId;method='PUT';body.key=tripKey;}
+  return fetch(url,{method:method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+    .then(function(r){return r.json().then(function(j){return {ok:r.ok,status:r.status,j:j};});})
+    .then(function(x){
+      tripSaving=false;
+      if(!x.ok){
+        if(method==='PUT'&&(x.status===403||x.status===404)){tripId='';tripKey='';return saveTrip();}
+        throw new Error((x.j&&x.j.error)||'The trip did not save. Try again.');
+      }
+      if(x.j.key){tripId=x.j.id;tripKey=x.j.key;}
+      tripSavedAt=Date.now();
+      myTripsPut({id:tripId,key:tripKey,title:tripTitle(),mode:travelMode,dates:dateRangeLabel(),at:tripSavedAt});
+      if(location.search!=='?t='+tripId)history.replaceState(null,'','?t='+tripId);
+      renderSaveBar();
+      return tripId;
+    },function(e){tripSaving=false;throw e;});
+}
+function tripDirty(){
+  if(!tripId||!tripKey||pendingRestore)return;
+  clearTimeout(tripSaveT);
+  tripSaveT=setTimeout(function(){saveTrip().catch(function(){});},1500);
+}
+function renderSaveBar(){
+  var el=document.getElementById('saveBar');if(!el)return;
+  var mine=tripId&&tripKey;
+  el.innerHTML=mine?('<span class="svok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Saved. Changes save by themselves.</span><button type="button" class="svshare" id="shareTrip">Share</button>')
+    :('<button type="button" class="svsave'+(tripReady?' hot':'')+'" id="saveTripBtn">'+(tripId?'Save a copy of this trip':'Save this trip')+'</button>');
+}
+function shareSheet(){
+  var link=tripLink();
+  inApp.show('Your trip is saved','<p class="intext">Anyone with this link can open your trip. It keeps up when you change it. Find it again on this phone under Your saved trips.</p>'+
+    '<input class="sharelink" id="shareLink" readonly value="'+esc(link)+'" aria-label="Link to your trip">'+
+    '<button type="button" class="actbtn actadd" id="copyLink">Copy the link</button>'+
+    (navigator.share?'<button type="button" class="actbtn actgo" id="nativeShare">Send it to someone</button>':''));
+}
+document.addEventListener('click',function(e){
+  var t=e.target.closest&&e.target.closest('#saveTripBtn,#shareTrip,#copyLink,#nativeShare,.mytrip,.mytripx');if(!t)return;
+  if(t.id==='saveTripBtn'){e.stopPropagation();t.disabled=true;t.textContent='Saving...';
+    saveTrip().then(function(){cheer('Trip saved.','It is in Your saved trips, and you can share the link.',function(){shareSheet();});},function(er){t.disabled=false;t.textContent='Save this trip';inApp.note('Not saved',er.message);});return;}
+  if(t.id==='shareTrip'){e.stopPropagation();shareSheet();return;}
+  if(t.id==='copyLink'){var done=function(){t.textContent='Copied';};
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(tripLink()).then(done,function(){var i=document.getElementById('shareLink');i.select();try{document.execCommand('copy');done();}catch(er){}});
+    else{var i2=document.getElementById('shareLink');i2.select();try{document.execCommand('copy');done();}catch(er2){}}
+    return;}
+  if(t.id==='nativeShare'){navigator.share({title:'My Voyage trip: '+tripTitle(),url:tripLink()}).catch(function(){});return;}
+  if(t.classList.contains('mytripx')){e.stopPropagation();myTripsDrop(t.getAttribute('data-id'));renderMyTrips();return;}
+  if(t.classList.contains('mytrip')){var id=t.getAttribute('data-id');history.pushState(null,'','?t='+id);applyParams(new URLSearchParams(location.search));}
+});
+function renderMyTrips(){
+  var el=document.getElementById('myTrips');if(!el)return;
+  var l=myTrips();
+  el.innerHTML=l.length?('<h2>Your saved trips</h2><div class="mtlist">'+l.map(function(x){
+    return '<div class="mtrow"><button type="button" class="mytrip" data-id="'+esc(x.id)+'"><b>'+esc(x.title||'My trip')+'</b><span>'+esc((x.mode==='fly'?'Flight':(x.mode==='boat'?'Boat trip':'Drive'))+(x.dates?(' · '+x.dates):''))+'</span></button><button type="button" class="mytripx" data-id="'+esc(x.id)+'" aria-label="Remove '+esc(x.title||'trip')+' from this list">&times;</button></div>';
+  }).join('')+'</div>'):'';
+}
+function loadTrip(id){
+  planBusy(true);
+  fetch('/api/trips/'+encodeURIComponent(id)).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}).then(function(rec){
+    if(!rec||!rec.trip){planBusy(false);myTripsDrop(id);openGate();renderMyTrips();inApp.note('Trip not found','That saved trip is no longer available. It may have been removed.');return;}
+    var t=rec.trip,mine=myTrips().filter(function(x){return x.id===id;})[0];
+    tripId=id;tripKey=(mine&&mine.key)||'';
+    restoring=true;
+    configTravel(t.mode);document.body.classList.add('chosen');syncTmSeg();
+    buildStops();
+    while(document.querySelectorAll('#stops .stopin').length<t.stops.length){var before=document.querySelectorAll('#stops .stopin').length;document.getElementById('addStop').click();if(document.querySelectorAll('#stops .stopin').length===before)break;}
+    var ins=document.querySelectorAll('#stops .stopin');t.stops.forEach(function(v,i){if(ins[i])ins[i].value=v;});
+    var a=document.getElementById('dStart'),b=document.getElementById('dEnd');
+    a.value=(t.dates&&t.dates.start)||'';b.value=(t.dates&&t.dates.end)||'';syncDates();calSync();
+    var pf=t.prefs||{};
+    [['hrs',[String(pf.hrs||8)]],['stay',[pf.stay||'any']],['see',pf.see||[]]].forEach(function(g){
+      [].forEach.call(document.querySelectorAll('.chips[data-pref="'+g[0]+'"] .chip'),function(c){c.classList.toggle('on',g[1].indexOf(c.getAttribute('data-v'))>-1);});
+    });
+    syncPrefs();
+    pendingRestore=t;
+    setTimeout(function(){restoring=false;},60);
+    form.dispatchEvent(new Event('submit',{cancelable:true}));
+  });
+}
+function applyRestore(t){
+  var n=(tripCtx.recs||[]).length;
+  Object.assign(budget,t.budget||{});budgetEdited=t.edited||{};
+  cart=(t.stays||[]).filter(function(x){return x.stopI<n;}).map(function(x){return {id:'c'+(cartSeq++),kind:'stay',label:'Stay: '+x.name,name:x.name,type:x.type,cost:x.cost,nights:x.nights,stopI:x.stopI,pp:false};});
+  saved=(t.picks||[]).filter(function(x){return x.stopI<n;});
+  tripStyle=t.style==='flow'?'flow':'plan';tripReady=!!t.ready;
+  renderCost();markSavedTiles();renderNext();renderSaveBar();
+  if(tripReady)setTimeout(function(){if(tripCtx)showTripMap();},1900);
+}
+renderMyTrips();
 function renderDoneStrip(){
   var el=document.getElementById('doneStrip');if(!el)return;
   var on=tripReady&&saved.length>0;
@@ -2688,6 +2818,7 @@ function renderPicks(){
     var box=pane.querySelector('.mypicks');
     if(!box){box=document.createElement('div');box.className='mypicks';var lb=pane.querySelector('.slbl');pane.insertBefore(box,lb?lb.nextSibling:pane.firstChild);}
     var mine=saved.filter(function(x){return x.stopI===i;});
+    tripDirty();
     box.innerHTML=mine.length?('<b>Your picks</b><div class="mpl">'+mine.map(function(x){return '<span class="mpk">'+esc(x.name)+'<button type="button" class="mpx" data-i="'+i+'" data-name="'+esc(x.name)+'" aria-label="Remove '+esc(x.name)+'">&times;</button></span>';}).join('')+'</div>'):'';
   });
 }
@@ -2809,7 +2940,7 @@ var inApp=(function(){
     if(h==='google.com'){var gq=u.searchParams.get('q');if(gq)return videos(gq+' travel',label||gq);}
     note(label||'Not in Voyage yet','This lives on another site, and Voyage does not send you out of the app. We are working on bringing it in.');
   },true);
-  return {video:video,videos:videos,wiki:wiki,frame:frame,note:note,close:close};
+  return {video:video,videos:videos,wiki:wiki,frame:frame,note:note,close:close,show:show};
 })();
 
 var planTimer=null,planFailsafe=null;
@@ -2879,11 +3010,11 @@ document.getElementById('editTrip').addEventListener('click',function(e){e.stopP
     panelEl.classList.toggle('peek');
     if(panelEl.classList.contains('peek')&&lastFit)setTimeout(function(){fitWithUI(lastFit);},500);
   }
-  ph.addEventListener('click',function(e){if(e.target.closest('.methodlink,.jumpbar,.pricehero,.donestrip'))return;toggle();});
+  ph.addEventListener('click',function(e){if(e.target.closest('.methodlink,.jumpbar,.pricehero,.donestrip,.savebar'))return;toggle();});
   ph.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
   var y0=null,dy=0,base=0,maxOff=0;
   ph.addEventListener('pointerdown',function(e){
-    if(!mqPhone.matches||(e.button&&e.button>0)||e.target.closest('button,a,.jumpbar,.donestrip'))return;
+    if(!mqPhone.matches||(e.button&&e.button>0)||e.target.closest('button,a,.jumpbar,.donestrip,.savebar'))return;
     y0=e.clientY;dy=0;
     maxOff=panelEl.offsetHeight-peekH();
     base=panelEl.classList.contains('peek')?maxOff:0;
@@ -2935,7 +3066,9 @@ function netErrMsg(e){
 }
 
 form.addEventListener('submit',function(e){
-  e.preventDefault();pushURL();hint.classList.remove('err');cart=[];saved=[];tripReady=false;tripStyle='plan';ideaProfile=null;ideaSrc='travelers';document.body.classList.remove('tripdone','pktapped');if(pkLayer)pkLayer.clearLayers();closeEdit();
+  e.preventDefault();
+  if(!pendingRestore){tripId='';tripKey='';}
+  pushURL();hint.classList.remove('err');cart=[];saved=[];tripReady=false;tripStyle='plan';ideaProfile=null;ideaSrc='travelers';document.body.classList.remove('tripdone','pktapped');if(pkLayer)pkLayer.clearLayers();closeEdit();
   var vals=[].map.call(document.querySelectorAll('#stops .stopin'),function(i){return i.value.trim();}).filter(Boolean);
   if(vals.length<2){hint.textContent=travelMode==='fly'?'Add at least a departure and destination city.':(travelMode==='boat'?'Add at least a departure and destination port.':'Add at least a start and a destination.');hint.classList.add('err');return;}
   hint.textContent=travelMode==='drive'?'Planning your route, stops, and stays...':'Planning your trip...';
@@ -2943,7 +3076,7 @@ form.addEventListener('submit',function(e){
   var pts=[],chain=Promise.resolve(null);
   vals.forEach(function(v){chain=chain.then(function(prev){return resolveLocation(v,prev?prev.lat+','+prev.lng:undefined,travelMode==='drive').then(function(r){pts.push(r);return r;});});});
   chain.then(function(){return GLOBE_READY;}).then(function(){planTrip(pts);hint.textContent='';})
-    .catch(function(er){planBusy(false);if(er==='cancel'){hint.textContent='';}else if(er&&er.kind){hint.textContent=netErrMsg(er);hint.classList.add('err');}else{hint.textContent='We could not find one of those stops. Add a city or state.';hint.classList.add('err');}});
+    .catch(function(er){planBusy(false);pendingRestore=null;if(er==='cancel'){hint.textContent='';}else if(er&&er.kind){hint.textContent=netErrMsg(er);hint.classList.add('err');}else{hint.textContent='We could not find one of those stops. Add a city or state.';hint.classList.add('err');}});
 });
 
 document.getElementById('reset').addEventListener('click',function(){
@@ -2984,6 +3117,8 @@ function buildDetail(opts){
   buildJump(rc.travel==='drive');
   initWPS();
   initStopSliders(rc.recs||[]);
+  if(pendingRestore){var pr=pendingRestore;pendingRestore=null;applyRestore(pr);}
+  renderSaveBar();
   applyPerDiem(rc.recs||[],planGen);
   var g2=++stageGen;
   setTimeout(function(){if(g2!==stageGen)return;
@@ -3105,6 +3240,7 @@ function decode(str,prec){var idx=0,lat=0,lng=0,out=[],f=Math.pow(10,prec||6),sh
 function fmtViews(v){return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?Math.round(v/1e3)+'K':''+v;}
 function openGate(){
   stageGen++;planGen++;closeEdit();
+  tripId='';tripKey='';renderMyTrips();
   streetStatus('');
   lastFit=null;var rcb=document.getElementById('recenter');if(rcb)rcb.classList.remove('show');
   document.body.classList.remove('chosen','inarea','m-drive','m-fly','m-boat');themeGlobe('#86C5A4');
@@ -3684,7 +3820,7 @@ function planDrive(pts,g){
         if(el)el.textContent=st.place+' \u00b7 ~'+st.afterMi+' mi \u00b7 about '+((tripCtx&&tripCtx.hrs?tripCtx.hrs:8)*st.night)+'h of driving in'+(st.date?(' \u00b7 '+fmtDate(st.date)):'');
       });
     });
-  }).catch(function(er){if(g!==planGen)return;planBusy(false);var hn=document.getElementById('hint');
+  }).catch(function(er){if(g!==planGen)return;planBusy(false);pendingRestore=null;var hn=document.getElementById('hint');
     hn.textContent=(er&&er.kind)?netErrMsg(er):'We could not map that drive. Check the stops and try again.';
     hn.classList.add('err');});
 }

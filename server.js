@@ -132,6 +132,113 @@ function storeInit(){
   } catch (e){ storeOn = false; console.warn('[store] off: ' + ((e && e.message) || e)); }
 }
 
+const TRIP_DIR = DATA_DIR ? path.join(DATA_DIR, 'trips') : '';
+const TRIP_MAX = 150 * 1024 * 1024;
+const tripMem = new Map();
+let tripsOn = false, tripCount = 0;
+function tripFile(id){ return path.join(TRIP_DIR, id + '.json'); }
+function tripInit(){
+  if (!TRIP_DIR) return;
+  try { fs.mkdirSync(TRIP_DIR, { recursive: true }); fs.accessSync(TRIP_DIR, fs.constants.W_OK); tripsOn = true; tripTrim(); }
+  catch (e){ tripsOn = false; }
+}
+function tripTrim(){
+  if (!tripsOn) return;
+  try {
+    const files = fs.readdirSync(TRIP_DIR).filter(f => f.endsWith('.json')).map(f => { const st = fs.statSync(path.join(TRIP_DIR, f)); return { f, size: st.size, m: st.mtimeMs }; });
+    tripCount = files.length;
+    let total = files.reduce((a, x) => a + x.size, 0);
+    if (total <= TRIP_MAX) return;
+    files.sort((a, b) => a.m - b.m);
+    for (const x of files){ if (total <= TRIP_MAX * 0.8) break; try { fs.unlinkSync(path.join(TRIP_DIR, x.f)); total -= x.size; tripCount--; } catch (e) {} }
+  } catch (e) {}
+}
+function tripRead(id){
+  if (!/^[a-z0-9]{10}$/.test(id)) return null;
+  if (!tripsOn) return tripMem.get(id) || null;
+  try { return JSON.parse(fs.readFileSync(tripFile(id), 'utf8')); } catch (e){ return null; }
+}
+function tripWrite(id, rec){
+  if (!tripsOn){ if (tripMem.size >= 500) tripMem.delete(tripMem.keys().next().value); tripMem.set(id, rec); return Promise.resolve(); }
+  return new Promise((resolve, reject) => {
+    const f = tripFile(id), tmp = f + '.' + process.pid + '.' + Date.now() + '.tmp', fresh = !fs.existsSync(f);
+    fs.writeFile(tmp, JSON.stringify(rec), err => {
+      if (err){ fs.unlink(tmp, () => {}); return reject(err); }
+      fs.rename(tmp, f, e2 => { if (e2){ fs.unlink(tmp, () => {}); return reject(e2); } if (fresh) tripCount++; resolve(); });
+    });
+  });
+}
+function str(v, max){ return typeof v === 'string' ? v.replace(/[\u0000-\u001f]/g, ' ').slice(0, max) : ''; }
+function num(v, lo, hi, d){ const n = +v; return isFinite(n) ? Math.min(hi, Math.max(lo, n)) : d; }
+function isoDay(v){ return /^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : ''; }
+function tripClean(t){
+  if (!t || typeof t !== 'object') return null;
+  const mode = ['drive', 'fly', 'boat'].indexOf(t.mode) > -1 ? t.mode : 'drive';
+  const stops = (Array.isArray(t.stops) ? t.stops : []).map(x => str(x, 120).trim()).filter(Boolean).slice(0, 6);
+  if (stops.length < 2) return null;
+  const p = t.prefs || {}, b = t.budget || {}, d = t.dates || {};
+  const out = {
+    v: 1, mode, stops,
+    dates: { start: isoDay(d.start), end: isoDay(d.end) },
+    prefs: { hrs: [4, 6, 8, 10].indexOf(+p.hrs) > -1 ? +p.hrs : 8, stay: ['airbnb', 'hotel', 'motel', 'any'].indexOf(p.stay) > -1 ? p.stay : 'any', see: (Array.isArray(p.see) ? p.see : []).filter(x => ['food', 'nature', 'history', 'nightlife', 'family', 'music', 'beaches', 'hikes'].indexOf(x) > -1) },
+    style: t.style === 'flow' ? 'flow' : 'plan',
+    ready: !!t.ready,
+    budget: { nightly: num(b.nightly, 0, 5000, 120), foodDay: num(b.foodDay, 0, 2000, 55), mpg: num(b.mpg, 1, 200, 26), gas: num(b.gas, 0, 20, 3.4), rental: num(b.rental, 0, 2000, 55), ppl: Math.round(num(b.ppl, 1, 30, 1)) },
+    edited: {},
+    stays: (Array.isArray(t.stays) ? t.stays : []).slice(0, 20).map(x => ({ name: str(x.name, 120), type: ['hotel', 'motel', 'rental'].indexOf(x.type) > -1 ? x.type : 'hotel', cost: num(x.cost, 0, 5000, 0), nights: Math.round(num(x.nights, 1, 30, 1)), stopI: Math.round(num(x.stopI, 0, 20, 0)) })).filter(x => x.name),
+    picks: (Array.isArray(t.picks) ? t.picks : []).slice(0, 60).map(x => {
+      const o = { stopI: Math.round(num(x.stopI, 0, 20, 0)), name: str(x.name, 140), src: ['travelers', 'trending', 'you'].indexOf(x.src) > -1 ? x.src : 'travelers', note: str(x.note, 220) };
+      if (isFinite(+x.lat) && isFinite(+x.lng) && x.lat !== null && x.lng !== null){ o.lat = num(x.lat, -90, 90, 0); o.lng = num(x.lng, -180, 180, 0); }
+      if (typeof x.wp === 'string' && /^[a-z-]{2,12}:[^<>"']{1,160}$/.test(x.wp)) o.wp = x.wp;
+      const sh = x.short;
+      if (sh && typeof sh === 'object' && /^[A-Za-z0-9_-]{6,16}$/.test(sh.id || '')) o.short = { id: sh.id, title: str(sh.title, 140), channel: str(sh.channel, 80), views: Math.round(num(sh.views, 0, 1e12, 0)), secs: Math.round(num(sh.secs, 0, 1e6, 0)) };
+      return o;
+    }).filter(x => x.name)
+  };
+  const ed = t.edited || {};
+  ['nightly', 'foodDay', 'mpg', 'gas', 'rental', 'ppl'].forEach(k => { if (ed[k]) out.edited[k] = true; });
+  return out;
+}
+function readBody(req, max){
+  return new Promise((resolve, reject) => {
+    let size = 0; const chunks = [];
+    req.on('data', c => { size += c.length; if (size > max){ reject(new Error('too large')); req.destroy(); } else chunks.push(c); });
+    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    req.on('error', reject);
+  });
+}
+const tripRL = new Map();
+function tripRateOk(ip){
+  const day = quotaDay(), k = ip + '|' + day;
+  if (tripRL.size > 20000) tripRL.clear();
+  const n = (tripRL.get(k) || 0) + 1; tripRL.set(k, n);
+  return n <= 60;
+}
+async function handleTripSave(req, res, id){
+  let body;
+  try { body = JSON.parse(await readBody(req, 40000)); } catch (e){ return json(res, 400, { error: 'bad trip' }); }
+  const trip = tripClean(body && body.trip);
+  if (!trip) return json(res, 400, { error: 'a trip needs at least two stops' });
+  const now = Date.now();
+  if (id){
+    const cur = tripRead(id);
+    if (!cur) return json(res, 404, { error: 'trip not found' });
+    if (!body.key || body.key !== cur.key) return json(res, 403, { error: 'this trip belongs to someone else' });
+    await tripWrite(id, { id, key: cur.key, created: cur.created, updated: now, trip });
+    return json(res, 200, { id, updated: now });
+  }
+  if (!tripRateOk(clientIP(req))) return json(res, 429, { error: 'too many trips saved today' });
+  const newId = crypto.randomBytes(8).toString('hex').slice(0, 10).replace(/[^a-z0-9]/g, '0');
+  const key = crypto.randomBytes(18).toString('hex');
+  await tripWrite(newId, { id: newId, key, created: now, updated: now, trip });
+  json(res, 200, { id: newId, key, updated: now });
+}
+function handleTripGet(res, id){
+  const rec = tripRead(id);
+  if (!rec) return json(res, 404, { error: 'trip not found' });
+  json(res, 200, { id: rec.id, created: rec.created, updated: rec.updated, trip: rec.trip });
+}
+
 const cache = new Map();
 const KEEP = /^(guide2|places|stayosm|yt|r):/;
 function cget(k){
@@ -577,7 +684,7 @@ function handleSocialStatus(res){
     events:   !!TM_KEY,
     google:   !!(G_KEY && G_CX),
     instagram: false, facebook: false, tiktok: false, airbnb: false,
-    store: storeOn, stored: storeCount, videoSearches: { used: spent.yt || 0, max: BUDGET.yt }, videoIndex: chanIdx.length,
+    store: storeOn, stored: storeCount, trips: tripCount, videoSearches: { used: spent.yt || 0, max: BUDGET.yt }, videoIndex: chanIdx.length,
     note: 'instagram/facebook need a Meta developer app + review; tiktok needs developer approval; airbnb has no public API. See docs/SOCIAL-APIS.md.'
   });
 }
@@ -1214,6 +1321,14 @@ http.createServer((req, res) => {
   if (u.pathname.startsWith('/api/')) {
     if (!originOk(req)) return json(res, 403, { error: 'forbidden origin' });
     if (!rateOk(clientIP(req))) return json(res, 429, { error: 'rate limited; slow down' });
+    const tm = /^\/api\/trips(?:\/([a-z0-9]{10}))?$/.exec(u.pathname);
+    if (tm){
+      if (req.method === 'POST' && !tm[1]) return void guard(handleTripSave(req, res, ''), res);
+      if (req.method === 'PUT' && tm[1]) return void guard(handleTripSave(req, res, tm[1]), res);
+      if (req.method === 'GET' && tm[1]) return void handleTripGet(res, tm[1]);
+      return json(res, 405, { error: 'method not allowed' });
+    }
+    if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { error: 'method not allowed' });
     if (u.pathname === '/api/geocode') return void guard(handleGeocode(u, res), res);
     if (u.pathname === '/api/route')   return void guard(handleRoute(u, res), res);
     if (u.pathname === '/api/reverse') return void guard(handleReverse(u, res), res);
@@ -1238,10 +1353,12 @@ http.createServer((req, res) => {
  }
 }).listen(PORT, HOST, () => {
   storeInit();
+  tripInit();
   if (storeOn){
     const w = storeGet('meta:wanted'); if (w && Array.isArray(w.data)) wanted = w.data;
     setInterval(prefillTick, 3 * 60000).unref();
     setInterval(storeTrim, 6 * 3600000).unref();
+    setInterval(tripTrim, 6 * 3600000).unref();
     idxEnsure();
     setInterval(idxEnsure, 6 * 3600000).unref();
   }
