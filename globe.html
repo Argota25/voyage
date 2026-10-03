@@ -162,7 +162,8 @@ body.chosen .gate{opacity:0;pointer-events:none}
 /* vehicle selector */
 .veh{display:flex;gap:6px;margin-top:6px}
 .veh button{flex:1;background:var(--panel);border:1px solid var(--rule-2);color:var(--text-2);border-radius:var(--radius);padding:9px 4px;cursor:pointer;font-family:var(--mono);font-size:8.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;transition:all .18s}
-.veh button .vi{font-size:17px;display:block;margin-bottom:3px}
+.veh button .vi{display:block;margin:0 auto 3px;width:22px;height:22px}
+.veh button .vi svg{width:22px;height:22px;display:block}
 .veh button.on{border-color:var(--gold);color:var(--gold);background:rgba(63,224,140,.09)}
 /* route cards */
 .routes{display:flex;flex-direction:column;gap:8px;margin-top:12px}
@@ -598,6 +599,35 @@ a.svcard:hover{border-color:var(--accent)}
 .jumpbar button:hover{border-color:#13714C}
 .jumpbar button.on{background:#13714C;color:#fff;border-color:#13714C}
 .jumpbar button:focus-visible{outline:2px solid #13714C;outline-offset:2px}
+/* ===== results hierarchy (owner 1002): price first, then the route, then sections =====
+   type scale: 44 price / 22 title / 18 stop / 15 section label / 13 body / 11 meta */
+.pricehero{display:flex;align-items:center;gap:14px;width:100%;margin-top:14px;padding:14px 16px 14px 18px;background:#123626;color:#fff;border:0;border-radius:16px;cursor:pointer;text-align:left;box-shadow:0 14px 30px -16px rgba(12,54,36,.65);transition:background .18s,transform .18s}
+.pricehero:hover{background:#0E2C1F}
+.pricehero:active{transform:translateY(1px)}
+.pricehero:focus-visible{outline:3px solid #A2E494;outline-offset:2px}
+.phamt{font:800 44px/1 var(--heading);letter-spacing:-.03em;font-variant-numeric:lining-nums tabular-nums;color:#FFFFFF}
+.phlbl{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.phlbl b{font:700 13px/1.2 var(--body);color:#A2E494}
+.phlbl span{font:500 12px/1.3 var(--body);color:rgba(255,255,255,.78)}
+.phgo{flex:none;width:20px;height:20px;color:#A2E494}
+/* the old inline "est $63" in the meta line is replaced by the price card */
+#metaEst{display:none}
+#panel .ph h2{font-size:24px}
+#panel .ph .meta{font:600 13px var(--body);color:#3e5f4f;margin-top:6px}
+/* stop cards: a real title, readable meta, section labels you can scan */
+#panel .stopcard{padding:16px}
+#panel .stopcard .sh{flex-direction:column;align-items:flex-start;gap:3px}
+#panel .stopcard .sn{font:800 18px var(--heading);color:#123626}
+#panel .stopcard .sm{font:500 12.5px var(--body);color:#3e5f4f;letter-spacing:0;text-align:left}
+#panel .stopcard .slbl{font:700 15px var(--heading);letter-spacing:-.005em;text-transform:none;color:#123626;margin:16px 0 8px}
+#panel .extra .lbl[data-sec="along"]{font:800 18px var(--heading);letter-spacing:-.01em;text-transform:none;color:#123626}
+/* cost card: the breakdown, now that the total lives in the header */
+#panel .cot>summary{font-size:16px}
+#panel .cottot{font-size:24px;color:#123626}
+#panel .cotv{font-size:15px}
+/* the planner's one primary action reads as primary: solid brand green */
+#searchForm #tripBtn{background:#13714C;color:#FFFFFF;border:1px solid #13714C;font-weight:800;box-shadow:0 12px 26px -12px rgba(12,54,36,.6)}
+#searchForm #tripBtn:hover{background:#0F5E3F}
 @media (prefers-reduced-motion:reduce){.card,.gate h1,.gate .lead,#stars .tw,.loading::before{animation:none}}
 /* phones: the Change-intent pill and the search bar both start at top:20px
    and collide below ~700px; drop the search bar under the pill */
@@ -959,7 +989,10 @@ i,em,.panel .ph .meta,.row .ct{font-style:normal}
   .panel.dragging{transition:none!important}
   /* the header is the drag handle: the finger moves the sheet, not the page */
   .panel .ph{touch-action:none;-webkit-user-select:none;user-select:none}
-  .sheethint{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;font:700 12.5px/1.3 var(--body);color:#13714C;background:rgba(58,182,125,.13);border:1px solid rgba(19,113,76,.24);border-radius:999px;padding:9px 14px;text-align:center}
+  .sheethint{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;font:700 12px/1.3 var(--body);color:#13714C;text-align:center}
+  .panel .pf{padding:8px 20px;font-size:9px;line-height:1.4}
+  #panel .ph h2{font-size:22px}
+  .phamt{font-size:40px}
   .sheethint svg{flex:none;width:16px;height:16px;animation:shnudge 1.5s ease-in-out infinite}
   .sheethint .sh-down{display:none}
   .panel:not(.peek) .sheethint .sh-up{display:none}
@@ -1110,9 +1143,9 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
 <form class="ui search" id="searchForm" autocomplete="off">
   <div class="trip" id="trip">
     <div class="veh tmseg" id="tmseg" role="group" aria-label="Travel mode">
-      <button type="button" data-tm="drive"><span class="vi">🚗</span>Drive</button>
-      <button type="button" data-tm="fly"><span class="vi">✈️</span>Fly</button>
-      <button type="button" data-tm="boat"><span class="vi">⛴️</span>Boat</button>
+      <button type="button" data-tm="drive"><span class="vi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l1.6-4.6A2 2 0 0 1 6.5 7h11a2 2 0 0 1 1.9 1.4L21 13v5h-2.5"/><path d="M3 18v-5M5.5 18h3M15 18h3.5"/><circle cx="7" cy="18" r="1.9"/><circle cx="17" cy="18" r="1.9"/></svg></span>Drive</button>
+      <button type="button" data-tm="fly"><span class="vi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L3 10.6l6.4 2.5L12 20l3-6.2z"/><path d="M9.4 13.1L21 3"/></svg></span>Fly</button>
+      <button type="button" data-tm="boat"><span class="vi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 14.5l1.5 4a1.5 1.5 0 0 0 1.4 1h11.8a1.5 1.5 0 0 0 1.4-1l1.5-4"/><path d="M5.2 14.5V9l6.8-2 6.8 2v5.5"/><path d="M12 3v4"/></svg></span>Boat</button>
     </div>
     <div class="stops" id="stops"></div>
     <div class="daterow" id="daterow">
@@ -1139,7 +1172,8 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
     <h2 id="pTitle"></h2>
     <div class="meta" id="pMeta"></div>
     <div class="count" id="pCount"></div>
-    <div class="sheethint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg><span class="sh-up">Swipe up for the full itinerary, or jump to a section</span><span class="sh-down">Swipe down to see the map</span></div>
+    <button class="pricehero" id="priceHero" type="button" aria-label="Estimated trip total. Show the cost breakdown"><span class="phamt" id="phAmt">--</span><span class="phlbl"><b>Estimated trip total</b><span id="phSub">See the breakdown</span></span><svg class="phgo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    <div class="sheethint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg><span class="sh-up">Swipe up for the full itinerary</span><span class="sh-down">Swipe down to see the map</span></div>
     <nav class="jumpbar" id="jumpbar" aria-label="Jump to a section"></nav>
   </div>
   <div class="scroll">
@@ -1548,7 +1582,7 @@ function costRow(name,detail,val){return '<div class="cotrow"><div class="cotl">
 function lineRow(it,ppl){var per=(it.pp&&ppl>1);var v=(+it.cost||0)*(it.pp?Math.max(1,ppl||1):1);
   return '<div class="cotrow cotadd"><div class="cotl">'+esc(it.label)+(per?' <span class="cotpp">'+usd(it.cost)+' x '+ppl+'</span>':'')+'</div><div class="cotv">'+usd(v)+'</div><button type="button" class="cotx" data-rm="'+it.id+'" aria-label="Remove">&times;</button></div>';}
 function adjIn(lbl,key,val,step){return '<label class="cotf"><span>'+esc(lbl)+'</span><input type="text" inputmode="decimal" autocomplete="off" data-bk="'+key+'" value="'+esc(String(val))+'"></label>';}
-function costHTML(){return '<details class="cot" id="cot" open><summary>Estimated trip cost <span class="cottot" id="cotTot">--</span></summary><div class="cotbody" id="cotBody"></div></details>';}
+function costHTML(){return '<details class="cot" id="cot" open><summary>Cost breakdown <span class="cottot" id="cotTot">--</span></summary><div class="cotbody" id="cotBody"></div></details>';}
 function renderCost(){
   var b=document.getElementById('cotBody');if(!b)return;
   // remember the focused assumption field so a rebuild does not eat mid-typing
@@ -1556,6 +1590,8 @@ function renderCost(){
   var e=estimate();
   var t=document.getElementById('cotTot');if(t)t.textContent=usd(e.total);
   var hm=document.getElementById('metaEst');if(hm)hm.textContent=' · est '+usd(e.total);
+  var pa=document.getElementById('phAmt');if(pa)pa.textContent=usd(e.total);
+  var psub=document.getElementById('phSub');if(psub)psub.textContent=(e.ppl>1?('For '+e.ppl+' travelers. '):'')+'See the breakdown';
   var pn=e.ppl>1?(' x '+e.ppl+' travelers'):'';
   var html='';
   if(e.stays.length){var rem=Math.max(0,e.nights-e.stays.length);html+=costRow('Stays',e.stays.length+' pinned'+(rem?(' + '+rem+' est night'+(rem===1?'':'s')):''),e.Stay);e.stays.forEach(function(it){html+=lineRow(it,e.ppl);});}
@@ -1639,6 +1675,13 @@ function scrollToSec(k){
       panelEl.classList.remove('peek');
       setTimeout(function(){scrollToSec(k);},400);    // let the sheet finish opening first
     }else scrollToSec(k);
+  });
+  var phb=document.getElementById('priceHero');
+  if(phb)phb.addEventListener('click',function(e){
+    e.stopPropagation();markJump('cost');
+    if(window.matchMedia('(max-width:700px)').matches&&panelEl.classList.contains('peek')){
+      panelEl.classList.remove('peek');setTimeout(function(){scrollToSec('cost');},400);
+    }else scrollToSec('cost');
   });
   function markJump(k){
     [].forEach.call(jb.children,function(c){c.classList.toggle('on',c.getAttribute('data-jump')===k);});
@@ -1738,7 +1781,7 @@ document.getElementById('editTrip').addEventListener('click',function(e){e.stopP
     // collapsing back to the footer restores the centered route
     if(panelEl.classList.contains('peek')&&lastFit)setTimeout(function(){fitWithUI(lastFit);},500);
   }
-  ph.addEventListener('click',function(e){if(e.target.closest('.methodlink,.jumpbar'))return;toggle();});
+  ph.addEventListener('click',function(e){if(e.target.closest('.methodlink,.jumpbar,.pricehero'))return;toggle();});
   ph.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
   // finger drag: the sheet follows the finger, then snaps open or back to peek
   var y0=null,dy=0,base=0,maxOff=0;
