@@ -18,7 +18,10 @@
   --serif:"Fraunces",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace; --radius:3px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--body);overflow:hidden}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--body);overflow:hidden;overscroll-behavior:none}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{touch-action:manipulation;width:100%;max-width:100vw}
+input,select,textarea{font-size:16px}
 ::selection{background:var(--gold);color:#000}
 #globe{position:fixed;inset:0;z-index:0}
 #globe canvas.wgl{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -1417,6 +1420,17 @@ body.tripdone #panel.peek .phlbl b{font-size:12px}
 body.tripdone #panel.peek .phlbl span{display:none}
 body.tripdone #panel.peek .jumpbar{display:none}
 @media (prefers-reduced-motion:reduce){.pkpin::after,.pkstop::after{animation:none}}
+.wpsopen{display:flex;align-items:center;gap:14px;width:100%;min-height:88px;margin-top:16px;padding:16px;border:0;border-radius:16px;background:#27493D;background-image:var(--tex-hex);background-size:28px 49px;color:#fff;text-align:left;cursor:pointer;box-shadow:var(--lift)}
+.wpsplay{flex:none;width:52px;height:52px;border-radius:50%;background:var(--pop);color:#fff;display:flex;align-items:center;justify-content:center}
+.wpsplay svg{width:24px;height:24px;margin-left:3px}
+.wpsopen .strt b{font:800 18px/1.25 var(--heading);color:#fff}
+.wpsopen .strt span{font:500 13.5px/1.4 var(--body);color:#D8F3DF}
+.wpsopen .idgo{color:var(--sun)}
+.shslide.shmsg{justify-content:center;gap:18px;text-align:center}
+.shslide.shmsg p{max-width:300px;font:600 16px/1.5 var(--body);color:#D8F3DF}
+.shslide.shmsg .shnext{min-height:52px;padding:0 24px;border:0;border-radius:14px;font:800 15px var(--body);cursor:pointer}
+.shsound{display:none;flex:none;margin:0 14px 8px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.12);color:#fff;font:700 12.5px var(--body);text-align:center}
+.shorts.ios .shsound{display:block}
 </style>
 </head>
 <body>
@@ -1435,6 +1449,7 @@ body.tripdone #panel.peek .jumpbar{display:none}
 </div>
 <div class="shorts" id="shorts" role="dialog" aria-modal="true" aria-label="Short videos">
   <div class="shtop"><button type="button" class="shback" id="shClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Back to my trip</button><span class="shmeta"><b id="shWhere"></b><span id="shCount"></span></span></div>
+  <div class="shsound">Tap a video to turn its sound on</div>
   <div class="shfeed" id="shFeed"></div>
 </div>
 <div class="maphint" id="mapHint" aria-hidden="true"><i></i>Tap a stop to see your picks</div>
@@ -2255,6 +2270,7 @@ function scrollToSec(k){
     var b=e.target.closest('button[data-jump]');if(!b)return;
     e.stopPropagation();
     var k=b.getAttribute('data-jump');
+    if(k==='wps'){openTravelers();return;}
     if(k==='map'){panelEl.classList.add('peek');if(lastFit)setTimeout(function(){fitWithUI(lastFit);},450);return;}
     markJump(k);
     if(window.matchMedia('(max-width:700px)').matches&&panelEl.classList.contains('peek')){
@@ -2967,18 +2983,6 @@ function buildDetail(opts){
   bindCost(ex);renderCost();renderNext();
   buildJump(rc.travel==='drive');
   initWPS();
-  (function(){
-    var dl=rc.pts&&rc.pts[rc.pts.length-1]||{},dn=dl.city||dl.label||'';
-    if(!dn)return;
-    var stN=dl.st&&BYABBR[String(dl.st).toLowerCase()];
-    if(stN&&dn.toLowerCase()===stN.n.toLowerCase())dn+=' USA';
-    else if(stN&&dn.indexOf(',')<0)dn+=', '+stN.n;
-    var wq='fun things to do in '+dn;
-    var w=document.getElementById('wps'),qi=document.getElementById('wpsq'),go=document.getElementById('wpsgo');
-    if(!w||!qi||!go)return;
-    qi.value=wq;
-    w.addEventListener('toggle',function once(){if(!w.open)return;w.removeEventListener('toggle',once);go.click();});
-  })();
   initStopSliders(rc.recs||[]);
   applyPerDiem(rc.recs||[],planGen);
   var g2=++stageGen;
@@ -3024,37 +3028,41 @@ function aggCard(x){
 }
 function wpsLinks(q){return '';}
 function wpsHTML(ph){
-  return '<details class="wps" id="wps"><summary>What travelers say <span class="wpshint">shared experiences</span></summary>'+
-    '<div class="wpsin"><input id="wpsq" placeholder="'+esc(ph)+'" autocomplete="off"><button type="button" id="wpsgo">Search</button></div>'+
-    '<div id="wpsout"><p class="note">Ask anything about a route or a place. We search the connected platforms and rank the best posts by views, votes, and likes.</p></div>'+
-    '<p class="note">These are public posts aggregated from social platforms and ranked by engagement. They are opinions, not guarantees. Where you go and what you decide is entirely your call, and Voyage is not responsible for those posts or for what happens on your trip.</p></details>';
+  return '<button type="button" class="wpsopen" id="wps"><span class="wpsplay"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>'+
+    '<span class="strt"><b>What travelers say</b><span>Watch what travelers filmed on this trip. One video at a time, swipe up for the next.</span></span>'+
+    '<svg class="idgo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>';
 }
 function initWPS(){
-  var go=document.getElementById('wpsgo'),qi=document.getElementById('wpsq'),out=document.getElementById('wpsout');
-  if(!go||!qi||!out)return;
-  function run(){
-    var v=qi.value.trim();if(!v)return;
-    out.innerHTML='<p class="note">Searching connected platforms…</p>';
-    fetch('/api/social/aggregate?q='+encodeURIComponent(v)).then(function(r){return r.json();}).then(function(j){
-      var h='',con=j.connected||{};
-      (j.results||[]).forEach(function(x){h+=aggCard(x);});
-      var webH=(j.web||[]).map(function(w){
-        return '<a class="svcard" href="'+esc(urlOk(w.url))+'" target="_blank" rel="noopener"><span class="svthumb svglyph">🌐</span>'+
-          '<div class="svb"><div class="svt">'+esc(w.title)+'</div><div class="svm">'+esc(w.site)+(w.snippet?' · '+esc(w.snippet.slice(0,90)):'')+'</div></div></a>';
-      }).join('');
-      if(webH)h+='<div class="lbl" style="margin-top:12px">From the web</div>'+webH;
-      if(h){
-        h+='<p class="note">Videos ranked by engagement; web results by relevance. Search the not-yet-connected platforms directly:</p>'+wpsLinks(v);
-      }else if(con.youtube||con.reddit||con.google){
-        h='<p class="note">'+(j.limited?'Video search has hit its daily limit. It comes back tomorrow.':'No videos came back for that. Try the name of a city, like "fun things to do in Austin".')+'</p>';
-      }else{
-        h='<p class="note">No platforms are connected yet, so we can’t rank posts in-app. Search directly:</p>'+wpsLinks(v)+connectHTML(platStatus||{});
-      }
-      out.innerHTML=h;
-    }).catch(function(){out.innerHTML='<p class="note">Search failed. Try again in a moment.</p>'+wpsLinks(v);});
-  }
-  go.addEventListener('click',run);
-  qi.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();run();}});
+  var b=document.getElementById('wps');
+  if(b)b.addEventListener('click',function(){openTravelers();});
+}
+function openTravelers(){
+  if(!tripCtx)return;
+  var recs=tripCtx.recs||[],order=[];
+  for(var i=recs.length-1;i>=0&&order.length<3;i--){var r=recs[i];if(r.place&&r.place!=='this area'&&r.place!=='this stop'&&!(tripCtx.travel!=='drive'&&r.first))order.push(r);}
+  var box=document.getElementById('shorts'),feed=document.getElementById('shFeed');
+  shortsSt=null;
+  document.getElementById('shWhere').textContent='What travelers say';
+  document.getElementById('shCount').textContent='';
+  feed.innerHTML='<section class="shslide shmsg"><p>Finding what travelers filmed on your trip...</p></section>';
+  box.classList.add('show');
+  var limited=false;
+  Promise.all(order.map(function(r){
+    if(r._shorts)return Promise.resolve(r._shorts.map(function(x){return Object.assign({place:r.place},x);}));
+    return bfetch('/api/social/shorts?place='+encodeURIComponent(placeQ(r)),20000).then(function(x){if(x.status===429)limited=true;return x.ok?x.json():[];}).catch(function(){return [];}).then(function(vs){
+      if(vs&&vs.length)r._shorts=vs;
+      return (vs||[]).map(function(x){return Object.assign({place:r.place},x);});
+    });
+  })).then(function(lists){
+    if(!box.classList.contains('show'))return;
+    var seen={},all=[],max=Math.max.apply(null,lists.map(function(l){return l.length;}).concat([0]));
+    for(var k=0;k<max;k++)lists.forEach(function(l){var x=l[k];if(x&&!seen[x.id]){seen[x.id]=1;all.push(x);}});
+    if(!all.length){
+      feed.innerHTML='<section class="shslide shmsg"><p>'+(limited?'Video search has hit its daily limit and none are saved for these stops yet. They come back tomorrow.':'No traveler videos turned up for these stops yet.')+'</p><button type="button" class="shnext shend" data-go="-1">Back to my trip</button></section>';
+      return;
+    }
+    openShorts(all.slice(0,24),0,'What travelers say');
+  });
 }
 function ensureMap(){
   if(stageMap)return stageMap;
@@ -3509,17 +3517,19 @@ function fillVideos(el,s){
   });
 }
 var shortsSt=null;
+var IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 function openShorts(list,k,place){
   var box=document.getElementById('shorts'),feed=document.getElementById('shFeed');if(!box||!feed)return;
   shortsSt={list:list,place:place,cur:-1};
   feed.innerHTML=list.map(function(x,i){
     return '<section class="shslide" data-i="'+i+'">'+
       '<div class="shframe'+(x.secs>180?' wide':'')+'" id="shf'+i+'"><span class="shposter" style="background-image:url(https://i.ytimg.com/vi/'+esc(x.id)+'/hqdefault.jpg)"></span></div>'+
-      '<div class="shcap"><b>'+esc(deent(x.title))+'</b><span>'+esc(x.channel)+' \u00b7 '+fmtViews(x.views)+' views</span>'+
+      '<div class="shcap"><b>'+esc(deent(x.title))+'</b><span>'+(x.place?esc(x.place)+' \u00b7 ':'')+esc(x.channel)+' \u00b7 '+fmtViews(x.views)+' views</span>'+
       '<div class="shnav">'+(i>0?'<button type="button" class="shprev" data-go="'+(i-1)+'" aria-label="Previous video">\u2191</button>':'<span></span>')+
       (i<list.length-1?'<button type="button" class="shnext" data-go="'+(i+1)+'">Next video \u2193</button>':'<button type="button" class="shnext shend" data-go="-1">Back to my trip</button>')+'</div></div></section>';
   }).join('');
   document.getElementById('shWhere').textContent=place;
+  document.getElementById('shorts').classList.toggle('ios',IOS);
   box.classList.add('show');
   var slide=feed.children[k];if(slide)feed.scrollTop=slide.offsetTop;
   shortsShow(k);
@@ -3529,7 +3539,7 @@ function shortsShow(i){
   if(st.cur>-1){var old=document.getElementById('shf'+st.cur);if(old)old.innerHTML='<span class="shposter" style="background-image:url(https://i.ytimg.com/vi/'+esc(st.list[st.cur].id)+'/hqdefault.jpg)"></span>';}
   st.cur=i;
   var f=document.getElementById('shf'+i),id=st.list[i].id;
-  if(f)f.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+esc(id)+'?autoplay=1&playsinline=1&rel=0&loop=1&playlist='+esc(id)+'" title="'+esc(deent(st.list[i].title))+'" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+  if(f)f.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+esc(id)+'?autoplay=1&playsinline=1&rel=0&loop=1&playlist='+esc(id)+(IOS?'&mute=1':'')+'" title="'+esc(deent(st.list[i].title))+'" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
   document.getElementById('shCount').textContent=(i+1)+' of '+st.list.length;
 }
 function closeShorts(){var box=document.getElementById('shorts');if(!box)return;box.classList.remove('show');document.getElementById('shFeed').innerHTML='';shortsSt=null;}
