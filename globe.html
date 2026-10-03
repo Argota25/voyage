@@ -1111,24 +1111,24 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
 <div class="gate" id="gate">
   <div class="glogo">Voyage</div>
   <h1>Plan the trip, <i>made easy.</i></h1>
-  <p class="lead">Pick a trip type. We build the itinerary, with what other travelers filmed and posted along the way.</p>
+  <p class="lead">Pick how you're going. We plan the stops, the stays, and the fun, with tips from travelers who went first.</p>
   <div class="cards">
     <button class="card drive" data-mode="drive" type="button">
       <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l1.6-4.6A2 2 0 0 1 6.5 7h11a2 2 0 0 1 1.9 1.4L21 13v5h-2.5"/><path d="M3 18v-5M5.5 18h3M15 18h3.5"/><circle cx="7" cy="18" r="1.9"/><circle cx="17" cy="18" r="1.9"/></svg></div>
       <h3>Drive</h3>
-      <p>Map a road route with as many stops as you like. We pace your overnight stays and surface things to do along the way.</p>
+      <p>Add as many stops as you want. We plan where you sleep each night and find the best things to do on the way.</p>
       <div class="go">Plan a drive &rarr;</div>
     </button>
     <button class="card fly" data-mode="fly" type="button">
       <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L3 10.6l6.4 2.5L12 20l3-6.2z"/><path d="M9.4 13.1L21 3"/></svg></div>
       <h3>Fly</h3>
-      <p>Line up the cities you want to hit. We draw the route between them and gather stays, food, events, and videos for each one.</p>
+      <p>Pick the cities you want to visit. We map the route and find places to stay, food, events, and videos for each city.</p>
       <div class="go">Plan a flight &rarr;</div>
     </button>
     <button class="card boat" data-mode="boat" type="button">
       <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 14.5l1.5 4a1.5 1.5 0 0 0 1.4 1h11.8a1.5 1.5 0 0 0 1.4-1l1.5-4"/><path d="M5.2 14.5V9l6.8-2 6.8 2v5.5"/><path d="M12 3v4"/></svg></div>
       <h3>Boat</h3>
-      <p>Chart your ports and coastal stops. We map the water route and pull together what to do at every landing.</p>
+      <p>Add your ports and coastal stops. We map the water route and find the best things to do at every port.</p>
       <div class="go">Plan a boat trip &rarr;</div>
     </button>
   </div>
@@ -1413,7 +1413,7 @@ function hideLoad(){var l=document.getElementById('loading');if(l)l.classList.ad
 
 /* ===== travel mode + trip planner ===== */
 var travelMode='drive', form=document.getElementById('searchForm');
-function defHint(){return travelMode==='fly'?'List the cities you want to hit. We build your itinerary: stays, things to do, and what other travelers filmed at each stop.':(travelMode==='boat'?'List your ports and coastal stops. We build your itinerary: the water route, what to do at each landing, and what other travelers filmed there.':'Add your stops. We build your itinerary: the road route, paced stays, and what other travelers filmed and posted along the way.');}
+function defHint(){return travelMode==='fly'?'Add the cities you want to visit. We plan places to stay, things to do, and traveler videos for each city.':(travelMode==='boat'?'Add your ports. We map the water route, the best things to do at each port, and what travelers filmed there.':'Add your stops. We plan your route, where you sleep each night, and what travelers filmed along the way.');}
 function configTravel(tm){
   travelMode=(tm==='fly'||tm==='boat')?tm:'drive';
   form.classList.add('roadtrip');                                   // planner is always visible
