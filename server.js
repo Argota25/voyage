@@ -577,7 +577,7 @@ function handleSocialStatus(res){
     events:   !!TM_KEY,
     google:   !!(G_KEY && G_CX),
     instagram: false, facebook: false, tiktok: false, airbnb: false,
-    store: storeOn, stored: storeCount, videoSearches: { used: spent.yt || 0, max: BUDGET.yt },
+    store: storeOn, stored: storeCount, videoSearches: { used: spent.yt || 0, max: BUDGET.yt }, videoIndex: chanIdx.length,
     note: 'instagram/facebook need a Meta developer app + review; tiktok needs developer approval; airbnb has no public API. See docs/SOCIAL-APIS.md.'
   });
 }
@@ -619,9 +619,15 @@ function packRead(place){
   if (m) return m.data;
   const j = storeGet(k);
   if (!j) return null;
-  const v = { t: j.t, list: j.data || [] };
+  const d = j.data || [];
+  const v = Array.isArray(d) ? { t: j.t, list: d, full: true } : { t: j.t, list: d.list || [], full: !!d.full };
   cache.set(k, { data: v, exp: Infinity });
   return v;
+}
+function packSave(place, list, full){
+  const k = packKey(place);
+  cache.set(k, { data: { t: Date.now(), list, full }, exp: Infinity });
+  storeSet(k, { list, full });
 }
 function wantAdd(place){
   const k = place.trim();
@@ -633,6 +639,84 @@ function wantDrop(place){
   const n = wanted.length;
   wanted = wanted.filter(x => x.toLowerCase() !== place.trim().toLowerCase());
   if (wanted.length !== n) storeSet('meta:wanted', wanted);
+}
+
+const CHANNELS = [
+  ['UUGaOvAFinZ7BCN_FDmw74fQ', 'Expedia'],
+  ['UUh3Rpsdv1fxefE0ZcKBaNcQ', 'touropia'],
+  ['UUPsil91i8gN0XLIbwl3vqsw', 'Lonely Planet'],
+  ['UUEaOIzCASJLcj3UDwGlt7nQ', 'The Daytripper'],
+  ['UUFr3sz2t3bDp6Cux08B93KQ', 'Wolters World'],
+  ['UUuoctbnIa5iwYAURijRCG8A', 'Travel Texas'],
+  ['UUk_5HwLfgy-eALpm879J5Ag', 'Visit California'],
+  ['UUDlZa0hPoPD3gjwRZrv9A6Q', 'VISIT FLORIDA'],
+  ['UU4ijq8Cg-8zQKx8OH12dUSw', 'Kara and Nate'],
+  ['UUS9S86BryT1on_qhDT2Jwig', 'Tripadvisor'],
+  ['UUw8_bi1G4duPevdfktipGOA', 'Yellow Productions'],
+  ['UUWyPjY3I86JQt1u3mV8OyUw', 'Through My Lens'],
+  ['UU6G-WN8KW4qFHEmdyyQtF7g', 'Visit The USA'],
+  ['UUEDrRCC0qRtPd5-sSa1hajw', 'The Endless Adventure'],
+  ['UU9_eukrzdzY91jjDZm62FXQ', 'MojoTravels'],
+  ['UUqENvRsthKwsb5Ab-OwnlOw', 'Oregon'],
+  ['UUy7RRCC-8zSimglouKlqa3Q', 'Visit Utah'],
+  ['UUOGzEUB9F0-tfeYHzTj3cgQ', 'Visit Colorado'],
+  ['UUTKQETAT33j2Gukan7-yKEQ', 'Pure Michigan'],
+  ['UUfnkzN14Mplb3U8VFU5YuPw', 'Visit North Carolina'],
+  ['UU1EzZHIWf382f_tyaZ5zOmA', 'Travel Wisconsin']
+];
+const IDX_FRESH = 7 * 864e5;
+let chanIdx = [], chanIdxAt = 0, chanIdxBusy = null;
+async function idxBuild(){
+  const out = [];
+  for (const [pl, name] of CHANNELS){
+    let tok = '', got = 0;
+    for (let page = 0; page < 30; page++){
+      const up = await upstream('https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=' + pl + (tok ? '&pageToken=' + tok : '') + '&key=' + YT_KEY);
+      if (up.status !== 200) break;
+      let j; try { j = JSON.parse(up.body); } catch (e){ break; }
+      (j.items || []).forEach(it => {
+        const sn = it.snippet || {}, id = sn.resourceId && sn.resourceId.videoId;
+        if (!id || sn.title === 'Private video' || sn.title === 'Deleted video') return;
+        out.push({ id, t: sn.title, c: name, p: (sn.publishedAt || '').slice(0, 10) }); got++;
+      });
+      tok = j.nextPageToken || '';
+      if (!tok || got >= 1500) break;
+    }
+  }
+  if (out.length > 500){ chanIdx = out; chanIdxAt = Date.now(); storeSet('meta:chanidx', out); }
+  return chanIdx;
+}
+function idxEnsure(){
+  if (!YT_KEY) return;
+  if (!chanIdx.length){
+    const j = storeGet('meta:chanidx');
+    if (j && Array.isArray(j.data) && j.data.length){ chanIdx = j.data; chanIdxAt = j.t; }
+  }
+  if ((!chanIdx.length || Date.now() - chanIdxAt > IDX_FRESH) && !chanIdxBusy){
+    chanIdxBusy = idxBuild().catch(() => chanIdx).finally(() => { chanIdxBusy = null; });
+  }
+}
+function rxWord(w){ return new RegExp('(^|[^a-z0-9])' + w.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').trim().replace(/\s+/g, '\\s+') + '([^a-z0-9]|$)', 'i'); }
+async function idxDetail(hits){
+  hits = hits.slice(0, 50);
+  if (!hits.length) return [];
+  const meta = {};
+  const v = await upstream('https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails&id=' + hits.map(x => x.id).join(',') + '&key=' + YT_KEY);
+  if (v.status === 200) JSON.parse(v.body).items.forEach(it => meta[it.id] = { views: parseInt((it.statistics || {}).viewCount || '0', 10), secs: isoSecs((it.contentDetails || {}).duration) });
+  return hits.filter(x => meta[x.id]).map(x => ({ id: x.id, title: x.t, channel: x.c, published: x.p, views: meta[x.id].views, secs: meta[x.id].secs, tier: 0 }))
+    .sort((a, b) => b.views - a.views);
+}
+async function idxPack(place){
+  idxEnsure();
+  const city = (place.split(',')[0] || '').replace(/ county$/i, '').trim();
+  if (city.length < 3 || !chanIdx.length) return [];
+  const rx = rxWord(city);
+  return idxDetail(chanIdx.filter(x => rx.test(x.t)));
+}
+function packMerge(a, b){
+  const seen = {}, out = [];
+  a.concat(b).forEach(x => { if (!seen[x.id]){ seen[x.id] = 1; out.push(x); } });
+  return out.sort((x, y) => x.tier - y.tier || y.views - x.views);
 }
 async function packFetch(place){
   if (Date.now() < ytDownUntil) throw limitedErr();
@@ -651,16 +735,16 @@ async function packFetch(place){
     const v = await upstream('https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails&id=' + ids.join(',') + '&key=' + YT_KEY);
     if (v.status === 200) JSON.parse(v.body).items.forEach(it => meta[it.id] = { views: parseInt((it.statistics || {}).viewCount || '0', 10), secs: isoSecs((it.contentDetails || {}).duration) });
   }
-  const list = items.map(i => {
+  let list = items.map(i => {
     const text = ((i.snippet.title || '') + ' ' + (i.snippet.description || '')).toLowerCase();
     const m = meta[i.id.videoId] || { views: 0, secs: 9999 };
     return { id: i.id.videoId, title: i.snippet.title, channel: i.snippet.channelTitle, published: (i.snippet.publishedAt || '').slice(0, 10), views: m.views, secs: m.secs,
       tier: (city && text.indexOf(city) > -1) ? 0 : ((state && text.indexOf(state) > -1) ? 1 : 2) };
   }).filter(x => x.tier < 2);
-  list.sort((a, b) => a.tier - b.tier || b.views - a.views);
-  const k = packKey(place);
-  cache.set(k, { data: { t: Date.now(), list }, exp: Infinity });
-  storeSet(k, list);
+  let extra = [];
+  try { extra = await idxPack(place); } catch (e) {}
+  list = packMerge(list, extra);
+  packSave(place, list, true);
   wantDrop(place);
   return list;
 }
@@ -671,16 +755,39 @@ function packOnce(place){
 }
 async function ytPack(place){
   const have = packRead(place);
-  if (have){
+  if (have && have.full){
     if (Date.now() - have.t > PACK_FRESH) packOnce(place).catch(() => {});
     return have.list;
   }
   try { return await packOnce(place); }
-  catch (e){ if (e && e.limited) wantAdd(place); throw e; }
+  catch (e){
+    if (!(e && e.limited)) throw e;
+    wantAdd(place);
+    if (have && have.list.length) return have.list;
+    const list = await idxPack(place).catch(() => []);
+    if (list.length){ packSave(place, list, false); return list; }
+    throw e;
+  }
 }
 async function ytShorts(place){
   const list = await ytPack(place);
-  return list.filter(x => x.secs <= 180).slice(0, 12).map(x => ({ id: x.id, title: x.title, channel: x.channel, views: x.views, secs: x.secs }));
+  const pick = x => ({ id: x.id, title: x.title, channel: x.channel, views: x.views, secs: x.secs });
+  const short = list.filter(x => x.secs <= 180), long = list.filter(x => x.secs > 180).sort((a, b) => b.views - a.views);
+  return short.concat(long).slice(0, 14).map(pick);
+}
+async function idxSearch(q){
+  idxEnsure();
+  const words = q.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w && ['travel', 'things', 'to', 'do', 'in', 'the', 'fun', 'tips', 'videos'].indexOf(w) < 0);
+  for (let n = Math.min(words.length, 4); n >= 1; n--){
+    const phrase = words.slice(0, n).join(' ');
+    if (phrase.length < 4) break;
+    const rx = rxWord(phrase), hits = chanIdx.filter(x => rx.test(x.t));
+    if (hits.length){
+      const d = await idxDetail(hits);
+      return d.map(x => ({ id: x.id, title: x.title, channel: x.channel, published: x.published, thumb: 'https://i.ytimg.com/vi/' + x.id + '/mqdefault.jpg', views: x.views }));
+    }
+  }
+  return [];
 }
 
 const STATE_NAME = { AL:'Alabama', AK:'Alaska', AZ:'Arizona', AR:'Arkansas', CA:'California', CO:'Colorado', CT:'Connecticut', DE:'Delaware', DC:'District of Columbia', FL:'Florida', GA:'Georgia', HI:'Hawaii', ID:'Idaho', IL:'Illinois', IN:'Indiana', IA:'Iowa', KS:'Kansas', KY:'Kentucky', LA:'Louisiana', ME:'Maine', MD:'Maryland', MA:'Massachusetts', MI:'Michigan', MN:'Minnesota', MS:'Mississippi', MO:'Missouri', MT:'Montana', NE:'Nebraska', NV:'Nevada', NH:'New Hampshire', NJ:'New Jersey', NM:'New Mexico', NY:'New York', NC:'North Carolina', ND:'North Dakota', OH:'Ohio', OK:'Oklahoma', OR:'Oregon', PA:'Pennsylvania', RI:'Rhode Island', SC:'South Carolina', SD:'South Dakota', TN:'Tennessee', TX:'Texas', UT:'Utah', VT:'Vermont', VA:'Virginia', WA:'Washington', WV:'West Virginia', WI:'Wisconsin', WY:'Wyoming' };
@@ -705,13 +812,13 @@ function prefillTick(){
   spendRoll();
   const reserve = quotaHour() >= 20 ? 5 : 50;
   if ((spent.yt || 0) >= BUDGET.yt - reserve) return;
-  let place = wanted.find(x => !packRead(x));
+  let place = wanted.find(x => !(packRead(x) || {}).full);
   if (!place){
     const seeds = seedList();
     for (let n = 0; n < seeds.length && !place; n++){
       const c = seeds[(seedAt + n) % seeds.length];
       const have = packRead(c);
-      if (!have || Date.now() - have.t > PACK_FRESH){ place = c; seedAt = (seedAt + n + 1) % seeds.length; }
+      if (!have || !have.full || Date.now() - have.t > PACK_FRESH){ place = c; seedAt = (seedAt + n + 1) % seeds.length; }
     }
   }
   if (place) packOnce(place).catch(() => {});
@@ -729,7 +836,13 @@ async function handleVideos(reqUrl, res){
   const q = (reqUrl.searchParams.get('q') || '').trim();
   if (!q) return json(res, 400, { error: 'missing q' });
   try { json(res, 200, await ytSearch(q)); }
-  catch (e){ json(res, e && e.limited ? 429 : 502, { error: e && e.limited ? 'video limit reached' : 'youtube unavailable' }); }
+  catch (e){
+    if (e && e.limited){
+      const alt = await idxSearch(q).catch(() => []);
+      if (alt.length) return json(res, 200, alt);
+    }
+    json(res, e && e.limited ? 429 : 502, { error: e && e.limited ? 'video limit reached' : 'youtube unavailable' });
+  }
 }
 
 let rdTok = null, rdExp = 0;
@@ -809,6 +922,7 @@ async function handleAggregate(reqUrl, res){
     const place = pm[1].replace(/ USA$/i, '').trim();
     let list = [];
     try { list = await ytPack(place); } catch (e){ if (e && e.limited) limited = true; }
+    if (list.length) limited = false;
     const results = list.slice().sort((a, b) => b.views - a.views).slice(0, 16).map(x => ({
       plat: 'youtube', title: x.title, url: 'https://www.youtube.com/watch?v=' + x.id,
       thumb: 'https://i.ytimg.com/vi/' + x.id + '/mqdefault.jpg', meta: x.channel + (x.published ? ' · ' + x.published : ''), engagement: x.views, kind: 'views',
@@ -1094,6 +1208,8 @@ http.createServer((req, res) => {
     const w = storeGet('meta:wanted'); if (w && Array.isArray(w.data)) wanted = w.data;
     setInterval(prefillTick, 3 * 60000).unref();
     setInterval(storeTrim, 6 * 3600000).unref();
+    idxEnsure();
+    setInterval(idxEnsure, 6 * 3600000).unref();
   }
   console.log('Store: ' + (storeOn ? ('on at ' + STORE_DIR + ', ' + storeCount + ' saved') : 'off (memory only)'));
   if (PUBLIC){
