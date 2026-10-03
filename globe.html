@@ -590,6 +590,14 @@ a.svcard:hover{border-color:var(--accent)}
 .dmk:hover .dmpin{transform:scale(1.1)}
 .dmsthumb.dmglyph{display:flex;align-items:center;justify-content:center;font-size:18px}
 .sheethint{display:none}
+/* jump bar: go straight to a section instead of scrolling the whole itinerary */
+.jumpbar{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding:2px 0 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;touch-action:pan-x}
+.jumpbar::-webkit-scrollbar{display:none}
+.jumpbar:empty{display:none}
+.jumpbar button{flex:none;font:700 13px var(--body);color:#123626;background:#fff;border:1px solid rgba(19,113,76,.28);border-radius:999px;padding:9px 14px;min-height:40px;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px -5px rgba(12,54,36,.35);transition:background .18s,color .18s,border-color .18s}
+.jumpbar button:hover{border-color:#13714C}
+.jumpbar button.on{background:#13714C;color:#fff;border-color:#13714C}
+.jumpbar button:focus-visible{outline:2px solid #13714C;outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.card,.gate h1,.gate .lead,#stars .tw,.loading::before{animation:none}}
 /* phones: the Change-intent pill and the search bar both start at top:20px
    and collide below ~700px; drop the search bar under the pill */
@@ -632,7 +640,7 @@ body::after{opacity:.035}
 .reset,.switch{background:rgba(255,255,255,.94);color:#123626;border-color:rgba(19,113,76,.3);box-shadow:0 14px 34px -14px rgba(16,58,40,.42)}
 .stchip{background:rgba(255,255,255,.8)}
 /* floating re-center control: one tap puts the route back in frame */
-.recenter{position:fixed;right:16px;bottom:232px;z-index:12;height:48px;padding:0 16px 0 12px;gap:8px;border-radius:999px;font:700 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;background:#13714C;border:2px solid rgba(255,255,255,.9);color:#FFFFFF;display:none;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 16px 36px -12px rgba(12,54,36,.6)}
+.recenter{position:fixed;right:16px;bottom:calc(var(--peek,250px) + 18px);z-index:12;height:48px;padding:0 16px 0 12px;gap:8px;border-radius:999px;font:700 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;background:#13714C;border:2px solid rgba(255,255,255,.9);color:#FFFFFF;display:none;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 16px 36px -12px rgba(12,54,36,.6)}
 .recenter svg{width:22px;height:22px}
 @media (max-width:700px){#panel.open:not(.peek)~.recenter{display:none!important}}
 .recenter:hover{background:#1E8A5F;box-shadow:0 18px 40px -12px rgba(12,54,36,.7)}
@@ -926,7 +934,8 @@ i,em,.panel .ph .meta,.row .ct{font-style:normal}
 .fname{font:800 24px/1.15 var(--heading);color:#F6F8F7;letter-spacing:-.02em;text-shadow:0 1px 10px rgba(4,20,13,.65)}
 .fkind{margin-top:6px;font:600 10.5px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:#A2E494}
 .fplay{position:absolute;right:18px;bottom:22px;width:42px;height:42px;border-radius:50%;background:rgba(19,113,76,.85);border:1px solid rgba(255,255,255,.6);color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:13px;backdrop-filter:blur(4px)}
-.panel .scroll{scroll-snap-type:y proximity}
+/* free scrolling: the old y-snap tugged the list onto card edges mid-swipe */
+.panel .scroll{scroll-snap-type:none;-webkit-overflow-scrolling:touch}
 .row .rk{display:flex;flex-direction:column;align-items:center;gap:3px}
 .hzmark{width:14px;height:14px;background:#13714C;opacity:.9;-webkit-mask:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M12%204%20L21.5%2020%20H2.5%20Z%22%20stroke%3D%22black%22%20stroke-width%3D%222.4%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%2010.2v3.6%22%20stroke%3D%22black%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2217%22%20r%3D%221.3%22%20fill%3D%22black%22%2F%3E%3C%2Fsvg%3E') center/contain no-repeat;mask:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M12%204%20L21.5%2020%20H2.5%20Z%22%20stroke%3D%22black%22%20stroke-width%3D%222.4%22%20stroke-linejoin%3D%22round%22%2F%3E%3Cpath%20d%3D%22M12%2010.2v3.6%22%20stroke%3D%22black%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2217%22%20r%3D%221.3%22%20fill%3D%22black%22%2F%3E%3C%2Fsvg%3E') center/contain no-repeat}
 /* map-side sight markers shed their dark-theme rings on the light map */
@@ -945,7 +954,8 @@ i,em,.panel .ph .meta,.row .ct{font-style:normal}
      peek (badge + title + count) and back. */
   .panel{top:auto;bottom:0;left:0;right:0;width:100%;height:min(72dvh,640px);border-left:0;border-top:1px solid var(--rule);border-radius:18px 18px 0 0;transform:translateY(102%)}
   .panel.open{transform:translateY(0)}
-  .panel.open.peek{transform:translateY(calc(100% - 214px))}
+  .panel.open.peek{transform:translateY(calc(100% - var(--peek,250px)))}
+  .panel{transition:transform .38s cubic-bezier(.22,.9,.24,1)}
   .panel.dragging{transition:none!important}
   /* the header is the drag handle: the finger moves the sheet, not the page */
   .panel .ph{touch-action:none;-webkit-user-select:none;user-select:none}
@@ -1129,7 +1139,8 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
     <h2 id="pTitle"></h2>
     <div class="meta" id="pMeta"></div>
     <div class="count" id="pCount"></div>
-    <div class="sheethint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg><span class="sh-up">Swipe up for your itinerary: stays, things to do, what travelers say</span><span class="sh-down">Swipe down to see the map</span></div>
+    <div class="sheethint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg><span class="sh-up">Swipe up for the full itinerary, or jump to a section</span><span class="sh-down">Swipe down to see the map</span></div>
+    <nav class="jumpbar" id="jumpbar" aria-label="Jump to a section"></nav>
   </div>
   <div class="scroll">
     <div class="rows" id="rows"></div>
@@ -1584,6 +1595,73 @@ function pinEl(){
   return el;
 }
 
+/* ===== sheet peek height = the real header height (title, meta, hint, jump
+   bar), measured after each render so nothing is cut off on any phone ===== */
+function peekH(){var v=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--peek'));return isFinite(v)&&v>0?v:250;}
+function setPeek(){
+  var ph=document.querySelector('#panel .ph');if(!ph)return;
+  var h=Math.round(ph.getBoundingClientRect().height)+6;
+  if(h>120)document.documentElement.style.setProperty('--peek',h+'px');
+}
+window.addEventListener('resize',function(){clearTimeout(window.__peekT);window.__peekT=setTimeout(setPeek,150);});
+
+/* ===== jump bar: one tap to a section; the active chip follows the scroll ===== */
+function jumpTarget(k){
+  var ex=document.getElementById('extra');if(!ex)return null;
+  if(k==='cost')return ex.querySelector('.cot');
+  if(k==='wps')return document.getElementById('wps');
+  return ex.querySelector('[data-sec="'+k+'"]');
+}
+function buildJump(drive){
+  var jb=document.getElementById('jumpbar');if(!jb)return;
+  var secs=[['cost','Trip cost'],['stay','Stays'],['do','Things to do'],['events','Events'],['videos','Videos']];
+  if(drive)secs.push(['along','Along the way']);
+  secs.push(['wps','What travelers say']);
+  jb.innerHTML=secs.map(function(x){return '<button type="button" data-jump="'+x[0]+'">'+esc(x[1])+'</button>';}).join('');
+  jb.scrollLeft=0;
+  setTimeout(setPeek,0);
+}
+function scrollToSec(k){
+  var el=jumpTarget(k),sc=document.querySelector('#panel .scroll');if(!el||!sc)return;
+  if(k==='wps'&&el.tagName==='DETAILS')el.open=true;
+  var top=el.getBoundingClientRect().top-sc.getBoundingClientRect().top+sc.scrollTop-10;
+  sc.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+}
+(function(){
+  var jb=document.getElementById('jumpbar'),panelEl=document.getElementById('panel');
+  if(!jb||!panelEl)return;
+  jb.addEventListener('click',function(e){
+    var b=e.target.closest('button[data-jump]');if(!b)return;
+    e.stopPropagation();
+    var k=b.getAttribute('data-jump');
+    markJump(k);
+    if(window.matchMedia('(max-width:700px)').matches&&panelEl.classList.contains('peek')){
+      panelEl.classList.remove('peek');
+      setTimeout(function(){scrollToSec(k);},400);    // let the sheet finish opening first
+    }else scrollToSec(k);
+  });
+  function markJump(k){
+    [].forEach.call(jb.children,function(c){c.classList.toggle('on',c.getAttribute('data-jump')===k);});
+    var on=jb.querySelector('.on');
+    if(on){var l=on.offsetLeft,r=l+on.offsetWidth;
+      if(l<jb.scrollLeft||r>jb.scrollLeft+jb.clientWidth)jb.scrollTo({left:Math.max(0,l-24),behavior:'smooth'});}
+  }
+  // scrollspy: highlight the section currently at the top of the sheet
+  var sc=panelEl.querySelector('.scroll'),raf=0;
+  if(sc)sc.addEventListener('scroll',function(){
+    if(raf)return;
+    raf=requestAnimationFrame(function(){raf=0;
+      var base=sc.getBoundingClientRect().top+60,cur=null;
+      [].forEach.call(jb.children,function(c){
+        var el=jumpTarget(c.getAttribute('data-jump'));
+        if(el&&el.getBoundingClientRect().top<=base)cur=c.getAttribute('data-jump');
+      });
+      if(cur&&!(jb.querySelector('.on')&&jb.querySelector('.on').getAttribute('data-jump')===cur))markJump(cur);
+      if(!cur)[].forEach.call(jb.children,function(c){c.classList.remove('on');});
+    });
+  },{passive:true});
+})();
+
 /* ===== planning overlay: steps tick forward while the plan builds; the last
    step keeps spinning until the result opens (or an error clears it) ===== */
 var planTimer=null,planFailsafe=null;
@@ -1638,6 +1716,7 @@ function renderArea(opts){
   if(window.matchMedia('(max-width:700px)').matches)panelEl.classList.add('peek');
   else panelEl.classList.remove('peek');
   panelEl.classList.add('open');
+  setPeek();
   document.getElementById('reset').classList.add('show');
   document.getElementById('disc').classList.add('hide');
 }
@@ -1659,14 +1738,14 @@ document.getElementById('editTrip').addEventListener('click',function(e){e.stopP
     // collapsing back to the footer restores the centered route
     if(panelEl.classList.contains('peek')&&lastFit)setTimeout(function(){fitWithUI(lastFit);},500);
   }
-  ph.addEventListener('click',function(e){if(e.target.closest('.methodlink'))return;toggle();});
+  ph.addEventListener('click',function(e){if(e.target.closest('.methodlink,.jumpbar'))return;toggle();});
   ph.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
   // finger drag: the sheet follows the finger, then snaps open or back to peek
   var y0=null,dy=0,base=0,maxOff=0;
   ph.addEventListener('pointerdown',function(e){
-    if(!mqPhone.matches||(e.button&&e.button>0)||e.target.closest('button,a'))return;
+    if(!mqPhone.matches||(e.button&&e.button>0)||e.target.closest('button,a,.jumpbar'))return;
     y0=e.clientY;dy=0;
-    maxOff=panelEl.offsetHeight-214;
+    maxOff=panelEl.offsetHeight-peekH();
     base=panelEl.classList.contains('peek')?maxOff:0;
     panelEl.classList.add('dragging');
     try{ph.setPointerCapture(e.pointerId);}catch(er){}
@@ -1776,10 +1855,11 @@ function buildDetail(opts){
   ex.className='extra';
   ex.innerHTML=costHTML()+
     (recsHtml||'<p class="note">Add another stop to build an itinerary.</p>')+
-    (rc.travel==='drive'?('<div class="lbl" style="margin-top:16px">Along the way</div>'+
+    (rc.travel==='drive'?('<div class="lbl" data-sec="along" style="margin-top:16px">Along the way</div>'+
       '<div id="sights"><div class="feedv"><div class="fslide fskel"></div><div class="fslide fskel" style="height:120px"></div></div></div>'):'')+
     wpsHTML('Taking this trip '+byWord+'. Great places to stay and things to do at each stop?');
   bindCost(ex);renderCost();
+  buildJump(rc.travel==='drive');
   initWPS();
   // shared experiences load themselves: run the community search for this trip
   // so other travelers' posts and videos appear without the user typing a thing
@@ -1920,7 +2000,7 @@ function fitWithUI(bounds){
   var rc=document.getElementById('recenter');if(rc)rc.classList.add('show');
   var phone=window.matchMedia('(max-width:700px)').matches;
   var opts=phone
-    ?{paddingTopLeft:[24,124],paddingBottomRight:[24,240]}
+    ?{paddingTopLeft:[24,124],paddingBottomRight:[24,peekH()+26]}
     :{paddingTopLeft:[450,90],paddingBottomRight:[40,60]};
   m.fitBounds(bounds,opts);
 }
@@ -2206,7 +2286,7 @@ function streetDrawInto(g,lines,fit){
   lines.forEach(function(pts){streetSegInto(g,pts);all=all.concat(pts);});
   if(fit&&all.length&&stageMap)stageMap.fitBounds(L.latLngBounds(all).pad(0.3),
     Object.assign({maxZoom:16},window.matchMedia('(max-width:700px)').matches
-      ?{paddingTopLeft:[24,124],paddingBottomRight:[24,240]}
+      ?{paddingTopLeft:[24,124],paddingBottomRight:[24,peekH()+26]}
       :{paddingTopLeft:[450,90],paddingBottomRight:[40,60]}));
   return true;
 }
@@ -2274,10 +2354,10 @@ function stopCardHTML(r,i){
 function stopCardShell(title,meta,i){
   function sl(kind){return '<div class="hslider" data-kind="'+kind+'" data-i="'+i+'"><div class="hslide hskel"></div><div class="hslide hskel"></div><div class="hslide hskel"></div></div>';}
   return '<div class="stopcard"><div class="sh"><div class="sn">'+esc(title)+'</div><div class="sm" data-smi="'+i+'">'+meta+'</div></div>'+
-    '<div class="slbl">Stay</div>'+sl('stay')+
-    '<div class="slbl">Do</div>'+sl('do')+
-    '<div class="slbl">Events</div>'+sl('events')+
-    '<div class="slbl">Top videos</div>'+sl('videos')+'</div>';
+    '<div class="slbl" data-sec="stay">Stay</div>'+sl('stay')+
+    '<div class="slbl" data-sec="do">Things to do</div>'+sl('do')+
+    '<div class="slbl" data-sec="events">Events</div>'+sl('events')+
+    '<div class="slbl" data-sec="videos">Top videos</div>'+sl('videos')+'</div>';
 }
 /* ----- in-app browse sliders: real data in the app, "look further" opens the platform ----- */
 function hsMore(href,lbl){return '<a class="hslide hsmore" href="'+href+'" target="_blank" rel="noopener"><span>'+esc(lbl)+'</span><span class="hsarr">&#8599;</span></a>';}
