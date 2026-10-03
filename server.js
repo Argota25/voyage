@@ -28,20 +28,26 @@ const { URL } = require('url');
 const PORT = process.env.PORT || 8787;
 // Local default: bind to this PC only (127.0.0.1). The public beta host sets
 // HOST=0.0.0.0 plus VOYAGE_ORIGINS=https://<domain>; see docs/DEPLOY.md.
-const HOST = process.env.HOST || '127.0.0.1';
+// On Railway (RAILWAY_ENVIRONMENT is set by the platform) public mode turns
+// on by itself; explicit env vars still win.
+const ON_RAILWAY = !!process.env.RAILWAY_ENVIRONMENT;
+const HOST = process.env.HOST || (ON_RAILWAY ? '0.0.0.0' : '127.0.0.1');
 const PUBLIC = HOST !== '127.0.0.1' && HOST !== 'localhost';
 // Behind a hosting proxy (Railway), the socket address is the proxy, so the
 // real client comes from X-Forwarded-For. Only trusted when TRUST_PROXY=1.
-const TRUST_PROXY = process.env.TRUST_PROXY === '1';
+const TRUST_PROXY = process.env.TRUST_PROXY ? process.env.TRUST_PROXY === '1' : ON_RAILWAY;
 const ROOT = __dirname;
 const zlib = require('zlib');
-const CONTACT = process.env.VOYAGE_CONTACT || 'voyage-dev';
+const CONTACT = process.env.VOYAGE_CONTACT || 'https://github.com/Argota25/voyage';
 const UA = `Voyage/0.1 (+proxy; ${CONTACT})`;
 
 /* ---------- abuse controls: same-origin gate + per-IP rate limit ---------- */
 // Only our own app may use the proxy. Set VOYAGE_ORIGINS for production hosts.
 const ORIGINS = (process.env.VOYAGE_ORIGINS ||
   `http://localhost:${PORT},http://127.0.0.1:${PORT}`).split(',').map(s => s.trim()).filter(Boolean);
+// Railway's generated domain is always allowed, so the first deploy works
+// before VOYAGE_ORIGINS is set (it is still needed for a custom domain).
+if (process.env.RAILWAY_PUBLIC_DOMAIN) ORIGINS.push('https://' + process.env.RAILWAY_PUBLIC_DOMAIN);
 function originOk(req){
   const o = req.headers.origin || '', r = req.headers.referer || '';
   if (!o && !r) return false;                          // no browser context -> scripted abuse

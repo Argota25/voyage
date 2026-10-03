@@ -12,3 +12,6 @@ node_modules/
 __pycache__/
 *.pyc
 *.log
+
+# local copies of host variables
+*.env
