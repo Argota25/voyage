@@ -133,7 +133,7 @@ function storeInit(){
 }
 
 const cache = new Map();
-const KEEP = /^(guide|places|stayosm|yt):/;
+const KEEP = /^(guide2|places|stayosm|yt):/;
 function cget(k){
   const v = cache.get(k);
   if (v && v.exp > Date.now()) return v.data;
@@ -463,14 +463,19 @@ async function wikivoyagePage(title){
   const want = { See: 'see', Do: 'do', Eat: 'eat', Drink: 'drink' }, out = { see: [], do: [], eat: [], drink: [] };
   for (let i = 1; i < parts.length; i += 2){
     const k = want[parts[i]]; if (!k) continue;
-    const re = /listing-name[^>]*>([^]*?)<\/span>([^]*?)(?=listing-name|$)/g; let m; const seen = {};
-    while ((m = re.exec(parts[i + 1])) && out[k].length < 14){
-      const name = stripTags(m[1]); if (!name || name.length > 70 || seen[name.toLowerCase()]) continue;
+    const seen = {}, cards = parts[i + 1].split('class="vcard"').slice(1);
+    for (const card of cards){
+      if (out[k].length >= 14) break;
+      const nm = /listing-name[^>]*>([^]*?)<\/span>/.exec(card); if (!nm) continue;
+      const name = stripTags(nm[1]); if (!name || name.length > 70 || seen[name.toLowerCase()]) continue;
       seen[name.toLowerCase()] = 1;
-      const c = /listing-content[^>]*>([^]*?)<\/span>/.exec(m[2]);
+      const c = /listing-content[^>]*>([^]*?)<\/span>/.exec(card);
       let note = c ? stripTags(c[1]) : '';
       if (note.length > 170) note = note.slice(0, 167).replace(/\s+\S*$/, '') + '...';
-      out[k].push({ name, note });
+      const la = /class="latitude">(-?[\d.]+)</.exec(card), lo = /class="longitude">(-?[\d.]+)</.exec(card);
+      const item = { name, note };
+      if (la && lo && isFinite(+la[1]) && isFinite(+lo[1])){ item.lat = +la[1]; item.lng = +lo[1]; }
+      out[k].push(item);
     }
   }
   out.title = j.parse.title || title;
@@ -479,7 +484,7 @@ async function wikivoyagePage(title){
 async function handleGuide(reqUrl, res){
   const place = (reqUrl.searchParams.get('place') || '').trim().slice(0, 80);
   if (!place) return json(res, 400, { error: 'missing place' });
-  const key = 'guide:' + place.toLowerCase();
+  const key = 'guide2:' + place.toLowerCase();
   const hit = cget(key); if (hit) return json(res, 200, hit, true);
   const bits = place.split(',').map(x => x.trim()).filter(Boolean);
   const city = (bits[0] || '').replace(/ county$/i, ''), state = bits[1] || '';
