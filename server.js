@@ -133,7 +133,7 @@ function storeInit(){
 }
 
 const cache = new Map();
-const KEEP = /^(guide2|places|stayosm|yt):/;
+const KEEP = /^(guide2|places|stayosm|yt|r):/;
 function cget(k){
   const v = cache.get(k);
   if (v && v.exp > Date.now()) return v.data;
@@ -1049,7 +1049,7 @@ async function handleRoute(reqUrl, res){
   if (hit){ return json(res, 200, hit, true); }
   try {
     const data = await routeAnyDistance(locations, costing);
-    cset(key, data, 6 * 3600 * 1000);
+    cset(key, data, 7 * 24 * 3600 * 1000);
     json(res, 200, data);
   } catch (e){ json(res, 502, { error: 'router unavailable' }); }
 }
@@ -1083,8 +1083,43 @@ function splitChain(locs){
 async function valhallaOnce(locs, costing, alternates){
   const body = { locations: locs, costing, alternates, units: 'miles' };
   const up = await upstream('https://valhalla1.openstreetmap.de/route?json=' + encodeURIComponent(JSON.stringify(body)));
-  if (up.status !== 200){ const err = new Error('router ' + up.status); err.status = up.status; throw err; }
+  if (up.status !== 200){
+    const err = new Error('router ' + up.status); err.status = up.status;
+    try { err.code = JSON.parse(up.body).error_code; } catch (e) {}
+    throw err;
+  }
   return JSON.parse(up.body);
+}
+const NUDGES = [0, 0.8, -0.8, 1.6, -1.6, 2.4, -2.4, 3.5, -3.5];
+async function routeVia(a, b, costing, depth, st){
+  if (gcMiles(a, b) <= LEG_CAP_MI){
+    if (++st.calls > 28) throw new Error('too many legs');
+    try {
+      const part = await valhallaOnce([a, b], costing, 0);
+      if (!part.trip || !part.trip.legs) throw new Error('leg missing');
+      return [part.trip];
+    } catch (e){ if (e.status !== 400 || depth >= 3 || (depth > 0 && e.code !== 154)) throw e; }
+  }
+  if (depth >= 4){ const e = new Error('route too deep'); e.status = 400; throw e; }
+  const mid = { lat: (a.lat + b.lat) / 2, lon: (a.lon + b.lon) / 2 };
+  const k = Math.cos(mid.lat * Math.PI / 180) || 1;
+  const vy = b.lat - a.lat, vx = (b.lon - a.lon) * k, vl = Math.sqrt(vy * vy + vx * vx) || 1;
+  const py = -vx / vl, px = vy / vl / k;
+  let last = null, best = null, found = 0;
+  const miles = parts => parts.reduce((t, x) => t + ((x.summary && x.summary.length) || 0), 0);
+  for (const n of NUDGES){
+    const c = { lat: mid.lat + py * n, lon: mid.lon + px * n };
+    try {
+      const left = await routeVia(a, c, costing, depth + 1, st);
+      const right = await routeVia(c, b, costing, depth + 1, st);
+      const parts = left.concat(right);
+      if (n === 0) return parts;
+      if (!best || miles(parts) < miles(best)) best = parts;
+      if (++found >= 3 || st.calls > 20) break;
+    } catch (e){ last = e; if (e.status !== 400) throw e; }
+  }
+  if (best) return best;
+  throw last || new Error('no route');
 }
 async function routeAnyDistance(locations, costing){
   const chain = splitChain(locations);
@@ -1092,12 +1127,11 @@ async function routeAnyDistance(locations, costing){
     try { return await valhallaOnce(locations, costing, locations.length > 2 ? 0 : 2); }
     catch (e){ if (e.status !== 400) throw e; }
   }
+  const st = { calls: 0 };
   const trips = [];
-  for (let i = 1; i < chain.length; i++){
-    const part = await valhallaOnce([chain[i - 1], chain[i]], costing, 0);
-    if (!part.trip || !part.trip.legs) throw new Error('leg missing');
-    trips.push(part.trip);
-    if (i > 8) throw new Error('too many legs');
+  for (let i = 1; i < locations.length; i++){
+    const parts = await routeVia(locations[i - 1], locations[i], costing, 0, st);
+    trips.push(...parts);
   }
   const legs = [], sum = { length: 0, time: 0 };
   trips.forEach(t => { legs.push(...t.legs); sum.length += (t.summary && t.summary.length) || 0; sum.time += (t.summary && t.summary.time) || 0; });
