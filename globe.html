@@ -206,6 +206,10 @@ body.chosen .betafb{top:76px}
    (html/body never scroll). Side padding keeps the card shadow unclipped. */
 body.chosen .search.roadtrip{max-height:calc(100dvh - 32px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;pointer-events:auto;touch-action:pan-y;scrollbar-width:none;width:min(544px,calc(100vw - 24px));padding:0 12px 18px}
 body.chosen .search.roadtrip::-webkit-scrollbar{display:none}
+/* once a trip type is picked the globe is only a backdrop: it must never take
+   a finger meant for the editor (swipes were rotating the globe instead of
+   scrolling). The gate screen keeps the draggable globe. */
+body.chosen #globe,body.chosen #globe *{pointer-events:none!important;touch-action:none}
 /* mid widths: the centered editor and the top-right trip-type switch collide,
    so the editor drops below a top row that holds the switch and the beta pill */
 @media (min-width:701px) and (max-width:1100px){
