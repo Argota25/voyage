@@ -1091,6 +1091,102 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
 .hslide{position:relative}
 .hsadd{position:absolute;top:7px;right:7px;width:24px;height:24px;border-radius:50%;background:#13714C;color:#fff;display:flex;align-items:center;justify-content:center;font:700 15px var(--body);line-height:1;cursor:pointer;box-shadow:0 3px 10px -3px rgba(12,54,36,.5);z-index:2}
 .hsadd.on{background:#3AB67D;font-size:9.5px;font-weight:700;letter-spacing:.04em}
+/* ===== itinerary contrast (owner 1002): dark stop headers, dropdown sections,
+   white tiles on a tinted list, a selected state that reads at a glance ===== */
+#panel .scroll{background:#E6EEE9}
+#panel .stopcard{padding:0;overflow:hidden;border:0;border-radius:16px;background:#fff;box-shadow:0 16px 34px -22px rgba(12,54,36,.55);margin-top:14px}
+#panel .stopcard .sh{background:#123626;padding:14px 16px 13px;gap:4px}
+#panel .stopcard .sn{color:#fff;font:800 18px var(--heading)}
+#panel .stopcard .sm{color:rgba(233,247,238,.82);font:500 12.5px var(--body)}
+.secs{padding:2px 12px 6px}
+.sec{border-top:1px solid rgba(19,113,76,.12)}
+.sec:first-child{border-top:0}
+#panel .stopcard .sec>summary.slbl{display:flex;align-items:center;gap:12px;margin:0;padding:13px 4px;cursor:pointer;list-style:none;text-transform:none;letter-spacing:0}
+.sec>summary::-webkit-details-marker{display:none}
+.secic{flex:none;width:36px;height:36px;border-radius:11px;background:#E3F1E7;color:#13714C;display:flex;align-items:center;justify-content:center;transition:background .18s,color .18s}
+.secic svg{width:19px;height:19px}
+.sec[open]>summary .secic{background:#13714C;color:#fff}
+.sect{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.sect b{font:800 15.5px var(--heading);color:#123626}
+.sect span{font:500 12px var(--body);color:#5f7268}
+.secch{flex:none;width:20px;height:20px;color:#13714C;transition:transform .2s ease}
+.sec[open]>summary .secch{transform:rotate(180deg)}
+.sec>.hslider{margin:0 0 12px}
+#panel .extra .hslide{border:1px solid rgba(19,113,76,.18);background:#fff;box-shadow:0 6px 16px -12px rgba(12,54,36,.5)}
+/* stay tiles: a clear button, and an unmistakable picked state */
+#panel .extra .staytile{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;padding:14px 46px 14px 14px;color:#123626;text-align:left}
+.staytile .stn{font:800 15px var(--heading);color:#123626}
+.staytile .hsp{font:600 12px var(--body);color:#13714C}
+#panel .extra .staytile.picked{background:#13714C;border-color:#13714C}
+.staytile.picked .stn,.staytile.picked .hsp{color:#fff}
+.staytile.picked .hsp::before{content:"\2713  Added \00b7  "}
+/* the estimate explainer: readable, obviously editable */
+.cotexp{margin:12px 0 4px;padding:13px 14px;border-radius:12px;background:#EAF5EE;border:1px solid rgba(19,113,76,.22)}
+.cotexph{display:flex;align-items:center;gap:8px;font:800 14px var(--heading);color:#123626;margin-bottom:6px}
+.cotexph svg{width:18px;height:18px;color:#13714C}
+.cotexp ul{list-style:none;display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.cotexp li{font:500 12.5px/1.45 var(--body);color:#2f4b3e}
+.cotexp li b{color:#123626}
+.cotexp p{font:700 12.5px/1.45 var(--body);color:#13714C}
+.cotadjh{display:flex;align-items:center;gap:8px;margin:14px 0 2px;font:800 14px var(--heading);color:#123626}
+.cotadjh svg{width:17px;height:17px;color:#13714C}
+#panel .cotf input{border:1.5px solid rgba(19,113,76,.4);background:#fff}
+#panel .cotf input:focus{border-color:#13714C;box-shadow:0 0 0 3px rgba(58,182,125,.25);outline:none}
+/* stays: full-width rows, big enough to tap and read */
+#panel .extra .hslider.stayrows{flex-direction:column;overflow:visible;gap:10px;padding:2px 0 6px;scroll-snap-type:none}
+#panel .extra .stayrows .staytile{flex-direction:row;align-items:center;justify-content:flex-start;width:100%;gap:14px;padding:14px 14px;border-radius:14px;min-height:72px}
+.stic{flex:none;width:44px;height:44px;border-radius:12px;background:#E3F1E7;color:#13714C;display:flex;align-items:center;justify-content:center}
+.stic svg{width:22px;height:22px}
+.stx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+#panel .extra .stayrows .stn{font:800 17px var(--heading)}
+#panel .extra .stayrows .hsp{font:600 13px var(--body);color:#3e5f4f}
+.stgo{flex:none;font:800 13px var(--body);color:#fff;background:#13714C;border-radius:999px;padding:9px 16px}
+.staytile .hsadd{display:none}
+#panel .extra .stayrows .staytile.picked .stic{background:rgba(255,255,255,.16);color:#fff}
+#panel .extra .stayrows .staytile.picked .hsp{color:#D8F3DF}
+.staytile.picked .stgo{background:#fff;color:#13714C}
+.staytile.picked .stgo::before{content:"\2713  "}
+#panel .extra .stayrows .staytile.picked .hsp::before{content:none}
+/* things to do + videos: bigger cards, one and a bit per screen on phones */
+#panel .extra .sec .hslider:not(.stayrows) .hslide{width:min(76vw,290px);padding:10px}
+#panel .extra .sec .hslider:not(.stayrows) .hsimg{height:150px;border-radius:10px}
+#panel .extra .sec .hslider .hsvidplay{width:min(84vw,320px);padding:0}
+#panel .extra .sec .hst{font:700 15px/1.3 var(--body)}
+/* cost breakdown: the bar shows where the money goes at a glance */
+.cotbar{display:flex;height:14px;border-radius:999px;overflow:hidden;margin:14px 0 8px;background:#E3F1E7;gap:2px}
+.cotbar span{display:block;min-width:6px}
+.cotlegend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-bottom:6px}
+.cotlegend span{display:inline-flex;align-items:center;gap:6px;font:700 12px var(--body);color:#3e5f4f}
+.cotlegend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.cotdot{flex:none;width:12px;height:12px;border-radius:4px}
+#panel .cotrow{padding:12px 0}
+#panel .cotl b{font:800 15px var(--heading)}
+#panel .cotl span{font:500 12.5px var(--body);color:#5f7268}
+#panel .cotv{font:800 18px var(--heading);color:#123626}
+#panel .cot>summary{background:#123626;color:#fff;padding:15px 16px}
+#panel .cot>summary .cottot{color:#A2E494}
+/* narrow phones: the two top buttons shrink so they never collide */
+@media (max-width:400px){
+  .switch,.reset{font-size:10px!important;letter-spacing:.1em!important;padding:11px 13px!important;gap:6px!important}
+}
+/* stay sheet */
+.actsheet{position:fixed;inset:0;z-index:45;display:none;align-items:flex-end;justify-content:center;background:rgba(8,26,18,.45);backdrop-filter:blur(2px)}
+.actsheet.show{display:flex}
+.actcard{width:min(460px,100%);background:#fff;border-radius:22px 22px 0 0;padding:12px 20px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -20px 50px -20px rgba(8,26,18,.5);animation:actup .26s cubic-bezier(.22,.9,.24,1)}
+@keyframes actup{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+@media (min-width:701px){.actsheet{align-items:center}.actcard{border-radius:22px}}
+.acthandle{width:44px;height:4px;border-radius:2px;background:rgba(19,113,76,.25);margin:0 auto 12px}
+.actcard h3{font:800 20px var(--heading);color:#123626}
+.actsub{font:500 13px/1.45 var(--body);color:#3e5f4f;margin:6px 0 12px}
+.actprice{display:flex;align-items:baseline;gap:8px;margin-bottom:14px}
+.actamt{font:800 36px/1 var(--heading);color:#123626;letter-spacing:-.02em}
+.actlbl{font:600 13px var(--body);color:#5f7268}
+.actbtn{display:flex;align-items:center;justify-content:center;width:100%;min-height:50px;border-radius:14px;font:800 15px var(--body);cursor:pointer;text-decoration:none;margin-top:8px}
+.actadd{background:#13714C;color:#fff;border:0;box-shadow:0 12px 26px -12px rgba(12,54,36,.6)}
+.actadd.on{background:#fff;color:#9b2c1c;border:1.5px solid rgba(155,44,28,.35);box-shadow:none}
+.actgo{background:#fff;color:#123626;border:1.5px solid rgba(19,113,76,.35)}
+.actx{background:none;border:0;color:#5f7268;font-weight:700;min-height:44px}
+@media (prefers-reduced-motion:reduce){.actcard{animation:none}}
 /* ===== phone: the open sheet is the whole screen (owner 1002) =====
    Peek = map + route + price. Open = a full-screen itinerary: a compact
    header (title, stats, price) sits just under the top buttons, and the
@@ -1128,6 +1224,17 @@ body.editing .editbtn{background:#13714C;color:#fff;border-color:#13714C}
 <div id="stage"><div id="smap"></div><div id="smapfx"></div></div>
 <div class="loading" id="loading">Warming up your map…</div>
 <div class="planbar" aria-hidden="true"></div>
+<div class="actsheet" id="actsheet" role="dialog" aria-modal="true" aria-labelledby="actTitle">
+  <div class="actcard">
+    <div class="acthandle" aria-hidden="true"></div>
+    <h3 id="actTitle">Hotels</h3>
+    <p class="actsub" id="actSub"></p>
+    <div class="actprice"><span class="actamt" id="actAmt">--</span><span class="actlbl" id="actLbl">typical night</span></div>
+    <button type="button" class="actbtn actadd" id="actAdd">Add to my trip</button>
+    <a class="actbtn actgo" id="actGo" href="#" target="_blank" rel="noopener">Browse options</a>
+    <button type="button" class="actbtn actx" id="actX">Not now</button>
+  </div>
+</div>
 <div class="planwrap" id="planwrap" role="status" aria-live="polite">
   <div class="plancard">
     <h3 id="planTitle">Planning your trip</h3>
@@ -1452,7 +1559,7 @@ function configTravel(tm){
   if(!document.getElementById('stops').children.length)buildStops();
   syncTmSeg();relabelStops();
   var btn=document.getElementById('tripBtn');
-  btn.textContent=travelMode==='fly'?'Draw the flight':(travelMode==='boat'?'Draw the boat trip':'Map the drive');
+  btn.textContent=travelMode==='fly'?'Plan my flights':(travelMode==='boat'?'Plan my boat trip':'Plan my drive');
   document.getElementById('hint').textContent=defHint();
 }
 function syncTmSeg(){var seg=document.getElementById('tmseg');if(!seg)return;[].forEach.call(seg.children,function(x){x.classList.toggle('on',x.dataset.tm===travelMode);});}
@@ -1607,7 +1714,79 @@ function estimate(){
   var Car=drive?0:(td.days*(+budget.rental||0));   // fly/boat: rent a car at the destination
   return {Stay:Stay,Tix:Tix,Food:Food,Gas:Gas,Car:Car,nights:td.nights,days:td.days,ppl:ppl,drive:drive,stays:stays,extras:extras,total:Stay+Tix+Food+Gas+Car};
 }
-function costRow(name,detail,val){return '<div class="cotrow"><div class="cotl"><b>'+esc(name)+'</b><span>'+esc(detail)+'</span></div><div class="cotv">'+usd(val)+'</div></div>';}
+/* ===== typical prices: GSA per diem (FY2026), bundled in /vendor =====
+   Lodging = the federal hotel-night benchmark for the stop's city or county
+   in the trip month; meals = the per diem meals rate. Shown as estimates the
+   traveler can change; a manual edit is never overwritten. */
+var PD=null,pdP=null,pdInfo=null,budgetEdited={};
+function pdLoad(){if(!pdP)pdP=fetch('vendor/perdiem-fy2026.json').then(function(r){return r.ok?r.json():null;}).then(function(j){PD=j;return j;}).catch(function(){return null;});return pdP;}
+var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function pdMonth(){var D=(tripCtx&&tripCtx.dates)||tripDates;var d=(D&&D.start)?new Date(D.start+'T00:00:00'):new Date();return d.getMonth();}
+function pdMatch(st,city,county){
+  if(!PD||!st)return null;
+  var rows=PD.rows.filter(function(r){return r.s===st;});if(!rows.length)return null;
+  var c=(city||'').toLowerCase(),k=(county||'').toLowerCase().replace(/ (county|parish|borough)$/,'');
+  var hit=c&&rows.filter(function(r){return r.c.toLowerCase()===c;})[0];
+  if(!hit&&k)hit=rows.filter(function(r){return r.k.toLowerCase().split(/\s*[\/,]\s*/).some(function(n){return n.replace(/ (parishes|parish|less the city of.*)$/,'').trim()===k;});})[0];
+  var std=rows.filter(function(r){return r.c==='Standard Rate';})[0];
+  return hit||std||null;
+}
+function pdForRec(r){
+  return bfetch('/api/reverse?lat='+r.lat+'&lon='+r.lng,9000).then(function(x){return x.ok?x.json():null;}).then(function(j){
+    var a=(j&&j.address)||{},st=BYNAME[(a.state||'').toLowerCase()];
+    var row=pdMatch(st&&st.s,a.city||a.town||a.village||'',a.county||'');
+    if(!row)return null;
+    var mo=pdMonth();
+    r.pd={lodging:row.m[mo],meals:row.f,area:row.c==='Standard Rate'?(st.n+' (statewide rate)'):(row.c+', '+row.s),month:MONTHS[mo]};
+    return r.pd;
+  }).catch(function(){return null;});
+}
+function applyPerDiem(recs,g){
+  pdLoad().then(function(){
+    if(!PD)return;
+    return Promise.all((recs||[]).map(pdForRec));
+  }).then(function(){
+    if(g!==planGen||!tripCtx)return;
+    var drive=tripCtx.travel==='drive';
+    // nights are spent at the overnight stops on a drive, at the cities after the first on fly/boat
+    var nightRecs=(recs||[]).filter(function(r){return r.pd&&(drive?!r.dest:!r.first);});
+    if(!nightRecs.length)nightRecs=(recs||[]).filter(function(r){return r.pd;});
+    var all=(recs||[]).filter(function(r){return r.pd;});
+    if(!nightRecs.length)return;
+    var avg=function(a,f){return Math.round(a.reduce(function(s,r){return s+f(r);},0)/a.length);};
+    pdInfo={nightly:avg(nightRecs,function(r){return r.pd.lodging;}),food:avg(all,function(r){return r.pd.meals;}),
+      where:nightRecs.length===1?nightRecs[0].pd.area:(nightRecs.length+' stops'),multi:nightRecs.length>1,month:nightRecs[0].pd.month};
+    if(!budgetEdited.nightly)budget.nightly=pdInfo.nightly;
+    if(!budgetEdited.foodDay)budget.foodDay=pdInfo.food;
+    // each stop's stay tiles show that stop's typical night
+    (recs||[]).forEach(function(r,i){if(!r.pd)return;
+      [].forEach.call(document.querySelectorAll('.hslider[data-kind="stay"][data-i="'+i+'"] .staytile .hsp'),function(el){el.textContent='Typical hotel night ~'+usd(r.pd.lodging)+' \u00b7 '+r.pd.month;});
+    });
+    renderCost();
+  });
+}
+function costExplainHTML(e){
+  var lines=[];
+  if(pdInfo){
+    lines.push('<li><b>Stays '+usd(budget.nightly)+' a night.</b> '+(budgetEdited.nightly?'Your number.':(pdInfo.multi?('The average federal per diem hotel rate across your '+pdInfo.where+' in '+pdInfo.month+'.'):('The federal per diem hotel rate for '+esc(pdInfo.where)+' in '+pdInfo.month+'.'))+' It is the government benchmark for a typical hotel night.')+'</li>');
+    lines.push('<li><b>Food '+usd(budget.foodDay)+' a day.</b> '+(budgetEdited.foodDay?'Your number.':'The per diem meals rate for the same stops.')+'</li>');
+  }else{
+    lines.push('<li><b>Stays '+usd(budget.nightly)+' a night</b> and <b>food '+usd(budget.foodDay)+' a day</b> until we look up typical rates for your stops.</li>');
+  }
+  if(e.drive)lines.push('<li><b>Gas.</b> Your miles at '+budget.mpg+' mpg and $'+(+budget.gas).toFixed(2)+' a gallon.</li>');
+  else lines.push('<li><b>Rental car '+usd(budget.rental)+' a day.</b> A starting number. Flights are not included.</li>');
+  if(e.stays.length||e.extras.length)lines.push('<li><b>Your picks.</b> Stays and tickets you added use their own prices.</li>');
+  return '<div class="cotexp"><div class="cotexph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>This is an estimate</div><ul>'+lines.join('')+'</ul>'+
+    '<p>Make it yours: change any number below, or tap a hotel, motel, Airbnb, or event to add your own pick.</p></div>';
+}
+var COST_COL={Stays:'#123626',Gas:'#13714C','Rental car':'#13714C',Food:'#3AB67D','Event tickets':'#A2E494'};
+function costRow(name,detail,val){return '<div class="cotrow"><span class="cotdot" style="background:'+(COST_COL[name]||'#13714C')+'"></span><div class="cotl"><b>'+esc(name)+'</b><span>'+esc(detail)+'</span></div><div class="cotv">'+usd(val)+'</div></div>';}
+function costBarHTML(e){
+  var parts=[['Stays',e.Stay],[e.drive?'Gas':'Rental car',e.drive?e.Gas:e.Car],['Food',e.Food],['Event tickets',e.Tix]].filter(function(x){return x[1]>0;});
+  if(!e.total)return '';
+  return '<div class="cotbar" role="img" aria-label="Where the money goes">'+parts.map(function(x){return '<span style="flex:'+x[1].toFixed(2)+';background:'+COST_COL[x[0]]+'" title="'+esc(x[0])+' '+usd(x[1])+'"></span>';}).join('')+'</div>'+
+    '<div class="cotlegend">'+parts.map(function(x){return '<span><i style="background:'+COST_COL[x[0]]+'"></i>'+esc(x[0])+' '+Math.round(x[1]/e.total*100)+'%</span>';}).join('')+'</div>';
+}
 function lineRow(it,ppl){var per=(it.pp&&ppl>1);var v=(+it.cost||0)*(it.pp?Math.max(1,ppl||1):1);
   return '<div class="cotrow cotadd"><div class="cotl">'+esc(it.label)+(per?' <span class="cotpp">'+usd(it.cost)+' x '+ppl+'</span>':'')+'</div><div class="cotv">'+usd(v)+'</div><button type="button" class="cotx" data-rm="'+it.id+'" aria-label="Remove">&times;</button></div>';}
 function adjIn(lbl,key,val,step){return '<label class="cotf"><span>'+esc(lbl)+'</span><input type="text" inputmode="decimal" autocomplete="off" data-bk="'+key+'" value="'+esc(String(val))+'"></label>';}
@@ -1622,26 +1801,29 @@ function renderCost(){
   var pa=document.getElementById('phAmt');if(pa)pa.textContent=usd(e.total);
   var psub=document.getElementById('phSub');if(psub)psub.textContent=(e.ppl>1?('For '+e.ppl+' travelers. '):'')+'See the breakdown';
   var pn=e.ppl>1?(' x '+e.ppl+' travelers'):'';
-  var html='';
+  var html=costBarHTML(e);
   if(e.stays.length){var rem=Math.max(0,e.nights-e.stays.length);html+=costRow('Stays',e.stays.length+' pinned'+(rem?(' + '+rem+' est night'+(rem===1?'':'s')):''),e.Stay);e.stays.forEach(function(it){html+=lineRow(it,e.ppl);});}
   else html+=costRow('Stays',e.nights+(e.nights===1?' night':' nights')+' x '+usd(budget.nightly),e.Stay);
   if(e.drive)html+=costRow('Gas',Math.round(tripCtx.miles)+' mi / '+budget.mpg+' mpg x $'+(+budget.gas).toFixed(2),e.Gas);
   else html+=costRow('Rental car',e.days+(e.days===1?' day':' days')+' x '+usd(budget.rental),e.Car);
   html+=costRow('Food',e.days+(e.days===1?' day':' days')+' x '+usd(budget.foodDay)+pn,e.Food);
   if(e.extras.length){html+=costRow('Event tickets',e.extras.length+' pinned'+(e.ppl>1?(' x '+e.ppl+' travelers'):''),e.Tix);e.extras.forEach(function(it){html+=lineRow(it,e.ppl);});}
-  html+='<div class="cotadj">'+adjIn('Nightly $','nightly',budget.nightly,'5')+adjIn('Food/day $','foodDay',budget.foodDay,'5')+
+  html+=costExplainHTML(e);
+  html+='<div class="cotadjh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>Edit the numbers</div><div class="cotadj">'+adjIn('Nightly $','nightly',budget.nightly,'5')+adjIn('Food/day $','foodDay',budget.foodDay,'5')+
     (e.drive?(adjIn('MPG','mpg',budget.mpg,'1')+adjIn('Gas $','gas',budget.gas,'0.1')):adjIn('Car/day $','rental',budget.rental,'5'))+
     adjIn('Travelers','ppl',budget.ppl,'1')+'</div>';
-  html+='<p class="note">A rough estimate you can adjust'+(e.drive?'':'; flight and fare prices are not included')+'. Tap + on a stay or event below to add real prices; pinned stays replace the estimate, and tickets count per traveler.</p>';
   b.innerHTML=html;
   if(aek){var ni=b.querySelector('input[data-bk="'+aek+'"]');if(ni){ni.focus();if(aeSel!=null){try{ni.setSelectionRange(aeSel,aeSel);}catch(e2){}}}}
 }
 function addCart(kind,label,cost,pp){cart.push({id:'c'+(cartSeq++),kind:kind,label:label,cost:+cost||0,pp:!!pp});renderCost();}
 function addBtn(kind,label,cost,pp){var dc=(typeof cost==='number')?Math.round(cost):esc(cost);return '<span class="hsadd" role="button" tabindex="0" data-kind="'+kind+'" data-label="'+esc(label)+'"'+(pp?' data-pp="1"':'')+' data-cost="'+dc+'" title="Add to trip cost">+</span>';}
-function stayTile(href,lbl,place){return '<a class="hslide hsmore" href="'+href+'" target="_blank" rel="noopener"><span>'+esc(lbl)+'</span>'+addBtn('stay','Stay: '+lbl+' in '+place,'nightly')+'</a>';}
+var STAY_IC={Hotels:'<path d="M4 21V4h11v17M15 9h5v12M8 8h3M8 12h3M8 16h3"/>',Motels:'<path d="M3 18V8m0 6h18v4M21 18v-6a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="2"/>',Airbnb:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'};
+function stayTile(href,lbl,place){return '<a class="hslide hsmore staytile" href="'+href+'" target="_blank" rel="noopener" data-lbl="'+esc(lbl)+'" data-place="'+esc(place)+'">'+
+  '<span class="stic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(STAY_IC[lbl]||STAY_IC.Hotels)+'</svg></span>'+
+  '<span class="stx"><span class="stn">'+esc(lbl)+'</span><span class="hsp">Typical night: looking it up</span></span><span class="stgo">Add</span></a>';}
 function bindCost(ex){
   if(ex._costBound)return;ex._costBound=true;
-  ex.addEventListener('input',function(e){var k=e.target.getAttribute&&e.target.getAttribute('data-bk');if(!k)return;var v=parseFloat(e.target.value);budget[k]=isFinite(v)?v:0;renderCost();});
+  ex.addEventListener('input',function(e){var k=e.target.getAttribute&&e.target.getAttribute('data-bk');if(!k)return;var v=parseFloat(e.target.value);budget[k]=isFinite(v)?v:0;budgetEdited[k]=true;renderCost();});
   ex.addEventListener('click',function(e){
     var rm=e.target.getAttribute&&e.target.getAttribute('data-rm');
     if(rm){e.preventDefault();e.stopPropagation();cart=cart.filter(function(x){return x.id!==rm;});renderCost();return;}
@@ -1693,6 +1875,7 @@ function buildJump(drive){
 function scrollToSec(k){
   var el=jumpTarget(k),sc=document.querySelector('#panel .scroll');if(!el||!sc)return;
   if(k==='wps'&&el.tagName==='DETAILS')el.open=true;
+  var dd=el.closest&&el.closest('details.sec');if(dd)dd.open=true;
   var top=el.getBoundingClientRect().top-sc.getBoundingClientRect().top+sc.scrollTop-10;
   sc.scrollTo({top:Math.max(0,top),behavior:'smooth'});
 }
@@ -1740,13 +1923,55 @@ function scrollToSec(k){
   },{passive:true});
 })();
 
+/* ===== stay sheet: tapping Hotels / Motels / Airbnb asks what to do with it ===== */
+(function(){
+  var sh=document.getElementById('actsheet');if(!sh)return;
+  var cur=null;
+  function close(){sh.classList.remove('show');cur=null;}
+  function open(tile){
+    var sl=tile.closest('.hslider'),i=sl?+sl.getAttribute('data-i'):0;
+    var r=(tripCtx&&tripCtx.recs||[])[i]||{},lbl=tile.getAttribute('data-lbl')||'Hotels',place=tile.getAttribute('data-place')||r.place||'this stop';
+    var nightly=r.pd?r.pd.lodging:(+budget.nightly||0);
+    cur={tile:tile,label:'Stay: '+lbl+' in '+place,cost:nightly};
+    document.getElementById('actTitle').textContent=lbl+' in '+place;
+    document.getElementById('actSub').textContent=r.pd?('Starting price: a typical hotel night here (the federal per diem rate for '+r.pd.area+' in '+r.pd.month+'). Change it any time in the cost breakdown.'):'Starting price: your nightly estimate. Change it any time in the cost breakdown.';
+    document.getElementById('actAmt').textContent=usd(nightly);
+    document.getElementById('actLbl').textContent=r.night?('a night · Night '+r.night):'a night';
+    var go=document.getElementById('actGo');go.href=tile.getAttribute('href');go.textContent='See '+lbl.toLowerCase()+' on '+(lbl==='Airbnb'?'Airbnb':'Google')+' ↗';
+    var added=tile.classList.contains('picked');
+    var ab=document.getElementById('actAdd');ab.textContent=added?'Remove from my trip':('Add to my trip · '+usd(nightly)+'/night');ab.classList.toggle('on',added);
+    sh.classList.add('show');setTimeout(function(){ab.focus();},50);
+  }
+  document.addEventListener('click',function(e){
+    var t=e.target.closest&&e.target.closest('.staytile');
+    if(!t||e.target.closest('.hsadd'))return;
+    e.preventDefault();e.stopPropagation();open(t);
+  },true);
+  document.getElementById('actAdd').addEventListener('click',function(){
+    if(!cur)return;
+    if(cur.tile.classList.contains('picked')){
+      var id=cur.tile.getAttribute('data-cart');cart=cart.filter(function(x){return x.id!==id;});
+      cur.tile.classList.remove('picked');cur.tile.removeAttribute('data-cart');
+      var sg2=cur.tile.querySelector('.stgo');if(sg2)sg2.textContent='Add';
+    }else{
+      addCart('stay',cur.label,cur.cost);cur.tile.classList.add('picked');cur.tile.setAttribute('data-cart',cart[cart.length-1].id);
+      var sg=cur.tile.querySelector('.stgo');if(sg)sg.textContent='Added';
+    }
+    renderCost();close();
+  });
+  document.getElementById('actX').addEventListener('click',close);
+  document.getElementById('actGo').addEventListener('click',function(){setTimeout(close,100);});
+  sh.addEventListener('click',function(e){if(e.target===sh)close();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&sh.classList.contains('show'))close();});
+})();
+
 /* ===== planning overlay: steps tick forward while the plan builds; the last
    step keeps spinning until the result opens (or an error clears it) ===== */
 var planTimer=null,planFailsafe=null;
 var PLAN_STEPS={
-  drive:['Finding your road route','Pacing your overnight stays','Pulling in what other travelers filmed and posted','Building your itinerary'],
-  fly:['Drawing your route between cities','Gathering stays and things to do at each stop','Pulling in what other travelers filmed and posted','Building your itinerary'],
-  boat:['Charting your route between ports','Gathering stays and things to do at each landing','Pulling in what other travelers filmed and posted','Building your itinerary']
+  drive:['Finding the best road route','Picking where you’ll sleep each night','Pulling in videos from travelers who went','Putting your itinerary together'],
+  fly:['Mapping your cities','Finding places to stay and things to do in each city','Pulling in videos from travelers who went','Putting your itinerary together'],
+  boat:['Mapping your ports','Finding things to do at each port','Pulling in videos from travelers who went','Putting your itinerary together']
 };
 function planBusy(on){
   clearInterval(planTimer);clearTimeout(planFailsafe);
@@ -1884,7 +2109,7 @@ form.addEventListener('submit',function(e){
   e.preventDefault();pushURL();hint.classList.remove('err');cart=[];closeEdit();   // a fresh search starts an empty cart
   var vals=[].map.call(document.querySelectorAll('#stops .stopin'),function(i){return i.value.trim();}).filter(Boolean);
   if(vals.length<2){hint.textContent=travelMode==='fly'?'Add at least a departure and destination city.':(travelMode==='boat'?'Add at least a departure and destination port.':'Add at least a start and a destination.');hint.classList.add('err');return;}
-  hint.textContent=travelMode==='drive'?'Mapping your route, stops, and stays...':'Drawing your route and gathering each stop...';
+  hint.textContent=travelMode==='drive'?'Planning your route, stops, and stays...':'Planning your trip...';
   planBusy(true);
   var pts=[],chain=Promise.resolve(null);
   vals.forEach(function(v){chain=chain.then(function(prev){return resolveLocation(v,prev?prev.lat+','+prev.lng:undefined,travelMode==='drive').then(function(r){pts.push(r);return r;});});});
@@ -1954,6 +2179,7 @@ function buildDetail(opts){
     });
   })();
   initStopSliders(rc.recs||[]);
+  applyPerDiem(rc.recs||[],planGen);
   var g2=++stageGen;
   setTimeout(function(){if(g2!==stageGen)return;
     showStage(opts.center,rc.travel==='drive'?7:5,null,rc.line);
@@ -2137,6 +2363,11 @@ function showChooser(list,onPick,onCancel,title,subtitle){
   // geocoders can return the same place twice ("Tulsa, Oklahoma" x2): drop
   // exact repeats, and skip the question when only one real choice is left
   var seen={};list=(list||[]).filter(function(c){var k=((c.label||'')+'|'+(c.sub||'')).toLowerCase();if(seen[k])return false;seen[k]=1;return true;});
+  // "Dallas" vs "Dallas County": a traveler typing a city means the city, so a
+  // county that shares the name of a city in the list drops out of the question
+  var names={};list.forEach(function(c){names[(c.label||'').toLowerCase()]=1;});
+  var noCounty=list.filter(function(c){var m=/^(.*) county$/i.exec(c.label||'');return !(m&&names[m[1].toLowerCase()]);});
+  if(noCounty.length)list=noCounty;
   if(list.length===1&&onPick){onPick(list[0]);return;}
   chooserPick=onPick||null; chooserCancel=onCancel||null;
   document.getElementById('chh').textContent=title||'Which one did you mean?';
@@ -2429,13 +2660,18 @@ function stopCardHTML(r,i){
   var hrsIn=(tripCtx&&tripCtx.hrs?tripCtx.hrs:8)*(r.night||1);
   return stopCardShell('Night '+r.night,esc(place)+' \u00b7 ~'+r.afterMi+' mi \u00b7 about '+hrsIn+'h of driving in'+ds,i);
 }
+var SEC_IC={stay:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18V8m0 6h18v4M21 18v-6a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="2"/></svg>',do:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',events:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>',videos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9l5 3-5 3z"/></svg>'};
 function stopCardShell(title,meta,i){
   function sl(kind){return '<div class="hslider" data-kind="'+kind+'" data-i="'+i+'"><div class="hslide hskel"></div><div class="hslide hskel"></div><div class="hslide hskel"></div></div>';}
   return '<div class="stopcard"><div class="sh"><div class="sn">'+esc(title)+'</div><div class="sm" data-smi="'+i+'">'+meta+'</div></div>'+
-    '<div class="slbl" data-sec="stay">Stay</div>'+sl('stay')+
-    '<div class="slbl" data-sec="do">Things to do</div>'+sl('do')+
-    '<div class="slbl" data-sec="events">Events</div>'+sl('events')+
-    '<div class="slbl" data-sec="videos">Top videos</div>'+sl('videos')+'</div>';
+    '<div class="secs">'+
+    sec('stay','Places to stay','Hotels, motels, and Airbnb',true)+
+    sec('do','Things to do','Sights and spots nearby',false)+
+    sec('events','Events','What is on while you are there',false)+
+    sec('videos','Top videos','What travelers filmed here',false)+'</div></div>';
+  function sec(kind,label,hint,open){
+    return '<details class="sec"'+(open?' open':'')+'><summary class="slbl" data-sec="'+kind+'"><span class="secic">'+SEC_IC[kind]+'</span><span class="sect"><b>'+label+'</b><span>'+hint+'</span></span><svg class="secch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></summary>'+sl(kind)+'</details>';
+  }
 }
 /* ----- in-app browse sliders: real data in the app, "look further" opens the platform ----- */
 function hsMore(href,lbl){return '<a class="hslide hsmore" href="'+href+'" target="_blank" rel="noopener"><span>'+esc(lbl)+'</span><span class="hsarr">&#8599;</span></a>';}
@@ -2447,6 +2683,7 @@ function fillStay(el,s){
   var gm='https://www.google.com/travel/search?q='+encodeURIComponent('motels in '+place);
   getStatus().then(function(st){
     if(!st.hotels){
+      el.classList.add('stayrows');
       el.innerHTML=stayTile(gh,'Hotels',place)+stayTile(gm,'Motels',place)+stayTile(ab,'Airbnb',place);
       return;
     }
