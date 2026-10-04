@@ -171,6 +171,15 @@ function tripWrite(id, rec){
 function str(v, max){ return typeof v === 'string' ? v.replace(/[\u0000-\u001f]/g, ' ').slice(0, max) : ''; }
 function num(v, lo, hi, d){ const n = +v; return isFinite(n) ? Math.min(hi, Math.max(lo, n)) : d; }
 function isoDay(v){ return /^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : ''; }
+function pickClean(x){
+  const o = { stopI: Math.round(num(x.stopI, 0, 20, 0)), name: str(x.name, 140), src: ['travelers', 'trending', 'you', 'event'].indexOf(x.src) > -1 ? x.src : 'travelers', note: str(x.note, 220) };
+  if (isFinite(+x.lat) && isFinite(+x.lng) && x.lat !== null && x.lng !== null){ o.lat = num(x.lat, -90, 90, 0); o.lng = num(x.lng, -180, 180, 0); }
+  if (typeof x.wp === 'string' && /^[a-z-]{2,12}:[^<>"']{1,160}$/.test(x.wp)) o.wp = x.wp;
+  if (typeof x.url === 'string' && x.url.length < 400 && /^https:\/\/([a-z0-9-]+\.)*(ticketmaster\.com|livenation\.com|ticketweb\.com|universe\.com|evyy\.net)\/[^\s<>"']*$/i.test(x.url)) o.url = x.url;
+  const sh = x.short;
+  if (sh && typeof sh === 'object' && /^[A-Za-z0-9_-]{6,16}$/.test(sh.id || '')) o.short = { id: sh.id, title: str(sh.title, 140), channel: str(sh.channel, 80), views: Math.round(num(sh.views, 0, 1e12, 0)), secs: Math.round(num(sh.secs, 0, 1e6, 0)) };
+  return o;
+}
 function tripClean(t){
   if (!t || typeof t !== 'object') return null;
   const mode = ['drive', 'fly', 'boat'].indexOf(t.mode) > -1 ? t.mode : 'drive';
@@ -190,15 +199,7 @@ function tripClean(t){
     edited: {},
     stays: (Array.isArray(t.stays) ? t.stays : []).slice(0, 20).map(x => ({ name: str(x.name, 120), type: ['hotel', 'motel', 'rental'].indexOf(x.type) > -1 ? x.type : 'hotel', cost: num(x.cost, 0, 5000, 0), nights: Math.round(num(x.nights, 1, 30, 1)), stopI: Math.round(num(x.stopI, 0, 20, 0)) })).filter(x => x.name),
     extras: (Array.isArray(t.extras) ? t.extras : []).slice(0, 30).map(x => ({ label: str(x && x.label, 160), cost: num(x && x.cost, 0, 100000, 0), pp: !!(x && x.pp) })).filter(x => x.label),
-    picks: (Array.isArray(t.picks) ? t.picks : []).slice(0, 60).map(x => {
-      const o = { stopI: Math.round(num(x.stopI, 0, 20, 0)), name: str(x.name, 140), src: ['travelers', 'trending', 'you', 'event'].indexOf(x.src) > -1 ? x.src : 'travelers', note: str(x.note, 220) };
-      if (isFinite(+x.lat) && isFinite(+x.lng) && x.lat !== null && x.lng !== null){ o.lat = num(x.lat, -90, 90, 0); o.lng = num(x.lng, -180, 180, 0); }
-      if (typeof x.wp === 'string' && /^[a-z-]{2,12}:[^<>"']{1,160}$/.test(x.wp)) o.wp = x.wp;
-      if (typeof x.url === 'string' && x.url.length < 400 && /^https:\/\/([a-z0-9-]+\.)*(ticketmaster\.com|livenation\.com|ticketweb\.com|universe\.com|evyy\.net)\/[^\s<>"']*$/i.test(x.url)) o.url = x.url;
-      const sh = x.short;
-      if (sh && typeof sh === 'object' && /^[A-Za-z0-9_-]{6,16}$/.test(sh.id || '')) o.short = { id: sh.id, title: str(sh.title, 140), channel: str(sh.channel, 80), views: Math.round(num(sh.views, 0, 1e12, 0)), secs: Math.round(num(sh.secs, 0, 1e6, 0)) };
-      return o;
-    }).filter(x => x.name)
+    picks: (Array.isArray(t.picks) ? t.picks : []).slice(0, 60).map(x => pickClean(x)).filter(x => x.name)
   };
   const ed = t.edited || {};
   ['nightly', 'foodDay', 'mpg', 'gas', 'rental', 'ppl'].forEach(k => { if (ed[k]) out.edited[k] = true; });
@@ -226,11 +227,13 @@ async function handleTripSave(req, res, id){
   if (!trip) return json(res, 400, { error: 'a trip needs at least two stops' });
   const now = Date.now();
   if (id){
-    const cur = tripRead(id);
-    if (!cur) return json(res, 404, { error: 'trip not found' });
-    if (!body.key || body.key !== cur.key) return json(res, 403, { error: 'this trip belongs to someone else' });
-    await tripWrite(id, { id, key: cur.key, created: cur.created, updated: now, trip });
-    return json(res, 200, { id, updated: now });
+    return tripSerial(id, async () => {
+      const cur = tripRead(id);
+      if (!cur) return json(res, 404, { error: 'trip not found' });
+      if (!body.key || body.key !== cur.key) return json(res, 403, { error: 'this trip belongs to someone else' });
+      await tripWrite(id, { id, key: cur.key, created: cur.created, updated: now, trip, sugg: Array.isArray(cur.sugg) ? cur.sugg : [] });
+      json(res, 200, { id, updated: now });
+    });
   }
   if (!tripRateOk(clientIP(req))) return json(res, 429, { error: 'too many trips saved today' });
   const newId = crypto.randomBytes(8).toString('hex').slice(0, 10).replace(/[^a-z0-9]/g, '0');
@@ -241,7 +244,90 @@ async function handleTripSave(req, res, id){
 function handleTripGet(res, id){
   const rec = tripRead(id);
   if (!rec) return json(res, 404, { error: 'trip not found' });
-  json(res, 200, { id: rec.id, created: rec.created, updated: rec.updated, trip: rec.trip });
+  json(res, 200, { id: rec.id, created: rec.created, updated: rec.updated, trip: rec.trip, sugg: Array.isArray(rec.sugg) ? rec.sugg : [] });
+}
+const tripLocks = new Map();
+function tripSerial(id, fn){
+  const prev = tripLocks.get(id) || Promise.resolve();
+  const run = prev.then(fn, fn);
+  const tail = run.then(() => {}, () => {});
+  tripLocks.set(id, tail);
+  tail.then(() => { if (tripLocks.get(id) === tail) tripLocks.delete(id); });
+  return run;
+}
+const suggRL = new Map();
+function suggRateOk(ip){
+  const day = quotaDay(), k = ip + '|' + day;
+  if (suggRL.size > 20000) suggRL.clear();
+  const n = (suggRL.get(k) || 0) + 1; suggRL.set(k, n);
+  return n <= 40;
+}
+function suggOpen(rec){ return (Array.isArray(rec.sugg) ? rec.sugg : []).filter(x => x && x.status === 'open').length; }
+function suggItem(kind, x){
+  if (!x || typeof x !== 'object') return null;
+  if (kind === 'pick'){ const o = pickClean(x); return o.name ? o : null; }
+  if (kind === 'stay'){
+    const o = { stopI: Math.round(num(x.stopI, 0, 20, 0)), name: str(x.name, 120).trim(), type: ['hotel', 'motel', 'rental'].indexOf(x.type) > -1 ? x.type : 'hotel', cost: num(x.cost, 0, 5000, 0), nights: Math.round(num(x.nights, 1, 30, 1)) };
+    return o.name ? o : null;
+  }
+  if (kind === 'note'){ const text = str(x.text, 300).trim(); return text ? { text } : null; }
+  return null;
+}
+async function handleSuggAdd(req, res, id){
+  let body;
+  try { body = JSON.parse(await readBody(req, 8000)); } catch (e){ return json(res, 400, { error: 'bad suggestion' }); }
+  if (!body || typeof body !== 'object') return json(res, 400, { error: 'bad suggestion' });
+  const kind = ['pick', 'stay', 'note'].indexOf(body.kind) > -1 ? body.kind : '';
+  const item = kind ? suggItem(kind, body.item) : null;
+  if (!item) return json(res, 400, { error: 'bad suggestion' });
+  const by = str(body.by, 40).replace(/[<>]/g, '').trim();
+  if (!tripRead(id)) return json(res, 404, { error: 'trip not found' });
+  if (!suggRateOk(clientIP(req))) return json(res, 429, { error: 'too many suggestions today' });
+  return tripSerial(id, async () => {
+    const rec = tripRead(id);
+    if (!rec) return json(res, 404, { error: 'trip not found' });
+    const list = Array.isArray(rec.sugg) ? rec.sugg.slice() : [];
+    if (suggOpen({ sugg: list }) >= 60) return json(res, 429, { error: 'full' });
+    while (list.length >= 60){
+      const i = list.findIndex(x => !x || x.status !== 'open');
+      if (i < 0) break;
+      list.splice(i, 1);
+    }
+    const sid = crypto.randomBytes(4).toString('hex');
+    list.push({ id: sid, by, kind, item, status: 'open', at: Date.now() });
+    rec.sugg = list;
+    await tripWrite(id, rec);
+    json(res, 201, { id: sid, open: suggOpen(rec) });
+  });
+}
+async function handleSuggDecide(req, res, id, sid){
+  let body;
+  try { body = JSON.parse(await readBody(req, 4000)); } catch (e){ return json(res, 400, { error: 'bad request' }); }
+  if (!body || typeof body !== 'object') return json(res, 400, { error: 'bad request' });
+  return tripSerial(id, async () => {
+    const rec = tripRead(id);
+    if (!rec) return json(res, 404, { error: 'trip not found' });
+    if (!body.key || body.key !== rec.key) return json(res, 403, { error: 'this trip belongs to someone else' });
+    const status = ['approved', 'declined'].indexOf(body.status) > -1 ? body.status : '';
+    if (!status) return json(res, 400, { error: 'status must be approved or declined' });
+    const list = Array.isArray(rec.sugg) ? rec.sugg : [];
+    const hit = list.filter(x => x && x.id === sid)[0];
+    if (!hit) return json(res, 404, { error: 'suggestion not found' });
+    hit.status = status;
+    hit.decidedAt = Date.now();
+    rec.sugg = list;
+    await tripWrite(id, rec);
+    json(res, 200, { ok: true, open: suggOpen(rec) });
+  });
+}
+function handleTripPeek(u, res){
+  const out = {}, seen = {};
+  String(u.searchParams.get('ids') || '').split(',').map(x => x.trim()).filter(x => /^[0-9a-f]{10}$/.test(x)).slice(0, 30).forEach(id => {
+    if (seen[id]) return; seen[id] = 1;
+    const rec = tripRead(id);
+    if (rec) out[id] = { open: suggOpen(rec), updated: rec.updated || 0 };
+  });
+  json(res, 200, out);
 }
 
 function htmlEsc(v){ return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
@@ -269,7 +355,7 @@ function serveTripPage(id, req, res){
 }
 
 const cache = new Map();
-const KEEP = /^(guide2|places|stayosm|yt|r):/;
+const KEEP = /^(guide2|places|stayosm|yt|r|gas):/;
 function cget(k){
   const v = cache.get(k);
   if (v && v.exp > Date.now()) return v.data;
@@ -372,12 +458,12 @@ function httpsReq(url, method, headers, body){
   });
 }
 
-function upstream(url, redirects = 0, timeoutMs = 0){
+function upstream(url, redirects = 0, timeoutMs = 0, accept = ''){
   return new Promise((resolve, reject) => {
-    const req = https.get(url, { headers: { 'User-Agent': UA, 'Accept': 'application/json', 'Accept-Language': 'en-US' }, timeout: timeoutMs || UPSTREAM_TIMEOUT_MS }, res => {
+    const req = https.get(url, { headers: { 'User-Agent': UA, 'Accept': accept || 'application/json', 'Accept-Language': 'en-US' }, timeout: timeoutMs || UPSTREAM_TIMEOUT_MS }, res => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location && redirects < 4){
         res.resume();
-        return resolve(upstream(new URL(res.headers.location, url).toString(), redirects + 1, timeoutMs));
+        return resolve(upstream(new URL(res.headers.location, url).toString(), redirects + 1, timeoutMs, accept));
       }
       let d = '';
       res.on('data', c => d += c);
@@ -729,6 +815,70 @@ const AMA_SECRET = process.env.AMADEUS_CLIENT_SECRET || SECRETS.amadeus_secret |
 const AMA_BASE   = (process.env.AMADEUS_ENV || SECRETS.amadeus_env || 'test') === 'production'
   ? 'https://api.amadeus.com' : 'https://test.api.amadeus.com';
 
+const GAS_URL = 'https://www.eia.gov/dnav/pet/pet_pri_gnd_a_epmr_pte_dpgal_w.htm';
+const GAS_SRC = 'U.S. Energy Information Administration, weekly retail regular';
+const GAS_LABEL = { NUS: 'U.S. average', R10: 'East Coast', R1X: 'New England', R1Y: 'Central Atlantic', R1Z: 'Lower Atlantic', R20: 'Midwest', R30: 'Gulf Coast', R40: 'Rocky Mountain', R50: 'West Coast', R5XCA: 'West Coast less California',
+  SCA: 'California', SCO: 'Colorado', SFL: 'Florida', SMA: 'Massachusetts', SMN: 'Minnesota', SNY: 'New York', SOH: 'Ohio', STX: 'Texas', SWA: 'Washington' };
+const GAS_OWN = { CA: 'SCA', CO: 'SCO', FL: 'SFL', MA: 'SMA', MN: 'SMN', NY: 'SNY', OH: 'SOH', TX: 'STX', WA: 'SWA' };
+const GAS_PADD = { R1X: 'CT ME MA NH RI VT', R1Y: 'DE DC MD NJ NY PA', R1Z: 'FL GA NC SC VA WV', R20: 'IL IN IA KS KY MI MN MO NE ND OH OK SD TN WI',
+  R30: 'AL AR LA MS NM TX', R40: 'CO ID MT UT WY', R5XCA: 'AK AZ HI NV OR WA', R50: 'CA' };
+const GAS_PARENT = { R1X: 'R10', R1Y: 'R10', R1Z: 'R10', R5XCA: 'R50' };
+const GAS_REGION = {};
+Object.keys(GAS_PADD).forEach(r => GAS_PADD[r].split(' ').forEach(st => { GAS_REGION[st] = r; }));
+function gasParse(html){
+  const src = String(html || ''), p = {};
+  src.split(/<tr class=["']DataRow["']>/).slice(1).forEach(r => {
+    const id = /EMM_EPMR_PTE_([A-Z0-9]+)_DPG/.exec(r), v = /class=["']Current2["']>\s*([0-9]+\.[0-9]+)/.exec(r);
+    if (!id || !v || !GAS_LABEL[id[1]] || p[id[1]]) return;
+    const n = parseFloat(v[1]);
+    if (n > 1 && n < 15) p[id[1]] = n;
+  });
+  const ds = src.match(/class=["']Series5["']>\s*\d\d\/\d\d\/\d\d/g);
+  const dm = ds && /(\d\d)\/(\d\d)\/(\d\d)$/.exec(ds[ds.length - 1]);
+  if (!p.NUS || !dm) return null;
+  return { asof: '20' + dm[3] + '-' + dm[1] + '-' + dm[2], p };
+}
+let gasInflight = null, gasDownUntil = 0;
+function gasTable(){
+  const hit = cget('gas:tbl');
+  if (hit) return Promise.resolve(hit);
+  if (Date.now() < gasDownUntil) return Promise.resolve(cget('gas:last'));
+  if (!gasInflight){
+    gasInflight = upstream(GAS_URL, 0, 12000, 'text/html').then(r => {
+      const t = r && r.status === 200 ? gasParse(r.body) : null;
+      if (!t){ gasDownUntil = Date.now() + 5 * 60000; return cget('gas:last'); }
+      cset('gas:tbl', t, 12 * 3600000);
+      cset('gas:last', t, 45 * 86400000);
+      return t;
+    }, () => { gasDownUntil = Date.now() + 5 * 60000; return cget('gas:last'); }).then(t => { gasInflight = null; return t; });
+  }
+  return gasInflight;
+}
+function gasStatus(){
+  gasTable().catch(() => {});
+  const t = cget('gas:tbl') || cget('gas:last');
+  return t ? { asof: t.asof, source: GAS_SRC } : { asof: '', source: 'fallback' };
+}
+async function handleGas(u, res){
+  const want = [];
+  String(u.searchParams.get('st') || '').toUpperCase().split(',').forEach(x => {
+    x = x.trim();
+    if (/^[A-Z]{2}$/.test(x) && GAS_REGION[x] && want.indexOf(x) < 0 && want.length < 8) want.push(x);
+  });
+  let t = null;
+  try { t = await gasTable(); } catch (e){ t = null; }
+  if (!t) return json(res, 200, { price: 3.40, unit: '$/gal', label: 'U.S. typical', asof: '', source: 'fallback', fallback: true, by: [] });
+  const r2 = n => Math.round(n * 100) / 100;
+  if (!want.length) return json(res, 200, { price: r2(t.p.NUS), unit: '$/gal', label: 'U.S. average', asof: t.asof, source: GAS_SRC, by: [] });
+  const by = want.map(st => {
+    const reg = GAS_REGION[st];
+    const k = [GAS_OWN[st], reg, GAS_PARENT[reg], 'NUS'].filter(x => x && t.p[x])[0];
+    return { st, price: r2(t.p[k]), label: GAS_LABEL[k] };
+  });
+  const labels = by.map(b => b.label);
+  json(res, 200, { price: r2(by.reduce((a, b) => a + b.price, 0) / by.length), unit: '$/gal', label: labels.every(l => l === labels[0]) ? labels[0] : 'your route', asof: t.asof, source: GAS_SRC, by });
+}
+
 function handleSocialStatus(res){
   json(res, 200, {
     youtube:  !!YT_KEY,
@@ -737,7 +887,7 @@ function handleSocialStatus(res){
     events:   !!TM_KEY,
     google:   !!(G_KEY && G_CX),
     instagram: false, facebook: false, tiktok: false, airbnb: false,
-    store: storeOn, stored: storeCount, trips: tripCount, videoSearches: { used: spent.yt || 0, max: BUDGET.yt }, videoIndex: chanIdx.length,
+    store: storeOn, stored: storeCount, trips: tripCount, gas: gasStatus(), videoSearches: { used: spent.yt || 0, max: BUDGET.yt }, videoIndex: chanIdx.length,
     note: 'instagram/facebook need a Meta developer app + review; tiktok needs developer approval; airbnb has no public API. See docs/SOCIAL-APIS.md.'
   });
 }
@@ -1408,6 +1558,16 @@ http.createServer((req, res) => {
   if (u.pathname.startsWith('/api/')) {
     if (!originOk(req)) return json(res, 403, { error: 'forbidden origin' });
     if (!rateOk(clientIP(req))) return json(res, 429, { error: 'rate limited; slow down' });
+    if (u.pathname === '/api/trips/peek'){
+      if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { error: 'method not allowed' });
+      return void handleTripPeek(u, res);
+    }
+    const sm = /^\/api\/trips\/([a-z0-9]{10})\/sugg(?:\/([0-9a-f]{8}))?$/.exec(u.pathname);
+    if (sm){
+      if (req.method !== 'POST') return json(res, 405, { error: 'method not allowed' });
+      if (sm[2]) return void guard(handleSuggDecide(req, res, sm[1], sm[2]), res);
+      return void guard(handleSuggAdd(req, res, sm[1]), res);
+    }
     const tm = /^\/api\/trips(?:\/([a-z0-9]{10}))?$/.exec(u.pathname);
     if (tm){
       if (req.method === 'POST' && !tm[1]) return void guard(handleTripSave(req, res, ''), res);
@@ -1418,6 +1578,7 @@ http.createServer((req, res) => {
     if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { error: 'method not allowed' });
     if (u.pathname === '/api/geocode') return void guard(handleGeocode(u, res), res);
     if (u.pathname === '/api/route')   return void guard(handleRoute(u, res), res);
+    if (u.pathname === '/api/gas')     return void guard(handleGas(u, res), res);
     if (u.pathname === '/api/reverse') return void guard(handleReverse(u, res), res);
     if (u.pathname === '/api/sights')  return void guard(handleSights(u, res), res);
     if (u.pathname === '/api/street')  return void guard(handleStreet(u, res), res);
