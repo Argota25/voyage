@@ -1691,6 +1691,84 @@ body.vidmap .hub{display:none!important}
 @media (prefers-reduced-motion:reduce){.hub.show{animation:none}}
 @media (prefers-reduced-motion:reduce){.pwtick.go{animation:pwtickrm .9s linear forwards}.cartpill.bump,.cartpill .cpn.flip,.sparkpulse{animation:none}.spark{display:none}.rdraw{transition:none}}
 @keyframes pwtickrm{0%,70%{opacity:1;transform:none}100%{opacity:0;transform:none}}
+.gsheet{position:fixed;inset:0;z-index:65;display:none;align-items:flex-end;justify-content:center;background:rgba(8,26,18,.5);backdrop-filter:blur(3px)}
+.gsheet.inbox{z-index:62}
+.gsheet.show{display:flex}
+.gscard{display:flex;flex-direction:column;width:min(480px,100%);max-height:92dvh;border-radius:22px 22px 0 0;background:#F8F6F0;overflow:hidden;box-shadow:0 -20px 50px -20px rgba(8,26,18,.55);animation:actup .28s cubic-bezier(.22,.9,.24,1)}
+.gscard:focus{outline:none}
+@media (min-width:701px){.gsheet{align-items:center}.gscard{border-radius:22px}}
+.gsband{flex:none;display:flex;align-items:center;gap:12px;padding:18px 14px 16px 18px;background-color:var(--sun);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120' viewBox='0 0 240 120' fill='none' stroke='%2327493D' stroke-opacity='.14' stroke-width='1.2'%3E%3Cpath d='M-10 30c40-18 70 14 110 0s70-26 150-4'/%3E%3Cpath d='M-10 52c44-16 74 16 116 2s72-24 144-2'/%3E%3Cpath d='M-10 76c40-12 80 18 120 4s76-22 140 0'/%3E%3Cpath d='M-10 100c46-14 78 14 118 2s78-20 142 2'/%3E%3Cellipse cx='190' cy='30' rx='24' ry='11'/%3E%3Cellipse cx='190' cy='30' rx='12' ry='5'/%3E%3C/svg%3E");background-size:240px 120px;color:var(--sun-ink)}
+.gsic{flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:#27493D;color:var(--sun)}
+.gsic svg{width:22px;height:22px}
+.gsbt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.gsbt b{font:800 18px/1.2 var(--heading)}
+.gsbt span{font:600 13px/1.35 var(--body);opacity:.86}
+.gsx{flex:none;align-self:flex-start;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.6);color:#27493D;font:700 24px/1 var(--body);cursor:pointer}
+.gsbody{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:14px 16px calc(18px + env(safe-area-inset-bottom))}
+.gsopt{display:flex;align-items:center;gap:14px;width:100%;min-height:68px;margin-top:10px;padding:12px 14px;border:1px solid rgba(70,127,103,.2);border-radius:16px;background:#fff;color:#27493D;text-align:left;cursor:pointer;box-shadow:0 8px 20px -16px rgba(12,54,36,.5)}
+.gsopt:first-child{margin-top:0}
+.gsopt:hover{border-color:#467F67}
+.gsoic{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:13px;background:#CDE8D3;color:#27493D}
+.gsopt.o2 .gsoic{background:#F6E3BC;color:#4A3610}
+.gsopt.o3 .gsoic{background:#F3DDD3;color:#6E2A17}
+.gsopt.o4 .gsoic{background:#27493D;color:var(--sun)}
+.gsoic svg{width:22px;height:22px}
+.gsot{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.gsot b{font:800 16px/1.2 var(--heading)}
+.gsot span{font:500 13px/1.35 var(--body);color:#5f7268}
+.gsgo{flex:none;width:18px;height:18px;color:#86C5A4}
+.gsquiet{display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;margin-top:10px;border:0;background:none;color:#3B6E59;font:700 14px var(--body);text-decoration:underline;text-decoration-color:#86C5A4;text-underline-offset:4px;cursor:pointer}
+.gsquiet:disabled{opacity:.6;cursor:progress}
+.gsh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:18px 0 8px;font:800 16px var(--heading);color:#27493D}
+.gsh span{font:700 12.5px var(--body);color:#5f7268;font-variant-numeric:lining-nums}
+.gsmine{display:flex;flex-direction:column;gap:8px}
+.gsrow{display:flex;align-items:center;gap:10px;min-height:52px;padding:8px 12px;border-radius:14px;background:#fff;border:1px solid rgba(70,127,103,.14)}
+.gsrt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.gsrt b{font:700 14px var(--body);color:#27493D;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.gsrt span{font:500 12px var(--body);color:#5f7268}
+.gspill{flex:none;padding:5px 10px;border-radius:999px;font:800 11.5px var(--body);background:#EEF0E6;color:#3B6E59;white-space:nowrap}
+.gspill.ok{background:#CDE8D3;color:#27493D}
+.gspill.no{background:#F1ECE4;color:#6b5d50}
+.gsempty{margin:0;font:500 13.5px/1.45 var(--body);color:#5f7268}
+.gsback{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 6px 0 0;border:0;background:none;color:#3B6E59;font:800 14px var(--body);cursor:pointer}
+.gsback svg{width:18px;height:18px}
+.gslbl{display:block;margin:4px 0 10px;font:800 18px/1.3 var(--heading);color:#27493D}
+.gsin{display:block;width:100%;min-height:50px;padding:0 14px;border-radius:14px;border:1.5px solid rgba(70,127,103,.4);background:#fff;font:600 16px var(--body);color:#27493D}
+.gsin:focus{outline:2px solid #467F67;outline-offset:1px}
+textarea.gsin{min-height:128px;padding:12px 14px;resize:vertical;line-height:1.45}
+.gscount{display:block;margin-top:4px;text-align:right;font:600 12px var(--body);color:#5f7268;font-variant-numeric:lining-nums}
+.gssub{margin:0 0 12px;font:500 13.5px/1.45 var(--body);color:#5f7268}
+.gsheet button:focus-visible{outline:2px solid #467F67;outline-offset:2px}
+.ibcard{margin-top:10px;padding:14px;border-radius:16px;background:#fff;border:1px solid rgba(70,127,103,.16);box-shadow:0 8px 20px -16px rgba(12,54,36,.5);max-height:420px;overflow:hidden;transition:opacity .26s ease,transform .3s ease,max-height .34s ease .1s,margin .34s ease .1s,padding .34s ease .1s}
+.ibcard:first-child{margin-top:0}
+.ibcard.gone{opacity:0;transform:translateX(44px);max-height:0;margin-top:0;padding-top:0;padding-bottom:0;border-width:0}
+.ibtop{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.ibwho{font:800 14px var(--body);color:#27493D}
+.ibchip{padding:4px 10px;border-radius:999px;font:800 11.5px var(--body);background:#CDE8D3;color:#27493D}
+.ibchip.stay{background:#F6E3BC;color:#4A3610}
+.ibchip.note{background:#F3DDD3;color:#6E2A17}
+.ibname{display:block;margin:8px 0 2px;font:800 17px/1.25 var(--heading);color:#27493D}
+.ibtext{margin:8px 0 2px;font:600 15px/1.45 var(--body);color:#27493D;overflow-wrap:anywhere}
+.ibwhere{display:block;font:500 13px/1.4 var(--body);color:#5f7268;font-variant-numeric:lining-nums}
+.ibswap{display:block;margin-top:4px;font:700 12.5px var(--body);color:#6E2A17}
+.ibbtns{display:grid;grid-template-columns:1.4fr 1fr;gap:10px;margin-top:12px}
+.ibadd{min-height:48px;border:0;border-radius:14px;background:var(--pop);color:var(--pop-ink);font:800 15px var(--body);cursor:pointer;box-shadow:0 10px 22px -14px rgba(150,56,28,.7)}
+.ibadd:hover{background:var(--pop-deep)}
+.ibno{min-height:48px;border-radius:14px;border:1.5px solid rgba(70,127,103,.35);background:#fff;color:#27493D;font:800 14.5px var(--body);cursor:pointer}
+.ibadd:disabled,.ibno:disabled{opacity:.6;cursor:progress}
+.ibdone{margin:0;padding:30px 10px;text-align:center;font:800 20px var(--heading);color:#27493D}
+.hubsugg{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;margin-top:16px;padding:12px 14px;border:0;border-radius:16px;background-color:var(--sun);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120' viewBox='0 0 240 120' fill='none' stroke='%2327493D' stroke-opacity='.14' stroke-width='1.2'%3E%3Cpath d='M-10 30c40-18 70 14 110 0s70-26 150-4'/%3E%3Cpath d='M-10 52c44-16 74 16 116 2s72-24 144-2'/%3E%3Cpath d='M-10 76c40-12 80 18 120 4s76-22 140 0'/%3E%3Cpath d='M-10 100c46-14 78 14 118 2s78-20 142 2'/%3E%3Cellipse cx='190' cy='30' rx='24' ry='11'/%3E%3Cellipse cx='190' cy='30' rx='12' ry='5'/%3E%3C/svg%3E");background-size:240px 120px;color:var(--sun-ink);font:800 15.5px var(--body);text-align:left;cursor:pointer;box-shadow:0 12px 24px -16px rgba(160,110,10,.7)}
+.hubsugg>span:nth-child(2){flex:1}
+.hubsugg em{font-style:normal;text-decoration:underline;text-underline-offset:3px}
+.hubsic{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#27493D;color:var(--sun)}
+.hubsic svg{width:19px;height:19px}
+.hubnote{margin:0;padding:10px 0;border-top:1px solid rgba(70,127,103,.14);font:500 14px/1.45 var(--body);color:#27493D;overflow-wrap:anywhere}
+.hubnote:first-of-type{border-top:0}
+.hubrt .hubfrom{align-self:flex-start;margin-top:2px;padding:1px 8px;border-radius:999px;background:var(--sun);color:var(--sun-ink);font:800 10.5px/1.6 var(--body);font-style:normal}
+.mytrip .mtnew{align-self:flex-start;margin-top:2px;padding:3px 9px;border-radius:999px;background:var(--sun);color:var(--sun-ink);font:800 11.5px var(--body);font-style:normal}
+.actsub .gsto{color:#BF4E30;font-weight:800}
+body.guest #editTrip,body.guest .sprm,body.guest .spchg,body.guest .mpx,body.guest .hsadd,body.guest .cotx,body.guest .cotadjh,body.guest .cotadj,body.guest .wizfoot,body.guest #wizProg,body.guest #stFlow{display:none!important}
+@media (prefers-reduced-motion:reduce){.gscard{animation:none}.ibcard{transition:none}}
 </style>
 </head>
 <body>
@@ -1721,6 +1799,8 @@ body.vidmap .hub{display:none!important}
   <div class="shhint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-6 6 6"/><path d="M6 20l6-6 6 6" opacity=".5"/></svg>Swipe up to see more</div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="gsheet" id="guestSheet" role="dialog" aria-modal="true" aria-labelledby="gsTitle"><div class="gscard" tabindex="-1"><div class="gsband"><span class="gsic" id="gsIc"></span><span class="gsbt"><b id="gsTitle">You are a guest on this trip</b><span id="gsSub"></span></span><button type="button" class="gsx" id="gsX" aria-label="Close">&times;</button></div><div class="gsbody" id="gsBody"></div></div></div>
+<div class="gsheet inbox" id="inboxSheet" role="dialog" aria-modal="true" aria-labelledby="ibTitle"><div class="gscard" tabindex="-1"><div class="gsband"><span class="gsic" id="ibIc"></span><span class="gsbt"><b id="ibTitle">Suggestions from friends</b><span id="ibSub"></span></span><button type="button" class="gsx" id="ibX" aria-label="Close">&times;</button></div><div class="gsbody" id="ibBody"></div></div></div>
 <div class="vidcard" id="vidCard" aria-live="polite"></div>
 <div class="maphint" id="mapHint" aria-hidden="true"><i></i>Tap a stop to see your picks</div>
 <div class="cheer" id="cheer" role="status" aria-live="polite">
@@ -2469,6 +2549,12 @@ function stopLabel(i){var r=(tripCtx.recs||[])[i]||{};var pl=r.place||'this stop
 function renderNext(){
   var el=document.getElementById('nextCard');if(!el||!tripCtx)return;
   var e=estimate();
+  if(isGuest()){
+    el.innerHTML='<div class="nxtop"><span class="nxstep">Guest</span><span class="nxtot">Trip so far: <b>'+usd(e.total)+'</b></span></div>'+
+      '<h3>'+esc(tripOwner?(tripOwner+' shared this trip with you'):'A friend shared this trip with you')+'</h3><p>'+esc('Look around, then suggest a place to stay, a thing to do or a note. '+(tripOwner||'The owner')+' decides what goes in.')+'</p>'+
+      '<button type="button" class="nxbtn" data-jumpto="guest">Suggest something for this trip</button>';
+    refreshStayBoxes();return;
+  }
   var step,title,body,btn,go;
   var seg='<div class="nxseg" role="group" aria-label="How do you want to plan?"><button type="button" data-style="plan" class="'+(tripStyle==='plan'?'on':'')+'">Plan every night</button><button type="button" data-style="flow" class="'+(tripStyle==='flow'?'on':'')+'">Go with the flow</button></div>';
   if(tripReady){
@@ -2509,6 +2595,7 @@ document.addEventListener('click',function(e){
   if(go==='dowiz'){openIdeas();return;}
   if(go==='map'){showTripMap();return;}
   if(go==='hub'){openHub();return;}
+  if(go==='guest'){openGuest();return;}
   scrollToSec(go);
 });
 function stayBoxHTML(i){
@@ -2665,6 +2752,7 @@ function openStaySheet(i,editId){
   staySt={i:i,type:(old&&old.type)||'hotel',price:old?old.cost:(r.pd?r.pd.lodging:(+budget.nightly||0)),nights:old?(+old.nights||1):stayDefaultNights(i),list:null,editId:editId||null,fresh:true};
   var ssx=stayStops(),kx=ssx.indexOf(i);
   document.getElementById('actTitle').textContent=(editId||kx<=0)?'Where will you sleep?':(kx===ssx.length-1?'Last one. Where will you sleep?':['Next night. Where to?','And the night after?','Keep going. Where to?'][(kx-1)%3]);
+  if(isGuest())document.getElementById('actTitle').textContent='Where should '+(tripOwner||'they')+' sleep?';
   stayRender();
   sh.classList.add('show');
   if(r._stayList){staySt.list=r._stayList;stayRender();}
@@ -2682,8 +2770,8 @@ function stayRender(){
   var r=tripCtx.recs[st.i],b=document.getElementById('actBody');
   var TYPES=[['hotel','Hotels'],['motel','Motels'],['rental','Home rental']];
   var tname=st.type==='motel'?'motel':(st.type==='rental'?'home rental':'hotel');
-  var rows='';
-  var generic='<button type="button" class="strow strany" data-name=""><span class="strt"><b>Any '+tname+' here</b><span>I will choose the exact one later</span></span><span class="strpick">Pick</span></button>';
+  var rows='',pk=isGuest()?'Suggest':'Pick';
+  var generic='<button type="button" class="strow strany" data-name=""><span class="strt"><b>Any '+tname+' here</b><span>'+(isGuest()?'They choose the exact one later':'I will choose the exact one later')+'</span></span><span class="strpick">'+pk+'</span></button>';
   if(st.type==='rental'){
     rows=generic+'<p class="stnote">Home rentals (Airbnb, Vrbo) do not share their listings with other apps, so Voyage cannot show them. Pick this to save the nights and your price.</p>';
   }else if(st.list===null){
@@ -2692,7 +2780,7 @@ function stayRender(){
     var want=st.type==='motel'?['motel']:['hotel','guest_house','hostel'];
     var l=st.list.filter(function(x){return want.indexOf(x.kind)>-1;}).slice(0,14);
     rows=generic+(l.length?l.map(function(x){
-      return '<button type="button" class="strow" data-name="'+esc(x.name)+'"><span class="strt"><b>'+esc(x.name)+'</b><span>'+(x.addr?esc(x.addr)+' \u00b7 ':'')+x.mi+' mi from your stop</span></span><span class="strpick">Pick</span></button>';
+      return '<button type="button" class="strow" data-name="'+esc(x.name)+'"><span class="strt"><b>'+esc(x.name)+'</b><span>'+(x.addr?esc(x.addr)+' \u00b7 ':'')+x.mi+' mi from your stop</span></span><span class="strpick">'+pk+'</span></button>';
     }).join(''):'<p class="stnote">No '+tname+'s are listed on the map near this stop. You can still pick "Any '+tname+' here".</p>');
   }
   var ssx=stayStops(),kx=Math.max(0,ssx.indexOf(st.i));
@@ -2705,7 +2793,7 @@ function stayRender(){
     '<p class="stnote">'+(r.pd?('The price starts at a typical hotel night for '+esc(r.pd.area)+' in '+r.pd.month+' (federal per diem rate). Change it to what you plan to pay.'):'Change the price to what you plan to pay.')+'</p>'+
     '<div class="stlist">'+rows+'</div>'+
     '<button type="button" class="actbtn actx" id="stFlow">Skip this. I will go with the flow.</button>'+wizFoot();
-  wizProg(1);wizBackShown(stayStops().indexOf(st.i)>0);
+  wizProg(1);wizBackShown(isGuest()||stayStops().indexOf(st.i)>0);
   if(st.fresh){st.fresh=false;b.className='';void b.offsetWidth;b.className=['stinA','stinB','stinC'][kx%3];}
 }
 function stayDone(name,row){
@@ -2713,6 +2801,7 @@ function stayDone(name,row){
   var pv=parseFloat(document.getElementById('stPrice').value);st.price=isFinite(pv)&&pv>=0?pv:st.price;
   var tl=st.type==='motel'?'motel':(st.type==='rental'?'home rental':'hotel');
   var nm=name||('A '+tl+' near '+(r.place||'this stop'));
+  if(isGuest()){suggest('stay',{stopI:st.i,name:nm,type:st.type,cost:st.price,nights:st.nights},row,function(){openGuest();},closeStaySheet);return;}
   if(st.editId)cart=cart.filter(function(x){return x.id!==st.editId;});
   cart.push({id:'c'+(cartSeq++),kind:'stay',label:'Stay: '+nm,name:nm,type:st.type,cost:st.price,nights:st.nights,stopI:st.i,pp:false});
   if(tripStyle==='flow')tripStyle='plan';
@@ -2765,14 +2854,16 @@ function spark(el,big,quiet){
   if(navigator.vibrate){try{navigator.vibrate(12);}catch(e){}}
 }
 function cartPillCount(){
+  if(isGuest())return mySugg().length;
   var sv=saved||[],ev={};sv.forEach(function(x){if(x.src==='event')ev['Event: '+x.name]=1;});
   return sv.length+(cart||[]).filter(function(x){return x.kind==='stay'||(x.kind==='extra'&&!ev[x.label]);}).length;
 }
 function cartPillSync(){
   var p=document.getElementById('cartPill'),nEl=document.getElementById('cartPillN');if(!p||!nEl)return;
   var n=cartPillCount();
+  guestSync();
   p.classList.toggle('show',n>0);
-  if(nEl.textContent!==String(n)){nEl.textContent=n;p.setAttribute('aria-label',n+(n===1?' thing':' things')+' in your trip. Show them');}
+  if(nEl.textContent!==String(n)){nEl.textContent=n;p.setAttribute('aria-label',isGuest()?(n+(n===1?' suggestion':' suggestions')+' from you. Show them'):(n+(n===1?' thing':' things')+' in your trip. Show them'));}
 }
 var addN=0,addToastAt=0,addLineK=0,ADD_LINES=['{n} things in your trip. It is coming together.','{n} in the cart. This is going to be a good one.','That is {n}. You are building a real trip.'];
 function added(kind,el,quiet){
@@ -2792,6 +2883,7 @@ function added(kind,el,quiet){
   }
 }
 document.getElementById('cartPill').addEventListener('click',function(){
+  if(isGuest()){openGuest();return;}
   if(tripReady){openHub();return;}
   var pe=document.getElementById('panel'),sc=pe.querySelector('.scroll');
   var box=[].filter.call(document.querySelectorAll('#extra .mypicks'),function(b){return b.children.length>0;})[0];
@@ -2835,12 +2927,13 @@ function lastPickFor(i){var pk=stopPicks(i);return pk.length?pk[pk.length-1].id:
 function wizBack(){
   var ss=stayStops();
   if(ideaView==='chat'){openIdeas();return;}
-  if(ideaView==='stop'&&doSt){if(doSt.k>0)openDoSheet(doSt.k-1);else openIdeas();return;}
+  if(ideaView==='stop'&&doSt){if(doSt.k>0)openDoSheet(doSt.k-1);else if(isGuest()){closeStaySheet();openGuest();}else openIdeas();return;}
   if(ideaView==='choose'){
     ideaView='';var li=ss[ss.length-1];
     for(var k=ss.length-1;k>=0;k--){if(stopPicks(ss[k]).length){li=ss[k];break;}}
     openStaySheet(li,lastPickFor(li));return;
   }
+  if(staySt&&isGuest()){closeStaySheet();gsOpenView('stops');return;}
   if(staySt){
     var idx=ss.indexOf(staySt.i);
     if(idx>0){var pi=ss[idx-1];openStaySheet(pi,lastPickFor(pi));}
@@ -2920,7 +3013,7 @@ function chatAnswer(vals){
 }
 function openDoSheet(k){
   var ss=stayStops();
-  if(k>=ss.length){finishTrip();return;}
+  if(k>=ss.length){if(isGuest()){closeStaySheet();openGuest();return;}finishTrip();return;}
   doSt={k:k,i:ss[k]};staySt=null;chatSt=null;ideaView='stop';
   document.getElementById('actTitle').textContent='Things to do';
   doRender();sheetShow();
@@ -2928,10 +3021,10 @@ function openDoSheet(k){
 function doRender(){
   var st=doSt;if(!st)return;
   var ss=stayStops(),last=st.k===ss.length-1;
-  document.getElementById('actBody').innerHTML='<p class="actsub">'+esc(capFirst(stopLabel(st.i)))+' · stop '+(st.k+1)+' of '+ss.length+'</p>'+
+  document.getElementById('actBody').innerHTML='<p class="actsub">'+(isGuest()?('<b class="gsto">Suggesting to '+esc(ownerWho())+'</b> · '):'')+esc(capFirst(stopLabel(st.i)))+' · stop '+(st.k+1)+' of '+ss.length+'</p>'+
     '<div class="idseg" role="tablist">'+['travelers','trending','you'].map(function(k){return '<button type="button" role="tab" data-src="'+k+'" class="'+(ideaSrc===k?'on':'')+'">'+IDEA_IC[k]+'<span>'+IDEA_NAME[k]+'</span></button>';}).join('')+'</div>'+
     '<div id="idList"><p class="stnote">Loading...</p></div><div class="idmore" id="idMore"></div>'+
-    '<button type="button" class="actbtn actadd" id="doNext">'+(last?'Finish my trip':'Next stop →')+'</button>'+wizFoot();
+    '<button type="button" class="actbtn actadd" id="doNext">'+(last?(isGuest()?'Done':'Finish my trip'):'Next stop →')+'</button>'+wizFoot();
   wizProg(2);wizBackShown(true);
   loadIdeas(st);
   idMoreSync();
@@ -2939,22 +3032,22 @@ function doRender(){
 function idMoreSync(){
   var el=document.getElementById('idMore'),st=doSt;if(!el||!st)return;
   var n=saved.filter(function(x){return x.stopI===st.i;}).length,last=st.k===stayStops().length-1;
-  if(!n||st.keep){el.className='idmore';el.innerHTML='';return;}
+  if(!n||st.keep||isGuest()){el.className='idmore';el.innerHTML='';return;}
   el.innerHTML='<span>✓ '+n+' saved</span><button type="button" class="idkeep" id="idKeep">Keep adding</button><button type="button" class="idcont" id="idCont">'+(last?'Finish':'Continue')+' →</button>';
   if(!el.classList.contains('show'))el.className='idmore show';
 }
 function idRowsSync(){
   var st=doSt;if(!st||!document.getElementById('idList'))return;
-  [].forEach.call(document.querySelectorAll('#idList .idrow'),function(rw){var on=isSaved(st.i,rw.getAttribute('data-name'));rw.classList.toggle('on',on);var sb=rw.querySelector('.idsave');if(sb)sb.textContent=on?'✓ Saved':'Save';});
+  [].forEach.call(document.querySelectorAll('#idList .idrow'),function(rw){var sl=saveLbl(st.i,rw.getAttribute('data-name')),on=sl[0];rw.classList.toggle('on',on);var sb=rw.querySelector('.idsave');if(sb)sb.textContent=sl[1];});
   st.keep=false;idMoreSync();
 }
 function ideaRow(st,x){
-  var on=isSaved(st.i,x.name);
+  var sl=saveLbl(st.i,x.name),on=sl[0];
   return '<div class="idrow'+(on?' on':'')+'" data-name="'+esc(x.name)+'">'+
     '<button type="button" class="idmain"'+(x.v!=null?' data-v="'+x.v+'"':'')+(x.wp?' data-wp="'+esc(x.wp)+'"':'')+' data-note="'+esc(x.note||'')+'">'+
     (x.thumb?'<span class="idthumb" style="background-image:url('+esc(urlOk(x.thumb))+')"></span>':'')+
     '<span class="strt"><b>'+esc(x.name)+'</b>'+(x.note?'<span>'+esc(x.note)+'</span>':'')+'</span></button>'+
-    '<button type="button" class="idsave">'+(on?'✓ Saved':'Save')+'</button></div>';
+    '<button type="button" class="idsave">'+sl[1]+'</button></div>';
 }
 function ideaList(st,items,head,foot){
   var el=document.getElementById('idList');if(!el||doSt!==st)return;
@@ -3109,17 +3202,17 @@ function cartIdle(){
   return sig==='[[],[]]'||sig===tripBase;
 }
 function saveNow(){
-  if(!tripCtx||pendingRestore||tripSaving)return;
+  if(!tripCtx||pendingRestore||tripSaving||isGuest())return;
   if(tripId&&tripKey){if(!tripUnsaved)return;}
   else if(cartIdle())return;
   clearTimeout(tripSaveT);
   saveTrip('leave').catch(function(){});
 }
 function leaveFor(a){
-  if(a.id==='evTix')evAdd(+a.getAttribute('data-i'),+a.getAttribute('data-k'),document.getElementById('evAdd'));
+  if(a.id==='evTix'&&!isGuest())evAdd(+a.getAttribute('data-i'),+a.getAttribute('data-k'),document.getElementById('evAdd'));
   leftAt=Date.now();
   clearTimeout(tripSaveT);
-  if(tripCtx&&!tripSaving&&(tripUnsaved||!cartIdle()))saveTrip('leave').catch(function(){});
+  if(tripCtx&&!tripSaving&&!isGuest()&&(tripUnsaved||!cartIdle()))saveTrip('leave').catch(function(){});
 }
 document.addEventListener('visibilitychange',function(){
   if(document.visibilityState==='hidden'){saveNow();return;}
@@ -3141,7 +3234,7 @@ function saveTrip(how){
         tripUnsaved=true;
         throw new Error((x.j&&x.j.error)||'The trip did not save. Try again.');
       }
-      if(x.j.key){tripId=x.j.id;tripKey=x.j.key;}
+      if(x.j.key){if(x.j.id!==tripId){tripSugg=[];}tripId=x.j.id;tripKey=x.j.key;}
       tripSavedAt=Date.now();
       myTripsPut({id:tripId,key:tripKey,title:tripTitle(),mode:travelMode,dates:dateRangeLabel(),at:tripSavedAt});
       if(location.search!=='?t='+tripId)history.replaceState(null,'','?t='+tripId);
@@ -3151,7 +3244,7 @@ function saveTrip(how){
     },function(e){tripSaving=false;tripUnsaved=true;throw e;});
 }
 function tripDirty(){
-  if(pendingRestore||!tripCtx||cartIdle())return;
+  if(pendingRestore||!tripCtx||isGuest()||cartIdle())return;
   tripUnsaved=true;
   clearTimeout(tripSaveT);
   tripSaveT=setTimeout(function(){saveTrip('auto').catch(function(){});},1500);
@@ -3160,6 +3253,8 @@ function renderSaveBar(){
   var el=document.getElementById('saveBar');if(!el)return;
   var mine=tripId&&tripKey;
   if(hubOpen)renderHub();
+  guestSync();
+  if(isGuest()){el.innerHTML='<button type="button" class="svsave hot" id="guestSuggBtn">Suggest a change</button>';return;}
   el.innerHTML=mine?('<span class="svok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Saved. Changes save by themselves.</span><button type="button" class="svshare" id="shareTrip">Share</button>')
     :('<button type="button" class="svsave'+(tripReady?' hot':'')+'" id="saveTripBtn">'+(tripId?'Save a copy of this trip':'Save this trip')+'</button>');
 }
@@ -3184,8 +3279,8 @@ function sharedSheet(t){
       return '<div class="shgroup"><em>'+esc((r.place||'On the way').split(',')[0])+'</em>'+by[si].map(function(x){return '<div class="shitem"><b>'+esc(x.name)+'</b>'+(x.note?'<span>'+esc(x.note)+'</span>':'')+'</div>';}).join('')+'</div>';}).join('')+'</div>';
   }
   if(!stays.length&&!picks.length)h+='<div class="shsec"><p class="intext">No stays or things to do are picked yet. The route is ready to look at.</p></div>';
-  h+='<button type="button" class="actbtn actadd" id="sharedSee">See it on the map</button>'+
-    '<button type="button" class="actbtn actgo" id="sharedCopy">Save a copy to my trips</button>';
+  h+='<button type="button" class="actbtn actadd" id="sharedSugg">Suggest something</button>'+
+    '<button type="button" class="actbtn actgo" id="sharedSee">See it on the map</button>';
   inApp.show(who+' shared a trip with you',h);
 }
 function shareSheet(){
@@ -3226,6 +3321,7 @@ function renderMyTrips(){
   el.innerHTML=l.length?('<h2>Your saved trips</h2><div class="mtlist">'+l.map(function(x){
     return '<div class="mtrow"><button type="button" class="mytrip" data-id="'+esc(x.id)+'"><b>'+esc(x.title||'My trip')+'</b><span>'+esc((x.mode==='fly'?'Flight':(x.mode==='boat'?'Boat trip':'Drive'))+(x.dates?(' · '+x.dates):''))+'</span></button><button type="button" class="mytripx" data-id="'+esc(x.id)+'" aria-label="Remove '+esc(x.title||'trip')+' from this list">&times;</button></div>';
   }).join('')+'</div>'):'';
+  if(l.length)peekTrips(l);
 }
 function loadTrip(id){
   planBusy(true);
@@ -3233,6 +3329,7 @@ function loadTrip(id){
     if(!rec||!rec.trip){planBusy(false);myTripsDrop(id);openGate();renderMyTrips();inApp.note('Trip not found','That saved trip is no longer available. It may have been removed.');return;}
     var t=rec.trip,mine=myTrips().filter(function(x){return x.id===id;})[0];
     tripId=id;tripKey=(mine&&mine.key)||'';
+    tripSugg=Array.isArray(rec.sugg)?rec.sugg:[];tripOwner=String(t.by||'').replace(/[<>]/g,'').trim().slice(0,40);
     restoring=true;
     configTravel(t.mode);document.body.classList.add('chosen');syncTmSeg();
     buildStops();
@@ -3273,8 +3370,282 @@ function applyRestore(t){
     try{sessionStorage.setItem('voyage-seen',seen+' '+tripId);}catch(e){}
     setTimeout(function(){if(tripCtx&&tripId)sharedSheet(t);},2400);
   }
+  if(tripKey&&openSugg().length)setTimeout(function(){if(tripCtx&&tripKey&&openSugg().length)openInbox();},tripReady?2600:1900);
 }
 renderMyTrips();
+var tripSugg=[],tripOwner='',gsView='home',gsThen=null,gsWas=false,ibT=0;
+var GS_IC={chat:'<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12.5h5"/>',inbox:'<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1.5 2.5h5L16 13h5"/>',note:'<path d="M5 4h14v11l-5 5H5z"/><path d="M14 20v-5h5M8 9h8M8 12.5h4"/>',back:'<path d="M15 6l-6 6 6 6"/>'};
+var SUGG_KIND={pick:'Thing to do',stay:'Place to stay',note:'Note'};
+function isGuest(){return !!(tripId&&!tripKey);}
+function guestSync(){document.body.classList.toggle('guest',isGuest());}
+function ownerWho(){return tripOwner||'the trip owner';}
+function guestName(){var n='';try{n=localStorage.getItem('voyage-name')||'';}catch(e){}return n.replace(/[<>]/g,'').trim().slice(0,40);}
+function myIds(){if(!tripId)return [];try{var l=JSON.parse(localStorage.getItem('voyage-sugg-'+tripId)||'[]');return Array.isArray(l)?l:[];}catch(e){return [];}}
+function myIdsAdd(id){var l=myIds();if(l.indexOf(id)<0)l.push(id);try{localStorage.setItem('voyage-sugg-'+tripId,JSON.stringify(l.slice(-80)));}catch(e){}}
+function mySugg(){var ids=myIds();return (tripSugg||[]).filter(function(x){return x&&ids.indexOf(x.id)>-1;});}
+function guestHas(i,name){return mySugg().some(function(x){return x.kind!=='note'&&x.item&&x.item.stopI===i&&x.item.name===name;});}
+function openSugg(){return (tripSugg||[]).filter(function(x){return x&&x.status==='open';});}
+function saveLbl(i,nm){
+  if(!isGuest()){var o=isSaved(i,nm);return [o,o?'✓ Saved':'Save'];}
+  if(guestHas(i,nm))return [true,'✓ Suggested'];
+  if(isSaved(i,nm))return [true,'✓ In the trip'];
+  return [false,'Suggest'];
+}
+function friendOf(kind,x){
+  if(!tripKey||!x)return '';
+  if(x.by)return x.by;
+  var h=(tripSugg||[]).filter(function(s){return s&&s.status==='approved'&&s.kind===kind&&s.item&&s.item.stopI===x.stopI&&s.item.name===x.name;})[0];
+  return h?(h.by||'a friend'):'';
+}
+function suggStop(i){
+  var r=((tripCtx&&tripCtx.recs)||[])[i]||{},city=hubCity(r.place)||'a stop';
+  if(tripCtx&&tripCtx.travel==='drive')return r.dest?('Destination, '+city):('Night '+(r.night||1)+', '+city);
+  var k=stayStops().indexOf(i);return k>-1?('Stop '+(k+1)+', '+city):city;
+}
+function suggTitle(x){var it=x.item||{};return x.kind==='note'?String(it.text||''):String(it.name||'');}
+function shStop(x){return isFinite(x.stopI)?x.stopI:(((tripCtx&&tripCtx.recs)||[]).length-1);}
+function shortItem(x){return {stopI:shStop(x),name:deent(x.title),src:'trending',note:x.channel+' · '+fmtViews(x.views)+' views',lat:x.lat,lng:x.lng,short:{id:x.id,title:x.title,channel:x.channel,views:x.views,secs:x.secs}};}
+function shGuestBtn(x,i){
+  var nm=deent(x.title),si=shStop(x),on=guestHas(si,nm)||isSaved(si,nm);
+  return '<button type="button" class="shadd'+(on?' on':'')+'" data-i="'+i+'"><b>'+(on?'✓ Suggested':('Suggest it to '+esc(ownerWho())))+'</b><span>'+esc(tripOwner||'The owner')+' sees it next time they open the trip.</span></button>';
+}
+function vidGuestRender(v,c){
+  var x=v.x,on=guestHas(v.si,deent(x.title))||isSaved(v.si,deent(x.title));
+  c.innerHTML=(v.gap?'<span class="vcgap">'+v.gap+'</span>':'')+'<b>'+esc(deent(x.title))+'</b><span class="vcwhere">'+esc(v.where)+'</span>'+
+    (on?('<div class="vcdone"><span class="vcck">'+hubSvg(HUB_IC.ok)+'</span><span class="vctx"><b>Suggested to '+esc(ownerWho())+'</b><span>They will see it next time they open the trip.</span></span></div>'+
+        '<div class="vcrow"><button type="button" class="vcback" id="vidBack">Keep looking</button><button type="button" class="vcadd" id="vidCont">Continue →</button></div>')
+       :('<button type="button" class="vcadd" id="vidAdd" data-i="'+v.i+'">Suggest it</button><button type="button" class="vcback" id="vidBack">Back to the videos</button>'));
+}
+function guestMarks(){
+  idRowsSync();
+  if(shortsSt)[].forEach.call(document.querySelectorAll('#shFeed .shadd'),function(b){
+    var x=shortsSt.list[+b.getAttribute('data-i')];
+    if(x&&guestHas(shStop(x),deent(x.title))){b.classList.add('on');b.querySelector('b').textContent='✓ Suggested';}
+  });
+  if(vidSt)vidCardRender();
+  var ea=document.getElementById('evAdd');
+  if(ea){var r=((tripCtx&&tripCtx.recs)||[])[+ea.getAttribute('data-i')],ex=r&&r._events&&r._events[+ea.getAttribute('data-k')];
+    if(ex&&guestHas(+ea.getAttribute('data-i'),ex.name)){ea.classList.add('on');ea.textContent='✓ Suggested';}}
+}
+function suggest(kind,item,el,then,sent){
+  if(!isGuest())return;
+  var nm=guestName();
+  if(!nm){askName(function(){suggest(kind,item,el,then,sent);});return;}
+  var btn=(el&&el.tagName==='BUTTON')?el:null;
+  if(btn)btn.disabled=true;
+  var fail=function(st){if(btn)btn.disabled=false;toast(st===429?'That is a lot of suggestions for one day. Try again tomorrow.':(st===404?'This trip is no longer available.':'That did not send. Check your connection and try again.'));};
+  fetch('/api/trips/'+encodeURIComponent(tripId)+'/sugg',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({by:nm,kind:kind,item:item})})
+    .then(function(r){return r.json().catch(function(){return {};}).then(function(j){return {ok:r.ok,status:r.status,j:j};});})
+    .then(function(x){
+      if(!x.ok||!x.j||!x.j.id){fail(x.status);return;}
+      if(btn)btn.disabled=false;
+      tripSugg.push({id:x.j.id,by:nm,kind:kind,item:item,status:'open',at:Date.now()});
+      myIdsAdd(x.j.id);
+      spark(el,false,true);
+      if(sent)sent();
+      guestMarks();cartPillSync();
+      var p=document.getElementById('cartPill');
+      if(p&&p.classList.contains('show')&&!RM.matches){p.classList.remove('bump');void p.offsetWidth;p.classList.add('bump');}
+      cheer('Sent to '+ownerWho()+'.','They will see it next time they open the trip.',then||null);
+    },function(){fail(0);});
+}
+function gsOn(){var g=document.getElementById('guestSheet');return !!(g&&g.classList.contains('show'));}
+function gsShow(){
+  var g=document.getElementById('guestSheet');if(!g)return;
+  if(!g.classList.contains('show')){g.classList.add('show');var c=g.querySelector('.gscard');setTimeout(function(){try{c.focus({preventScroll:true});}catch(e){}},40);}
+}
+function gsHide(){var g=document.getElementById('guestSheet');if(g)g.classList.remove('show');gsThen=null;}
+function gsOpenView(v){gsView=v;gsRender();gsShow();}
+function askName(then){
+  gsWas=gsOn();gsThen=then;gsOpenView('name');
+  setTimeout(function(){var i=document.getElementById('gsName');if(i){try{i.focus({preventScroll:true});}catch(e){}}},90);
+}
+function nameSend(){
+  var i=document.getElementById('gsName');if(!i)return;
+  var v=i.value.replace(/[<>]/g,'').trim().slice(0,40);
+  if(!v){i.focus();i.setAttribute('aria-invalid','true');return;}
+  try{localStorage.setItem('voyage-name',v);}catch(e){}
+  var th=gsThen;gsThen=null;
+  if(gsWas){gsView='home';gsRender();}else gsHide();
+  if(th)th();
+}
+function gsBackBtn(){return '<button type="button" class="gsback" id="gsBack">'+hubSvg(GS_IC.back)+'Back</button>';}
+function gsOpt(id,cls,ic,t,d){return '<button type="button" class="gsopt '+cls+'" id="'+id+'"><span class="gsoic">'+hubSvg(ic)+'</span><span class="gsot"><b>'+esc(t)+'</b><span>'+esc(d)+'</span></span>'+hubSvg(HUB_IC.go,'gsgo')+'</button>';}
+function gsRender(){
+  var b=document.getElementById('gsBody');if(!b)return;
+  var who=ownerWho();
+  document.getElementById('gsIc').innerHTML=hubSvg(GS_IC.chat);
+  document.getElementById('gsTitle').textContent='You are a guest on '+(tripOwner?(tripOwner+'\'s trip'):'this trip');
+  document.getElementById('gsSub').textContent='Suggest anything. '+(tripOwner||'The owner')+' decides what goes in.';
+  var h='';
+  if(gsView==='name'){
+    h='<label class="gslbl" for="gsName">What should '+esc(tripOwner||'they')+' call you?</label>'+
+      '<input class="gsin" id="gsName" maxlength="40" autocomplete="given-name" placeholder="Your first name" value="'+esc(guestName())+'">'+
+      '<button type="button" class="actbtn actadd" id="gsNameSend">Send</button>';
+  }else if(gsView==='note'){
+    h=gsBackBtn()+'<label class="gslbl" for="gsNoteIn">'+esc(tripOwner?('Leave '+tripOwner+' a note'):'Leave a note')+'</label>'+
+      '<textarea class="gsin" id="gsNoteIn" maxlength="300" placeholder="A tip, a question, a place you love"></textarea><span class="gscount" id="gsCount">0 of 300</span>'+
+      '<button type="button" class="actbtn actadd" id="gsNoteSend">Send</button>';
+  }else if(gsView==='stops'){
+    var ss=stayStops();
+    h=gsBackBtn()+'<span class="gslbl">Which stop?</span>'+(ss.length?'<p class="gssub">Pick the night you have a place in mind for.</p>':'<p class="gssub">This trip has no overnight stops to suggest a place for.</p>')+
+      ss.map(function(i,k){var cur=stopPicks(i)[0];
+        return gsOpt('gsStop'+i,'gsstop o'+((k%4)+1),HUB_IC.stay,suggStop(i),cur?((tripOwner||'They')+' picked '+(cur.name||'a place')):'No place picked yet').replace('class="gsopt','data-i="'+i+'" class="gsopt');}).join('');
+  }else{
+    h=gsOpt('gsDo','o1',HUB_IC.pick,'Suggest a thing to do','Pick from what travelers recommend at each stop')+
+      gsOpt('gsStay','o2',HUB_IC.stay,'Suggest a place to stay','Choose a stop, then a hotel or motel')+
+      gsOpt('gsNote','o3',GS_IC.note,tripOwner?('Leave '+tripOwner+' a note'):'Leave a note','A tip, a question, anything up to 300 characters')+
+      gsOpt('gsVids','o4',HUB_IC.play,'See what other travelers did','Short videos from the stops. Suggest the ones you like')+
+      '<button type="button" class="gsquiet" id="gsCopy">Make my own copy instead</button>';
+    var mine=mySugg().slice().reverse();
+    h+='<h3 class="gsh">Your suggestions'+(mine.length?'<span>'+mine.length+'</span>':'')+'</h3>';
+    h+=mine.length?('<div class="gsmine">'+mine.map(function(x){
+      var st=x.status==='approved'?'ok':(x.status==='declined'?'no':'');
+      var pill=st==='ok'?((x.kind==='note'?'Kept by ':'Added by ')+(tripOwner||'the owner')):(st==='no'?'Not this time':'Waiting');
+      var sub=SUGG_KIND[x.kind]||'Suggestion';if(x.kind!=='note'&&x.item)sub+=' · '+suggStop(x.item.stopI);
+      return '<div class="gsrow"><span class="gsrt"><b>'+esc(suggTitle(x))+'</b><span>'+esc(sub)+'</span></span><span class="gspill '+st+'">'+esc(pill)+'</span></div>';
+    }).join('')+'</div>'):('<p class="gsempty">Nothing sent yet. What you suggest shows up here, with what '+esc(who)+' decided.</p>');
+  }
+  b.innerHTML=h;b.scrollTop=0;
+}
+function openGuest(){
+  if(!isGuest())return;
+  if(hubOpen)closeHub();
+  gsWas=false;gsThen=null;gsOpenView('home');
+  var id=tripId;
+  fetch('/api/trips/'+encodeURIComponent(id)).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}).then(function(rec){
+    if(!rec||id!==tripId||!isGuest())return;
+    if(Array.isArray(rec.sugg))tripSugg=rec.sugg;
+    if(rec.trip&&rec.trip.by)tripOwner=String(rec.trip.by).replace(/[<>]/g,'').trim().slice(0,40);
+    cartPillSync();
+    if(gsView==='home'&&gsOn())gsRender();
+  });
+}
+function copyShared(btn){
+  btn.disabled=true;btn.textContent='Saving...';
+  saveTrip().then(function(){
+    tripSugg=[];tripOwner='';gsHide();guestSync();renderNext();renderSaveBar();cartPillSync();
+    cheer('Saved to your trips.','It is yours now. Change anything you like.',function(){if(tripReady)showTripMap();});
+  },function(){btn.disabled=false;btn.textContent='Make my own copy instead';toast('That did not save. Try again.');});
+}
+function ibCard(s){
+  var it=s.item||{},k=s.kind,cur=k==='stay'?stopPicks(Math.max(0,+it.stopI||0))[0]:null;
+  var main=k==='note'?('<p class="ibtext">'+esc(it.text)+'</p>'):('<b class="ibname">'+esc(it.name)+'</b>');
+  var where='';
+  if(k==='stay'){var nn=+it.nights||1;where=suggStop(it.stopI)+' · '+nn+(nn===1?' night':' nights')+' · '+usd(it.cost)+' a night';}
+  else if(k==='pick')where=suggStop(it.stopI)+(it.note?(' · '+it.note):'');
+  return '<div class="ibcard" data-sid="'+esc(s.id)+'"><div class="ibtop"><span class="ibwho">'+esc(s.by||'A friend')+'</span><span class="ibchip '+esc(k)+'">'+esc(SUGG_KIND[k]||'Suggestion')+'</span></div>'+main+
+    (where?'<span class="ibwhere">'+esc(where)+'</span>':'')+(cur?'<span class="ibswap">Swaps out '+esc(cur.name||'your current pick')+'</span>':'')+
+    '<div class="ibbtns"><button type="button" class="ibadd" data-sid="'+esc(s.id)+'">'+(k==='note'?'Keep it':(cur?'Swap it in':'Add it'))+'</button><button type="button" class="ibno" data-sid="'+esc(s.id)+'">Not now</button></div></div>';
+}
+function ibHead(){
+  var n=openSugg().length;
+  document.getElementById('ibTitle').textContent=n?(n+(n===1?' suggestion from a friend':' suggestions from friends')):'All caught up.';
+  document.getElementById('ibSub').textContent=n?'Add what you like. Your trip saves by itself.':'Nothing left to review.';
+}
+function openInbox(){
+  var el=document.getElementById('inboxSheet');if(!el||!tripKey)return;
+  clearTimeout(ibT);
+  document.getElementById('ibIc').innerHTML=hubSvg(GS_IC.inbox);
+  ibHead();
+  var l=openSugg();
+  document.getElementById('ibBody').innerHTML=l.length?l.map(ibCard).join(''):'<p class="ibdone">All caught up.</p>';
+  if(!el.classList.contains('show')){el.classList.add('show');var c=el.querySelector('.gscard');setTimeout(function(){try{c.focus({preventScroll:true});}catch(e){}},40);}
+}
+function closeInbox(){clearTimeout(ibT);var el=document.getElementById('inboxSheet');if(el)el.classList.remove('show');if(hubOpen)renderHub();}
+function ibApply(s,btn){
+  var it=s.item||{},n=((tripCtx&&tripCtx.recs)||[]).length,si=Math.min(Math.max(0,+it.stopI||0),Math.max(0,n-1));
+  if(s.kind==='pick'){if(!isSaved(si,it.name))saved.push({stopI:si,name:it.name,src:it.src||'travelers',note:it.note||'',lat:it.lat,lng:it.lng,wp:it.wp||null,short:it.short||null,url:it.url||null,by:s.by||''});}
+  else if(s.kind==='stay'){
+    cart=cart.filter(function(x){return !(x.kind==='stay'&&x.stopI===si);});
+    cart.push({id:'c'+(cartSeq++),kind:'stay',label:'Stay: '+it.name,name:it.name,type:it.type||'hotel',cost:+it.cost||0,nights:+it.nights||1,stopI:si,pp:false,by:s.by||''});
+  }
+  if(s.kind==='note')spark(btn);else added(s.kind==='stay'?'stay':'idea',btn);
+  markSavedTiles();renderNext();renderDoneStrip();drawPicks();renderCost();
+  saveTrip('auto').catch(function(){});
+}
+function ibDecide(sid,ok,btn){
+  var s=(tripSugg||[]).filter(function(x){return x&&x.id===sid;})[0];if(!s||!tripKey||!tripCtx)return;
+  var card=btn.closest('.ibcard'),bs=card?card.querySelectorAll('button'):[];
+  [].forEach.call(bs,function(b){b.disabled=true;});
+  var undo=function(){[].forEach.call(bs,function(b){b.disabled=false;});toast('That did not go through. Try again.');};
+  fetch('/api/trips/'+encodeURIComponent(tripId)+'/sugg/'+encodeURIComponent(sid),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:tripKey,status:ok?'approved':'declined'})})
+    .then(function(r){return r.json().catch(function(){return {};}).then(function(j){return {ok:r.ok,j:j};});})
+    .then(function(x){
+      if(!x.ok){undo();return;}
+      s.status=ok?'approved':'declined';s.decidedAt=Date.now();
+      if(ok)ibApply(s,btn);
+      if(card)card.classList.add('gone');
+      ibHead();
+      if(hubOpen)renderHub();
+      setTimeout(function(){
+        if(card&&card.parentNode)card.parentNode.removeChild(card);
+        if(!openSugg().length){
+          var b=document.getElementById('ibBody');if(b)b.innerHTML='<p class="ibdone">All caught up.</p>';
+          ibT=setTimeout(closeInbox,1300);
+        }
+      },dur(420));
+    },undo);
+}
+function renderHubSugg(){
+  var a=document.getElementById('hubSugg'),b=document.getElementById('hubNotes');if(!a||!b)return;
+  if(!tripKey){a.innerHTML='';b.innerHTML='';return;}
+  var n=openSugg().length;
+  a.innerHTML=n?('<button type="button" class="hubsugg" id="hubSuggBtn"><span class="hubsic">'+hubSvg(GS_IC.inbox)+'</span><span>'+n+(n===1?' suggestion waiting':' suggestions waiting')+' · <em>Review</em></span>'+hubSvg(HUB_IC.go,'hubgo')+'</button>'):'';
+  var notes=(tripSugg||[]).filter(function(s){return s&&s.kind==='note'&&s.status==='approved'&&s.item&&s.item.text;});
+  b.innerHTML=notes.length?('<section class="hubsec" aria-labelledby="hubNotesH"><h3 class="hubh" id="hubNotesH">Notes from friends</h3>'+notes.map(function(s){return '<p class="hubnote"><b>From '+esc(s.by||'a friend')+':</b> '+esc(s.item.text)+'</p>';}).join('')+'</section>'):'';
+}
+function peekTrips(l){
+  var ids=l.filter(function(x){return x&&x.key&&/^[0-9a-f]{10}$/.test(x.id);}).map(function(x){return x.id;}).slice(0,30);if(!ids.length)return;
+  fetch('/api/trips/peek?ids='+ids.join(',')).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}).then(function(m){
+    if(!m)return;
+    ids.forEach(function(id){
+      var b=document.querySelector('.mytrip[data-id="'+id+'"]');if(!b)return;
+      var old=b.querySelector('.mtnew');if(old)old.parentNode.removeChild(old);
+      var n=m[id]&&m[id].open;
+      if(n>0){var t=document.createElement('em');t.className='mtnew';t.textContent=n+' new';b.appendChild(t);}
+    });
+  });
+}
+document.getElementById('guestSheet').addEventListener('click',function(e){
+  if(e.target===this||e.target.closest('#gsX')){gsHide();return;}
+  var t=e.target.closest('button');if(!t)return;
+  if(t.id==='gsDo'){gsHide();if(!stayStops().length)return;ideaSrc='travelers';openDoSheet(0);return;}
+  if(t.id==='gsStay'){gsView='stops';gsRender();return;}
+  if(t.id==='gsNote'){gsView='note';gsRender();setTimeout(function(){var n=document.getElementById('gsNoteIn');if(n){try{n.focus({preventScroll:true});}catch(er){}}},60);return;}
+  if(t.id==='gsVids'){gsHide();openTravelers();return;}
+  if(t.id==='gsCopy'){copyShared(t);return;}
+  if(t.id==='gsBack'){gsView='home';gsRender();return;}
+  if(t.id==='gsNameSend'){nameSend();return;}
+  if(t.id==='gsNoteSend'){
+    var ta=document.getElementById('gsNoteIn'),v=ta?ta.value.replace(/[<>]/g,'').trim().slice(0,300):'';
+    if(!v){if(ta)ta.focus();return;}
+    suggest('note',{text:v},t,function(){if(isGuest())openGuest();},function(){gsHide();});return;
+  }
+  if(t.classList.contains('gsstop')){gsHide();openStaySheet(+t.getAttribute('data-i'));return;}
+});
+document.getElementById('guestSheet').addEventListener('input',function(e){
+  if(e.target&&e.target.id==='gsNoteIn'){var c=document.getElementById('gsCount');if(c)c.textContent=e.target.value.length+' of 300';}
+  if(e.target&&e.target.id==='gsName')e.target.removeAttribute('aria-invalid');
+});
+document.getElementById('guestSheet').addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target&&e.target.id==='gsName'){e.preventDefault();nameSend();}});
+document.getElementById('inboxSheet').addEventListener('click',function(e){
+  if(e.target===this||e.target.closest('#ibX')){closeInbox();return;}
+  var a=e.target.closest('.ibadd,.ibno');if(!a||a.disabled)return;
+  ibDecide(a.getAttribute('data-sid'),a.classList.contains('ibadd'),a);
+});
+document.addEventListener('click',function(e){
+  var t=e.target.closest&&e.target.closest('#sharedSugg,#guestSuggBtn,#hubSuggBtn');if(!t)return;
+  if(t.id==='hubSuggBtn'){openInbox();return;}
+  if(t.id==='sharedSugg')inApp.close();
+  e.stopPropagation();openGuest();
+});
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape')return;
+  var ib=document.getElementById('inboxSheet');
+  if(ib&&ib.classList.contains('show')){closeInbox();return;}
+  if(gsOn())gsHide();
+});
 function renderDoneStrip(){
   var el=document.getElementById('doneStrip');if(!el)return;
   var on=tripReady&&saved.length>0;
@@ -3290,8 +3661,8 @@ var HUB_IC={stay:'<path d="M3 18V8m0 6h18v4M21 18v-6a3 3 0 0 0-3-3h-7v5"/><circl
   share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>',ok:'<path d="M5 12l5 5 9-10"/>',
   map:'<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>'};
 function hubCity(x){return String(x||'').split(',')[0].trim();}
-function hubRow(kind,name,sub,btn){
-  return '<div class="hubrow"><span class="hubic'+(kind==='stay'?' stay':'')+'">'+hubSvg(HUB_IC[kind]||HUB_IC.pick)+'</span><span class="hubrt"><b>'+esc(name)+'</b>'+(sub?'<span>'+esc(sub)+'</span>':'')+'</span>'+btn+'</div>';
+function hubRow(kind,name,sub,btn,from){
+  return '<div class="hubrow"><span class="hubic'+(kind==='stay'?' stay':'')+'">'+hubSvg(HUB_IC[kind]||HUB_IC.pick)+'</span><span class="hubrt"><b>'+esc(name)+'</b>'+(from?'<i class="hubfrom">from '+esc(from)+'</i>':'')+(sub?'<span>'+esc(sub)+'</span>':'')+'</span>'+btn+'</div>';
 }
 function renderHub(){
   var el=document.getElementById('hub');if(!el)return;
@@ -3319,8 +3690,8 @@ function renderHub(){
       var sub=drive?(r.dest?'Destination':('Night '+r.night)):(k>-1?('Stop '+(k+1)):'Start');
       h+='<div class="hubstop"><div class="hubsh"><b>'+esc(hubCity(r.place)||'Your stop')+'</b><span>'+esc(sub)+'</span></div>';
       st.forEach(function(x){var nn=+x.nights||1,nm=x.name||String(x.label||'').replace(/^Stay: /,'');
-        h+=hubRow('stay',nm,capFirst(String(x.type||'stay'))+' \u00b7 '+nn+(nn===1?' night':' nights')+' \u00b7 '+usd(x.cost)+' a night','<button type="button" class="hubrm" data-rm="'+esc(x.id)+'" aria-label="Remove '+esc(nm)+'">&times;</button>');});
-      pk.forEach(function(x){h+=hubRow(x.src==='event'?'ev':'pick',x.name,x.note||'','<button type="button" class="mpx hubrm" data-i="'+i+'" data-name="'+esc(x.name)+'" aria-label="Remove '+esc(x.name)+'">&times;</button>');});
+        h+=hubRow('stay',nm,capFirst(String(x.type||'stay'))+' \u00b7 '+nn+(nn===1?' night':' nights')+' \u00b7 '+usd(x.cost)+' a night','<button type="button" class="hubrm" data-rm="'+esc(x.id)+'" aria-label="Remove '+esc(nm)+'">&times;</button>',friendOf('stay',x));});
+      pk.forEach(function(x){h+=hubRow(x.src==='event'?'ev':'pick',x.name,x.note||'','<button type="button" class="mpx hubrm" data-i="'+i+'" data-name="'+esc(x.name)+'" aria-label="Remove '+esc(x.name)+'">&times;</button>',friendOf('pick',x));});
       if(!st.length&&!pk.length)h+='<p class="hubnone">Nothing here yet.</p>';
       if(k>-1)h+='<button type="button" class="hubmore" data-k="'+k+'">+ Add more here</button>';
       h+='</div>';
@@ -3339,6 +3710,7 @@ function renderHub(){
     '<button type="button" class="hubshare" id="hubShare">'+hubSvg(HUB_IC.share)+'Share this trip</button>'+
     (mine?('<p class="hubsaved">'+hubSvg(HUB_IC.ok)+'Saved. It will be here when you come back.</p>'):'')+
     '<div class="hubbtns"><button type="button" class="hubghost" id="hubMap">'+hubSvg(HUB_IC.map)+'See it on the map</button><button type="button" class="hubghost" id="hubEdit">'+hubSvg(HUB_IC.edit)+'Edit trip</button></div>';
+  renderHubSugg();
 }
 function openHub(){
   var el=document.getElementById('hub');if(!el||!tripCtx)return;
@@ -3377,7 +3749,7 @@ document.getElementById('hub').addEventListener('click',function(e){
 window.addEventListener('keydown',function(e){
   if(e.key!=='Escape'||!hubOpen)return;
   var on=function(id){var x=document.getElementById(id);return !!(x&&x.classList.contains('show'));};
-  if(on('actsheet')||on('inapp')||on('shorts')||on('cheer'))return;
+  if(on('actsheet')||on('inapp')||on('shorts')||on('cheer')||on('guestSheet')||on('inboxSheet'))return;
   closeHub();showTripMap();
 },true);
 function showTripMap(){
@@ -3450,6 +3822,7 @@ function markSavedTiles(){
     if(e.target.closest('#idCont')&&doSt){openDoSheet(doSt.k+1);return;}
     var sv=e.target.closest('.idsave');
     if(sv&&doSt){var rw=sv.closest('.idrow'),nm=rw.getAttribute('data-name');
+      if(isGuest()){if(!rw.classList.contains('on')){var gi=(doSt.byName&&doSt.byName[nm])||{};suggest('pick',{stopI:doSt.i,name:nm,src:ideaSrc,note:gi.note||'',lat:gi.lat,lng:gi.lng,wp:gi.wp||null,short:gi.short||null},sv);}return;}
       if(isSaved(doSt.i,nm)){saved=saved.filter(function(x){return !(x.stopI===doSt.i&&x.name===nm);});rw.classList.remove('on');sv.textContent='Save';}
       else{var it=(doSt.byName&&doSt.byName[nm])||{};
         saved.push({stopI:doSt.i,name:nm,src:ideaSrc,note:it.note||'',lat:it.lat,lng:it.lng,wp:it.wp||null,short:it.short||null});
@@ -3658,7 +4031,7 @@ function netErrMsg(e){
 
 form.addEventListener('submit',function(e){
   e.preventDefault();
-  if(!pendingRestore){tripId='';tripKey='';tripBase='';tripUnsaved=false;}
+  if(!pendingRestore){tripId='';tripKey='';tripBase='';tripUnsaved=false;tripSugg=[];tripOwner='';}
   pushURL();hint.classList.remove('err');cart=[];saved=[];tripReady=false;tripStyle='plan';ideaProfile=null;ideaSrc='travelers';document.body.classList.remove('tripdone','pktapped');if(pkLayer)pkLayer.clearLayers();closeEdit();
   var vals=[].map.call(document.querySelectorAll('#stops .stopin'),function(i){return i.value.trim();}).filter(Boolean);
   if(vals.length<2){hint.textContent=travelMode==='fly'?'Add at least a departure and destination city.':(travelMode==='boat'?'Add at least a departure and destination port.':'Add at least a start and a destination.');hint.classList.add('err');return;}
@@ -3845,7 +4218,7 @@ function decode(str,prec){var idx=0,lat=0,lng=0,out=[],f=Math.pow(10,prec||6),sh
 function fmtViews(v){return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?Math.round(v/1e3)+'K':''+v;}
 function openGate(){
   stageGen++;planGen++;closeEdit();
-  tripId='';tripKey='';renderMyTrips();
+  tripId='';tripKey='';tripSugg=[];tripOwner='';renderMyTrips();
   streetStatus('');
   lastFit=null;var rcb=document.getElementById('recenter');if(rcb)rcb.classList.remove('show');
   document.body.classList.remove('chosen','inarea','m-drive','m-fly','m-boat');themeGlobe('#86C5A4');
@@ -4261,19 +4634,20 @@ var EV_IC={day:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strok
   ticket:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 3"/></svg>'};
 function evShow(i,k){
   var r=(tripCtx&&tripCtx.recs||[])[i],x=r&&r._events&&r._events[k];if(!x)return;
-  var on=isSaved(i,x.name);
+  var on=isSaved(i,x.name)||(isGuest()&&guestHas(i,x.name));
   inApp.show('Event','<div class="evcard">'+(x.img?'<span class="evimg" style="background-image:url('+esc(urlOk(x.img))+')"></span>':'')+
     '<b class="evname">'+esc(x.name)+'</b>'+
     '<span class="evrow">'+EV_IC.day+'<span>'+esc(x.date?fmtDayLong(x.date):'Date not listed')+'</span></span>'+
     (x.venue?('<span class="evrow">'+EV_IC.place+'<span>'+esc(x.venue)+'</span></span>'):'')+
     '<span class="evrow">'+EV_IC.ticket+'<span>'+(x.price?('Tickets from '+usd(x.price)+' a person'):'Ticket price is not listed')+'</span></span>'+
-    '<button type="button" class="actbtn actadd evadd'+(on?' on':'')+'" id="evAdd" data-i="'+i+'" data-k="'+k+'">'+(on?'✓ Added to your trip':'Add it to my trip')+'</button>'+
+    '<button type="button" class="actbtn actadd evadd'+(on?' on':'')+'" id="evAdd" data-i="'+i+'" data-k="'+k+'">'+(isGuest()?(on?'✓ Suggested':'Suggest this event'):(on?'✓ Added to your trip':'Add it to my trip'))+'</button>'+
     (urlOk(x.url)?('<a class="actbtn actgo evtix" id="evTix" data-out="1" data-i="'+i+'" data-k="'+k+'" href="'+esc(urlOk(x.url))+'" target="_blank" rel="noopener">Get tickets on Ticketmaster</a>'+
       '<p class="stnote">Tickets are sold on Ticketmaster. Your trip saves first, so everything is here when you come back.</p>')
      :'<p class="stnote">Adding it keeps the date and the venue in your plan.</p>')+'</div>');
 }
 function evAdd(i,k,btn){
   var r=(tripCtx&&tripCtx.recs||[])[i],x=r&&r._events&&r._events[k];if(!x||isSaved(i,x.name))return;
+  if(isGuest()){if(!guestHas(i,x.name))suggest('pick',{stopI:i,name:x.name,src:'event',note:[x.date?fmtDayLong(x.date):'',x.venue||''].filter(Boolean).join(' · '),lat:x.lat,lng:x.lng,url:x.url||null},btn);return;}
   saved.push({stopI:i,name:x.name,src:'event',note:[x.date?fmtDayLong(x.date):'',x.venue||''].filter(Boolean).join(' · '),lat:x.lat,lng:x.lng,url:x.url||null});
   if(x.price)addCart('extra','Event: '+x.name,x.price,true);
   markSavedTiles();renderNext();renderDoneStrip();drawPicks();
@@ -4347,7 +4721,7 @@ function shortSlide(x,i){
   return '<section class="shslide" data-i="'+i+'"><div class="glass shglass">'+
     '<b>'+esc(deent(x.title))+'</b><span class="shsub">'+(x.place?esc(x.place.split(',')[0])+' · ':'')+esc(x.channel)+' · '+fmtViews(x.views)+' views</span>'+
     '<button type="button" class="shmapit" data-i="'+i+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Map it</button>'+
-    '<div class="shopts"><button type="button" class="shadd'+(added?' on':'')+'" data-i="'+i+'"><b>'+(added?'✓ Added to your trip':'Add it to my trip')+'</b><span>Saves it to your picks'+(x.place?' for '+esc(x.place.split(',')[0]):'')+', right now.</span></button>'+
+    '<div class="shopts">'+(isGuest()?shGuestBtn(x,i):('<button type="button" class="shadd'+(added?' on':'')+'" data-i="'+i+'"><b>'+(added?'✓ Added to your trip':'Add it to my trip')+'</b><span>Saves it to your picks'+(x.place?' for '+esc(x.place.split(',')[0]):'')+', right now.</span></button>'))+
     '<button type="button" class="shsee" data-i="'+i+'"><b>See it on the map</b><span>Where it is and how far it sits from your route.</span></button></div>'+
     '</div></section>';
 }
@@ -4428,6 +4802,7 @@ function vidClear(){
 }
 function vidCardRender(){
   var v=vidSt,c=document.getElementById('vidCard');if(!v||!c)return;
+  if(isGuest()){vidGuestRender(v,c);return;}
   var x=v.x,on=isSaved(v.si,deent(x.title)),n=saved.length;
   c.innerHTML=(v.gap?'<span class="vcgap">'+v.gap+'</span>':'')+'<b>'+esc(deent(x.title))+'</b><span class="vcwhere">'+esc(v.where)+'</span>'+
     (on?('<div class="vcdone"><span class="vcck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="vctx"><b>Added to your trip</b><span>'+n+(n===1?' idea':' ideas')+' on your map so far.</span></span></div>'+
@@ -4508,6 +4883,7 @@ function backToVideos(){
     var mi=e.target.closest('.shmapit');
     if(mi){mi.closest('.shglass').classList.toggle('open');return;}
     var ad=e.target.closest('.shadd');
+    if(ad&&isGuest()){var gx=shortsSt.list[+ad.getAttribute('data-i')];if(gx&&!ad.classList.contains('on'))suggest('pick',shortItem(gx),ad);return;}
     if(ad){var x=shortsSt.list[+ad.getAttribute('data-i')];if(x){if(shortAdd(x,ad))shMoreShow();ad.classList.add('on');ad.querySelector('b').textContent='✓ Added to your trip';}return;}
     var se=e.target.closest('.shsee');
     if(se){mapVideo(+se.getAttribute('data-i'));return;}
@@ -4519,6 +4895,7 @@ function backToVideos(){
     if(a.id==='vidBack'){backToVideos();return;}
     if(a.id==='vidCont'){feedContinue();return;}
     var x=shortsSt&&shortsSt.list[+a.getAttribute('data-i')];if(!x)return;
+    if(isGuest()){suggest('pick',shortItem(x),a,null,vidAdded);return;}
     shortAdd(x,a);vidAdded();
     var sl=feed.querySelector('.shadd[data-i="'+a.getAttribute('data-i')+'"]');if(sl){sl.classList.add('on');sl.querySelector('b').textContent='✓ Added to your trip';}
   });
