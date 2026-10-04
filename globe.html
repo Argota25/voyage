@@ -1521,6 +1521,10 @@ body.tripdone #panel.peek .jumpbar{display:none}
 .pkpin.vid svg{margin-left:2px}
 .pkback{margin-top:6px;min-height:42px;border:1.5px solid rgba(70,127,103,.35);border-radius:12px;background:#fff;color:#27493D;font:800 13.5px var(--body);cursor:pointer}
 @media (min-width:701px){.shplayer{left:50%;right:auto;width:min(100vw,calc(100dvh * 9 / 16 + 240px));transform:translateX(-50%)}}
+.toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));z-index:80;width:max-content;max-width:calc(100% - 32px);padding:12px 18px;border-radius:18px;background:#27493D;color:#fff;font:700 13.5px/1.35 var(--body);text-align:center;box-shadow:0 16px 36px -16px rgba(8,26,18,.7);opacity:0;pointer-events:none;transform:translate(-50%,-16px);transition:opacity .25s,transform .25s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.pktix{display:flex;align-items:center;justify-content:center;text-decoration:none}
+.evtix{text-decoration:none}
 .datenote{display:block;margin-top:8px;padding:8px 12px;border-radius:12px;background:#F6E3BC;color:#4A3610;font:700 12.5px/1.4 var(--body)}
 .evcard{display:flex;flex-direction:column;gap:8px}
 .evimg{display:block;width:100%;aspect-ratio:16/9;border-radius:16px;background:#DDE7E1 center/cover no-repeat;margin-bottom:4px}
@@ -1627,6 +1631,7 @@ body.vidmap .actsheet,body.vidmap .inapp{display:none!important}
   <div class="glass shmore" id="shMore"><span id="shMoreT"></span><button type="button" id="shKeep">Keep watching</button><button type="button" id="shCont">Continue</button></div>
   <div class="shhint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-6 6 6"/><path d="M6 20l6-6 6 6" opacity=".5"/></svg>Swipe up to see more</div>
 </div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="vidcard" id="vidCard" aria-live="polite"></div>
 <div class="maphint" id="mapHint" aria-hidden="true"><i></i>Tap a stop to see your picks</div>
 <div class="cheer" id="cheer" role="status" aria-live="polite">
@@ -2823,7 +2828,8 @@ function pickCard(x){
   var r=(tripCtx.recs||[])[x.stopI]||{};
   return '<div class="pkcard"><b>'+esc(x.name)+'</b><span class="pkwhere">'+esc(r.place||'On your route')+'</span>'+
     (x.note?'<span class="pknote">'+esc(x.note)+'</span>':'')+
-    '<button type="button" class="pkmore" data-pk="'+saved.indexOf(x)+'">'+(x.short?'Watch the video':(x.wp?'Read about it':(x.note?'See details':'Watch videos of it')))+'</button></div>';
+    '<button type="button" class="pkmore" data-pk="'+saved.indexOf(x)+'">'+(x.short?'Watch the video':(x.wp?'Read about it':(x.note?'See details':'Watch videos of it')))+'</button>'+
+    ((x.src==='event'&&urlOk(x.url))?('<a class="pkback pktix" data-out="1" href="'+esc(urlOk(x.url))+'" target="_blank" rel="noopener">Get tickets</a>'):'')+'</div>';
 }
 function drawPicks(){
   if(!stageMap)return;
@@ -2873,20 +2879,55 @@ function tripState(){
   return {mode:travelMode,stops:stopVals(),by:by,pts:((tripCtx&&tripCtx.pts)||[]).map(function(p){return {lat:p.lat,lng:p.lng,label:p.label||'',city:p.city||'',st:p.st||''};}),dates:{start:tripDates.start,end:tripDates.end},prefs:{hrs:tripPrefs.hrs,stay:tripPrefs.stay,see:tripPrefs.see},
     style:tripStyle,ready:tripReady,budget:budget,edited:budgetEdited,
     stays:cart.filter(function(x){return x.kind==='stay';}).map(function(x){return {name:x.name||x.label,type:x.type||'hotel',cost:x.cost,nights:x.nights||1,stopI:x.stopI||0};}),
-    picks:saved.map(function(x){return {stopI:x.stopI,name:x.name,src:x.src,note:x.note||'',lat:x.lat,lng:x.lng,wp:x.wp||null,short:x.short||null};})};
+    extras:cart.filter(function(x){return x.kind==='extra';}).map(function(x){return {label:x.label,cost:x.cost,pp:!!x.pp};}),
+    picks:saved.map(function(x){return {stopI:x.stopI,name:x.name,src:x.src,note:x.note||'',lat:x.lat,lng:x.lng,wp:x.wp||null,short:x.short||null,url:x.url||null};})};
 }
 function tripLink(){return location.origin+location.pathname+'?t='+tripId;}
-function saveTrip(){
+var tripBase='',tripUnsaved=false,leftAt=0,toastT=0;
+function toast(msg){
+  var el=document.getElementById('toast');if(!el)return;
+  el.textContent=msg;el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
+  clearTimeout(toastT);toastT=setTimeout(function(){el.classList.remove('show');},3400);
+}
+function cartSig(){
+  return JSON.stringify([cart.filter(function(x){return x.kind==='stay'||x.kind==='extra';}).map(function(x){return [x.kind,x.label,x.cost,x.nights||0,x.stopI||0];}),saved.map(function(x){return [x.stopI,x.name];})]);
+}
+function cartIdle(){
+  if(tripId&&tripKey)return false;
+  var sig=cartSig();
+  return sig==='[[],[]]'||sig===tripBase;
+}
+function saveNow(){
+  if(!tripCtx||pendingRestore||tripSaving)return;
+  if(tripId&&tripKey){if(!tripUnsaved)return;}
+  else if(cartIdle())return;
+  clearTimeout(tripSaveT);
+  saveTrip('leave').catch(function(){});
+}
+function leaveFor(a){
+  if(a.id==='evTix')evAdd(+a.getAttribute('data-i'),+a.getAttribute('data-k'),document.getElementById('evAdd'));
+  leftAt=Date.now();
+  clearTimeout(tripSaveT);
+  if(tripCtx&&!tripSaving&&(tripUnsaved||!cartIdle()))saveTrip('leave').catch(function(){});
+}
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='hidden'){saveNow();return;}
+  if(leftAt&&Date.now()-leftAt>3000){leftAt=0;toast('Welcome back. Your trip is right where you left it.');}
+});
+window.addEventListener('pagehide',saveNow);
+function saveTrip(how){
   if(!tripCtx||tripSaving)return Promise.resolve(tripId||null);
   tripSaving=true;
-  var body={trip:tripState()},url='/api/trips',method='POST';
+  var body={trip:tripState()},url='/api/trips',method='POST',wasNew=!(tripId&&tripKey);
   if(tripId&&tripKey){url+='/'+tripId;method='PUT';body.key=tripKey;}
-  return fetch(url,{method:method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+  tripUnsaved=false;
+  return fetch(url,{method:method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body),keepalive:how==='leave'})
     .then(function(r){return r.json().then(function(j){return {ok:r.ok,status:r.status,j:j};});})
     .then(function(x){
       tripSaving=false;
       if(!x.ok){
-        if(method==='PUT'&&(x.status===403||x.status===404)){tripId='';tripKey='';return saveTrip();}
+        if(method==='PUT'&&(x.status===403||x.status===404)){tripId='';tripKey='';return saveTrip(how);}
+        tripUnsaved=true;
         throw new Error((x.j&&x.j.error)||'The trip did not save. Try again.');
       }
       if(x.j.key){tripId=x.j.id;tripKey=x.j.key;}
@@ -2894,13 +2935,15 @@ function saveTrip(){
       myTripsPut({id:tripId,key:tripKey,title:tripTitle(),mode:travelMode,dates:dateRangeLabel(),at:tripSavedAt});
       if(location.search!=='?t='+tripId)history.replaceState(null,'','?t='+tripId);
       renderSaveBar();
+      if(wasNew&&how==='auto')toast('Trip saved. It will be here when you come back.');
       return tripId;
-    },function(e){tripSaving=false;throw e;});
+    },function(e){tripSaving=false;tripUnsaved=true;throw e;});
 }
 function tripDirty(){
-  if(!tripId||!tripKey||pendingRestore)return;
+  if(pendingRestore||!tripCtx||cartIdle())return;
+  tripUnsaved=true;
   clearTimeout(tripSaveT);
-  tripSaveT=setTimeout(function(){saveTrip().catch(function(){});},1500);
+  tripSaveT=setTimeout(function(){saveTrip('auto').catch(function(){});},1500);
 }
 function renderSaveBar(){
   var el=document.getElementById('saveBar');if(!el)return;
@@ -3007,7 +3050,9 @@ function applyRestore(t){
   var n=(tripCtx.recs||[]).length;
   Object.assign(budget,t.budget||{});budgetEdited=t.edited||{};
   cart=(t.stays||[]).filter(function(x){return x.stopI<n;}).map(function(x){return {id:'c'+(cartSeq++),kind:'stay',label:'Stay: '+x.name,name:x.name,type:x.type,cost:x.cost,nights:x.nights,stopI:x.stopI,pp:false};});
+  (t.extras||[]).forEach(function(x){cart.push({id:'c'+(cartSeq++),kind:'extra',label:x.label,cost:+x.cost||0,pp:!!x.pp});});
   saved=(t.picks||[]).filter(function(x){return x.stopI<n;});
+  tripBase=cartSig();tripUnsaved=false;
   tripStyle=t.style==='flow'?'flow':'plan';tripReady=!!t.ready;
   renderCost();markSavedTiles();renderNext();renderSaveBar();
   if(tripReady)setTimeout(function(){if(tripCtx)showTripMap();},1900);
@@ -3158,6 +3203,7 @@ var inApp=(function(){
     var href=a.getAttribute('href')||'';if(!/^https?:/i.test(href))return;
     var u;try{u=new URL(href);}catch(er){return;}
     if(u.origin===location.origin)return;
+    if(a.hasAttribute('data-out')){leaveFor(a);return;}
     e.preventDefault();e.stopPropagation();
     var h=u.hostname.replace(/^www\./,''),label=(a.querySelector('.hst,.fname,.svt')||a).textContent.trim().slice(0,80);
     if(h==='youtube.com'||h==='youtu.be'||h==='youtube-nocookie.com'){
@@ -3302,7 +3348,7 @@ function netErrMsg(e){
 
 form.addEventListener('submit',function(e){
   e.preventDefault();
-  if(!pendingRestore){tripId='';tripKey='';}
+  if(!pendingRestore){tripId='';tripKey='';tripBase='';tripUnsaved=false;}
   pushURL();hint.classList.remove('err');cart=[];saved=[];tripReady=false;tripStyle='plan';ideaProfile=null;ideaSrc='travelers';document.body.classList.remove('tripdone','pktapped');if(pkLayer)pkLayer.clearLayers();closeEdit();
   var vals=[].map.call(document.querySelectorAll('#stops .stopin'),function(i){return i.value.trim();}).filter(Boolean);
   if(vals.length<2){hint.textContent=travelMode==='fly'?'Add at least a departure and destination city.':(travelMode==='boat'?'Add at least a departure and destination port.':'Add at least a start and a destination.');hint.classList.add('err');return;}
@@ -3911,11 +3957,13 @@ function evShow(i,k){
     (x.venue?('<span class="evrow">'+EV_IC.place+'<span>'+esc(x.venue)+'</span></span>'):'')+
     '<span class="evrow">'+EV_IC.ticket+'<span>'+(x.price?('Tickets from '+usd(x.price)+' a person'):'Ticket price is not listed')+'</span></span>'+
     '<button type="button" class="actbtn actadd evadd'+(on?' on':'')+'" id="evAdd" data-i="'+i+'" data-k="'+k+'">'+(on?'✓ Added to your trip':'Add it to my trip')+'</button>'+
-    '<p class="stnote">Tickets are sold by Ticketmaster. Voyage cannot sell them inside the app yet. Adding it keeps the date and the venue in your plan'+(x.price?', and puts the ticket price in your estimate':'')+'.</p></div>');
+    (urlOk(x.url)?('<a class="actbtn actgo evtix" id="evTix" data-out="1" data-i="'+i+'" data-k="'+k+'" href="'+esc(urlOk(x.url))+'" target="_blank" rel="noopener">Get tickets on Ticketmaster</a>'+
+      '<p class="stnote">Tickets are sold on Ticketmaster. Your trip saves first, so everything is here when you come back.</p>')
+     :'<p class="stnote">Adding it keeps the date and the venue in your plan.</p>')+'</div>');
 }
 function evAdd(i,k,btn){
   var r=(tripCtx&&tripCtx.recs||[])[i],x=r&&r._events&&r._events[k];if(!x||isSaved(i,x.name))return;
-  saved.push({stopI:i,name:x.name,src:'event',note:[x.date?fmtDayLong(x.date):'',x.venue||''].filter(Boolean).join(' · '),lat:x.lat,lng:x.lng});
+  saved.push({stopI:i,name:x.name,src:'event',note:[x.date?fmtDayLong(x.date):'',x.venue||''].filter(Boolean).join(' · '),lat:x.lat,lng:x.lng,url:x.url||null});
   if(x.price)addCart('extra','Event: '+x.name,x.price,true);
   chime();if(navigator.vibrate){try{navigator.vibrate(18);}catch(e){}}
   markSavedTiles();renderNext();renderDoneStrip();drawPicks();

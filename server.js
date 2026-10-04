@@ -189,10 +189,12 @@ function tripClean(t){
     budget: { nightly: num(b.nightly, 0, 5000, 120), foodDay: num(b.foodDay, 0, 2000, 55), mpg: num(b.mpg, 1, 200, 26), gas: num(b.gas, 0, 20, 3.4), rental: num(b.rental, 0, 2000, 55), ppl: Math.round(num(b.ppl, 1, 30, 1)) },
     edited: {},
     stays: (Array.isArray(t.stays) ? t.stays : []).slice(0, 20).map(x => ({ name: str(x.name, 120), type: ['hotel', 'motel', 'rental'].indexOf(x.type) > -1 ? x.type : 'hotel', cost: num(x.cost, 0, 5000, 0), nights: Math.round(num(x.nights, 1, 30, 1)), stopI: Math.round(num(x.stopI, 0, 20, 0)) })).filter(x => x.name),
+    extras: (Array.isArray(t.extras) ? t.extras : []).slice(0, 30).map(x => ({ label: str(x && x.label, 160), cost: num(x && x.cost, 0, 100000, 0), pp: !!(x && x.pp) })).filter(x => x.label),
     picks: (Array.isArray(t.picks) ? t.picks : []).slice(0, 60).map(x => {
       const o = { stopI: Math.round(num(x.stopI, 0, 20, 0)), name: str(x.name, 140), src: ['travelers', 'trending', 'you', 'event'].indexOf(x.src) > -1 ? x.src : 'travelers', note: str(x.note, 220) };
       if (isFinite(+x.lat) && isFinite(+x.lng) && x.lat !== null && x.lng !== null){ o.lat = num(x.lat, -90, 90, 0); o.lng = num(x.lng, -180, 180, 0); }
       if (typeof x.wp === 'string' && /^[a-z-]{2,12}:[^<>"']{1,160}$/.test(x.wp)) o.wp = x.wp;
+      if (typeof x.url === 'string' && x.url.length < 400 && /^https:\/\/([a-z0-9-]+\.)*(ticketmaster\.com|livenation\.com|ticketweb\.com|universe\.com|evyy\.net)\/[^\s<>"']*$/i.test(x.url)) o.url = x.url;
       const sh = x.short;
       if (sh && typeof sh === 'object' && /^[A-Za-z0-9_-]{6,16}$/.test(sh.id || '')) o.short = { id: sh.id, title: str(sh.title, 140), channel: str(sh.channel, 80), views: Math.round(num(sh.views, 0, 1e12, 0)), secs: Math.round(num(sh.secs, 0, 1e6, 0)) };
       return o;
@@ -1137,7 +1139,7 @@ async function handleEvents(reqUrl, res){
       venue: ((((e._embedded || {}).venues) || [])[0] || {}).name || '',
       lat: parseFloat((((((e._embedded || {}).venues) || [])[0] || {}).location || {}).latitude) || undefined,
       lng: parseFloat((((((e._embedded || {}).venues) || [])[0] || {}).location || {}).longitude) || undefined,
-      img: ((e.images || []).sort((a, b) => (b.width || 0) - (a.width || 0))[0] || {}).url || '',
+      img: (((e.images || []).filter(i => i.ratio === '16_9' && (i.width || 0) >= 500).sort((a, b) => (a.width || 0) - (b.width || 0))[0]) || (e.images || []).sort((a, b) => (b.width || 0) - (a.width || 0))[0] || {}).url || '',
       price: ((e.priceRanges || [])[0] || {}).min || null,
     }));
     cset(key, out, 6 * 3600 * 1000);
