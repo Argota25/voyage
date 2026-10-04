@@ -190,7 +190,7 @@ function tripClean(t){
     edited: {},
     stays: (Array.isArray(t.stays) ? t.stays : []).slice(0, 20).map(x => ({ name: str(x.name, 120), type: ['hotel', 'motel', 'rental'].indexOf(x.type) > -1 ? x.type : 'hotel', cost: num(x.cost, 0, 5000, 0), nights: Math.round(num(x.nights, 1, 30, 1)), stopI: Math.round(num(x.stopI, 0, 20, 0)) })).filter(x => x.name),
     picks: (Array.isArray(t.picks) ? t.picks : []).slice(0, 60).map(x => {
-      const o = { stopI: Math.round(num(x.stopI, 0, 20, 0)), name: str(x.name, 140), src: ['travelers', 'trending', 'you'].indexOf(x.src) > -1 ? x.src : 'travelers', note: str(x.note, 220) };
+      const o = { stopI: Math.round(num(x.stopI, 0, 20, 0)), name: str(x.name, 140), src: ['travelers', 'trending', 'you', 'event'].indexOf(x.src) > -1 ? x.src : 'travelers', note: str(x.note, 220) };
       if (isFinite(+x.lat) && isFinite(+x.lng) && x.lat !== null && x.lng !== null){ o.lat = num(x.lat, -90, 90, 0); o.lng = num(x.lng, -180, 180, 0); }
       if (typeof x.wp === 'string' && /^[a-z-]{2,12}:[^<>"']{1,160}$/.test(x.wp)) o.wp = x.wp;
       const sh = x.short;
@@ -1117,8 +1117,11 @@ async function handleEvents(reqUrl, res){
   const lat = parseFloat(reqUrl.searchParams.get('lat')), lng = parseFloat(reqUrl.searchParams.get('lng'));
   if (!isFinite(lat) || !isFinite(lng)) return json(res, 400, { error: 'lat/lng required' });
   const dISO = /^\d{4}-\d{2}-\d{2}$/;
-  const ds = dISO.test(reqUrl.searchParams.get('start') || '') ? reqUrl.searchParams.get('start') : '';
-  const de = dISO.test(reqUrl.searchParams.get('end') || '') ? reqUrl.searchParams.get('end') : '';
+  const today = new Date().toISOString().slice(0, 10);
+  let ds = dISO.test(reqUrl.searchParams.get('start') || '') ? reqUrl.searchParams.get('start') : today;
+  if (ds < today) ds = today;
+  let de = dISO.test(reqUrl.searchParams.get('end') || '') ? reqUrl.searchParams.get('end') : '';
+  if (de && de < ds) de = '';
   const win = (ds ? '&startDateTime=' + ds + 'T00:00:00Z' : '') + (de ? '&endDateTime=' + de + 'T23:59:59Z' : '');
   const key = 'ev:' + lat.toFixed(2) + ',' + lng.toFixed(2) + ':' + ds + '-' + de;
   const hit = cget(key); if (hit) return json(res, 200, hit, true);
@@ -1132,6 +1135,8 @@ async function handleEvents(reqUrl, res){
       name: e.name, url: e.url || '',
       date: ((e.dates || {}).start || {}).localDate || '',
       venue: ((((e._embedded || {}).venues) || [])[0] || {}).name || '',
+      lat: parseFloat((((((e._embedded || {}).venues) || [])[0] || {}).location || {}).latitude) || undefined,
+      lng: parseFloat((((((e._embedded || {}).venues) || [])[0] || {}).location || {}).longitude) || undefined,
       img: ((e.images || []).sort((a, b) => (b.width || 0) - (a.width || 0))[0] || {}).url || '',
       price: ((e.priceRanges || [])[0] || {}).min || null,
     }));

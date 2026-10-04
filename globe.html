@@ -1521,6 +1521,13 @@ body.tripdone #panel.peek .jumpbar{display:none}
 .pkpin.vid svg{margin-left:2px}
 .pkback{margin-top:6px;min-height:42px;border:1.5px solid rgba(70,127,103,.35);border-radius:12px;background:#fff;color:#27493D;font:800 13.5px var(--body);cursor:pointer}
 @media (min-width:701px){.shplayer{left:50%;right:auto;width:min(100vw,calc(100dvh * 9 / 16 + 240px));transform:translateX(-50%)}}
+.datenote{display:block;margin-top:8px;padding:8px 12px;border-radius:12px;background:#F6E3BC;color:#4A3610;font:700 12.5px/1.4 var(--body)}
+.evcard{display:flex;flex-direction:column;gap:8px}
+.evimg{display:block;width:100%;aspect-ratio:16/9;border-radius:16px;background:#DDE7E1 center/cover no-repeat;margin-bottom:4px}
+.evname{font:800 20px/1.25 var(--heading);color:#27493D}
+.evrow{display:flex;align-items:center;gap:10px;font:600 14.5px/1.4 var(--body);color:#2f4b3e}
+.evrow svg{flex:none;width:20px;height:20px;color:#3B6E59}
+#inBody .actbtn.evadd.on{background:#3B6E59;color:#fff;border-color:#3B6E59;box-shadow:none;animation:vcpop .4s cubic-bezier(.2,1.5,.3,1)}
 .sthero{display:flex;align-items:center;gap:12px;margin:6px 0 12px;padding:12px 14px;border-radius:16px;background:#CDE8D3;color:#27493D}
 .sthic{flex:none;width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.6)}
 .sthic svg{width:24px;height:24px}
@@ -3210,6 +3217,7 @@ function renderArea(opts){
   document.getElementById('pTitle').textContent=opts.title;
   var pm=document.getElementById('pMeta');pm.textContent=opts.meta||'';
   var ms=document.createElement('b');ms.className='metaest';ms.id='metaEst';pm.appendChild(ms);
+  if(opts.note){var dn=document.createElement('span');dn.className='datenote';dn.id='dateNote';dn.textContent=opts.note;pm.appendChild(dn);}
   document.getElementById('pCount').textContent='';
   document.getElementById('rows').innerHTML='';
   buildDetail(opts);
@@ -3602,7 +3610,9 @@ function resolveLocation(query,near,geom){
     if(addr)return list;
     var towns=list.filter(function(c){return c.settle;});
     if(towns.length){
-      var hd=query.split(',')[0].trim().toLowerCase(),same=towns.filter(function(c){return (c.label||'').toLowerCase()===hd;});
+      var parts=query.split(','),tail=parts.length>1?parts[parts.length-1].trim().toLowerCase():'',qs=tail?(BYNAME[tail]||BYABBR[tail]):null;
+      if(qs){var inSt=towns.filter(function(c){return c.st===qs.s;});if(inSt.length)towns=inSt;}
+      var hd=parts[0].trim().toLowerCase(),same=towns.filter(function(c){return (c.label||'').toLowerCase()===hd;});
       if(same.length)towns=same;
       towns.sort(function(a,b){return (b.imp-a.imp)||(a.rank-b.rank);});return towns;
     }
@@ -3889,6 +3899,34 @@ function fillDo(el,s){
     loadThumbs();
   });
 }
+var EV_IC={day:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>',
+  place:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  ticket:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 3"/></svg>'};
+function evShow(i,k){
+  var r=(tripCtx&&tripCtx.recs||[])[i],x=r&&r._events&&r._events[k];if(!x)return;
+  var on=isSaved(i,x.name);
+  inApp.show('Event','<div class="evcard">'+(x.img?'<span class="evimg" style="background-image:url('+esc(urlOk(x.img))+')"></span>':'')+
+    '<b class="evname">'+esc(x.name)+'</b>'+
+    '<span class="evrow">'+EV_IC.day+'<span>'+esc(x.date?fmtDayLong(x.date):'Date not listed')+'</span></span>'+
+    (x.venue?('<span class="evrow">'+EV_IC.place+'<span>'+esc(x.venue)+'</span></span>'):'')+
+    '<span class="evrow">'+EV_IC.ticket+'<span>'+(x.price?('Tickets from '+usd(x.price)+' a person'):'Ticket price is not listed')+'</span></span>'+
+    '<button type="button" class="actbtn actadd evadd'+(on?' on':'')+'" id="evAdd" data-i="'+i+'" data-k="'+k+'">'+(on?'✓ Added to your trip':'Add it to my trip')+'</button>'+
+    '<p class="stnote">Tickets are sold by Ticketmaster. Voyage cannot sell them inside the app yet. Adding it keeps the date and the venue in your plan'+(x.price?', and puts the ticket price in your estimate':'')+'.</p></div>');
+}
+function evAdd(i,k,btn){
+  var r=(tripCtx&&tripCtx.recs||[])[i],x=r&&r._events&&r._events[k];if(!x||isSaved(i,x.name))return;
+  saved.push({stopI:i,name:x.name,src:'event',note:[x.date?fmtDayLong(x.date):'',x.venue||''].filter(Boolean).join(' · '),lat:x.lat,lng:x.lng});
+  if(x.price)addCart('extra','Event: '+x.name,x.price,true);
+  chime();if(navigator.vibrate){try{navigator.vibrate(18);}catch(e){}}
+  markSavedTiles();renderNext();renderDoneStrip();drawPicks();
+  if(btn){btn.classList.add('on');btn.textContent='✓ Added to your trip';}
+}
+document.addEventListener('click',function(e){
+  var t=e.target.closest&&e.target.closest('.evtile');
+  if(t){e.preventDefault();evShow(+t.getAttribute('data-i'),+t.getAttribute('data-k'));return;}
+  var b=e.target.closest&&e.target.closest('#evAdd');
+  if(b)evAdd(+b.getAttribute('data-i'),+b.getAttribute('data-k'),b);
+});
 function fillEvents(el,s){
   var place=s.place||'this area';
   var eb='https://www.eventbrite.com/d/'+slugify(place)+'/all-events/';
@@ -3899,8 +3937,10 @@ function fillEvents(el,s){
     }
     bfetch('/api/events?lat='+s.lat+'&lng='+s.lng+(s.ci?('&start='+s.ci+(s.co?('&end='+s.co):'')):'')).then(function(r){return r.ok?r.json():[];}).catch(function(){return null;}).then(function(ev){
       if(ev===null){el.innerHTML=hsTile('Didn’t load right now.')+hsMore(eb,'Eventbrite');return;}
-      var h=(ev||[]).slice(0,8).map(function(x){
-        return '<a class="hslide" href="'+esc(urlOk(x.url))+'" target="_blank" rel="noopener"><span class="hsimg" style="'+(x.img?'background-image:url('+esc(urlOk(x.img))+')':'')+'"></span><span class="hst">'+esc(x.name)+'</span><span class="hsm">'+esc(x.date||'')+(x.venue?' · '+esc(x.venue):'')+(x.price?(' · from $'+esc(String(x.price))):'')+'</span>'+(x.price?addBtn('extra','Event: '+x.name,x.price,true):'')+'</a>';
+      s._events=(ev||[]).slice(0,8);
+      var si=+el.getAttribute('data-i');
+      var h=s._events.map(function(x,k){
+        return '<a class="hslide evtile" href="#" role="button" data-i="'+si+'" data-k="'+k+'"><span class="hsimg" style="'+(x.img?'background-image:url('+esc(urlOk(x.img))+')':'')+'"></span><span class="hst">'+esc(x.name)+'</span><span class="hsm">'+esc(x.date?fmtDayLong(x.date):'')+(x.venue?' · '+esc(x.venue):'')+(x.price?(' · from $'+esc(String(Math.round(x.price)))):'')+'</span></a>';
       }).join('');
       el.innerHTML=(h||hsTile('No listed events right now'))+hsMore(eb,'Eventbrite');
     });
@@ -4231,6 +4271,15 @@ function planDrive(pts,g){
     var stays=planStays(line,miles2,mins,tripPrefs.hrs);
     var dest=pts[pts.length-1],destRec={dest:true,place:(dest.city||dest.label||'your destination'),st:dest.st||'',lat:dest.lat,lng:dest.lng};
     var recs=stays.slice();recs.push(destRec);
+    var dnote='';
+    if(tripDates.start&&tripDates.end&&stays.length){
+      var need=addDaysISO(tripDates.start,stays.length);
+      if(tripDates.end<need){
+        var de=document.getElementById('dEnd');if(de)de.value=need;
+        syncDates();
+        dnote='This drive takes '+stays.length+(stays.length>1?' nights':' night')+' on the road, so your return date moved to '+fmtDate(need)+'.';
+      }
+    }
     if(tripDates.start){
       stays.forEach(function(st){st.ci=addDaysISO(tripDates.start,st.night-1);st.co=addDaysISO(tripDates.start,st.night);st.date=st.ci;});
       destRec.ci=addDaysISO(tripDates.start,stays.length);
@@ -4240,7 +4289,7 @@ function planDrive(pts,g){
     tripCtx={travel:'drive',line:line,pts:pts,miles:miles2,mins:mins,recs:recs,nights:stays.length,hrs:tripPrefs.hrs,sightsPromise:sightsP,dates:{start:tripDates.start,end:tripDates.end}};
     var mid=line[Math.floor(line.length/2)]||[pts[0].lat,pts[0].lng];
     var drange=dateRangeLabel();
-    renderArea({title:'Your drive',travel:'drive',meta:pts.length+' stops \u00b7 '+miles2.toFixed(0)+' mi \u00b7 '+fmtTime(mins)+(stays.length?(' \u00b7 '+stays.length+' night'+(stays.length>1?'s':'')):'')+(drange?(' \u00b7 '+drange):''),badge:'Real road routing \u00b7 OpenStreetMap',center:{lat:mid[0],lng:mid[1]}});
+    renderArea({title:'Your drive',travel:'drive',meta:pts.length+' stops \u00b7 '+miles2.toFixed(0)+' mi \u00b7 '+fmtTime(mins)+(stays.length?(' \u00b7 '+stays.length+' night'+(stays.length>1?'s':'')):'')+(drange?(' \u00b7 '+drange):''),note:dnote,badge:'Real road routing \u00b7 OpenStreetMap',center:{lat:mid[0],lng:mid[1]}});
     stays.forEach(function(st,si){
       st.labelP.then(function(){
         if(g!==planGen)return;
