@@ -1312,7 +1312,7 @@ body.editing .editbtn{background:#467F67;color:#fff;border-color:#467F67}
   --lift:0 1px 0 rgba(39,73,61,.05),0 6px 14px -6px rgba(39,73,61,.14),0 26px 44px -28px rgba(39,73,61,.38)}
 .pricehero,#panel .stopcard .sh,#panel .cot>summary,.nextcard,.cheercard,.staypick{background-image:var(--tex-hex)!important;background-size:28px 49px!important;background-repeat:repeat!important}
 #panel .scroll{background-image:var(--tex-topo)!important;background-size:240px 240px!important;background-repeat:repeat!important}
-.actcard,.incard,.plancard,#panel .ph{background-image:var(--tex-topo-soft)!important;background-size:240px 240px!important;background-repeat:repeat!important}
+.actcard,.incard,.plancard,.hub,#panel .ph{background-image:var(--tex-topo-soft)!important;background-size:240px 240px!important;background-repeat:repeat!important}
 #panel .stopcard,#panel .cot,.nextcard{box-shadow:var(--lift)}
 .switch,.reset{height:44px!important;padding:0 16px!important;gap:8px!important;justify-content:center;border-radius:999px;
   font:800 13px/1 var(--body)!important;letter-spacing:0!important;text-transform:none!important;color:#27493D;white-space:nowrap;
@@ -1626,6 +1626,69 @@ body.vidmap .actsheet,body.vidmap .inapp{display:none!important}
 @media (max-width:700px){#panel.open:not(.peek)~.cartpill{bottom:calc(44px + env(safe-area-inset-bottom))}#panel.dragging~.cartpill{display:none!important}}
 @media (min-width:701px){.cartpill{right:auto;left:calc(clamp(380px,34vw,500px) + 26px);bottom:28px}}
 .rdraw{transition:stroke-dashoffset .9s cubic-bezier(.45,0,.2,1)}
+.hub{position:fixed;inset:0;z-index:42;display:none;background-color:#F7F5EE;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.hub.show{display:block;animation:hubup .34s cubic-bezier(.22,.9,.24,1)}
+.hub:focus{outline:none}
+@keyframes hubup{from{transform:translateY(48px);opacity:.3}to{transform:none;opacity:1}}
+body.vidmap .hub{display:none!important}
+.hubcard{max-width:560px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top)) 16px calc(30px + env(safe-area-inset-bottom))}
+.hubtop{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hubchip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--sun);color:var(--sun-ink);font:800 12.5px var(--body);letter-spacing:.01em}
+.hubchip svg{width:14px;height:14px}
+.hubx{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid rgba(70,127,103,.28);background:#fff;color:#27493D;font:700 24px/1 var(--body);cursor:pointer;box-shadow:0 4px 12px -8px rgba(12,54,36,.45)}
+.hubcard h2{font:800 30px/1.08 var(--heading);letter-spacing:-.02em;color:#27493D;margin:14px 0 6px}
+.hubroute{font:800 19px/1.25 var(--heading);color:#3B6E59;margin:0}
+.hubroute i{font-style:normal;color:#86C5A4;padding:0 2px}
+.hubdates{font:600 13.5px var(--body);color:#3e5f4f;margin:4px 0 0}
+.hubline{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;margin:6px 0 0;font:600 14px var(--body);color:#3e5f4f;font-variant-numeric:lining-nums}
+.hubline em{font-style:normal;color:#86C5A4}
+.hubcost{min-height:44px;padding:0;border:0;background:none;color:#27493D;font:800 15px var(--body);text-decoration:underline;text-decoration-style:dotted;text-decoration-color:#86C5A4;text-underline-offset:4px;cursor:pointer;font-variant-numeric:lining-nums}
+.hubsec{margin-top:16px;padding:16px;border-radius:18px;background:#fff;box-shadow:var(--lift)}
+.hubh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 6px;font:800 18px var(--heading);color:#27493D}
+.hubh span{font:700 12.5px var(--body);color:#5f7268;font-variant-numeric:lining-nums}
+.hubempty{margin:4px 0 6px;font:500 14px/1.45 var(--body);color:#3e5f4f}
+.hubstop{padding:10px 0 4px}
+.hubstop+.hubstop{border-top:1px solid rgba(70,127,103,.14);margin-top:6px}
+.hubsh{display:flex;align-items:baseline;gap:8px;margin-bottom:2px}
+.hubsh b{font:800 15.5px var(--heading);color:#27493D}
+.hubsh span{font:600 12px var(--body);color:#5f7268}
+.hubrow{display:flex;align-items:center;gap:10px;min-height:52px}
+.hubic{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:#EEF0E6;color:#467F67}
+.hubic.stay{background:#CDE8D3;color:#27493D}
+.hubic svg{width:19px;height:19px}
+.hubrt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.hubrt b,.hubrt span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.hubrt b{font:700 14.5px var(--body);color:#27493D}
+.hubrt span{font:500 12.5px var(--body);color:#5f7268;font-variant-numeric:lining-nums}
+.hub .hubrm{flex:none;width:44px;height:44px;border-radius:50%;border:0;background:transparent;color:#5f7268;font:700 22px/1 var(--body);cursor:pointer}
+.hub .hubrm:hover{background:#EEF0E6;color:#27493D}
+.hubnone{margin:2px 0;font:500 13px var(--body);color:#5f7268}
+.hubmore{display:inline-flex;align-items:center;min-height:44px;margin-top:4px;padding:0 16px;border-radius:999px;border:1.5px dashed rgba(70,127,103,.5);background:transparent;color:#3B6E59;font:700 13.5px var(--body);cursor:pointer}
+.hubmore:hover{background:#EEF0E6}
+.hubtile{display:flex;align-items:center;gap:14px;width:100%;margin-top:10px;padding:16px;border-radius:16px;text-align:left;cursor:pointer}
+.hubtile.big{min-height:96px;border:0;background:#27493D;color:#fff;box-shadow:0 14px 28px -16px rgba(12,54,36,.7)}
+.hubtile.alt{min-height:76px;border:1px solid rgba(70,127,103,.22);background:#F8F6F0;color:#27493D}
+.hubtic{flex:none;display:grid;place-items:center;width:50px;height:50px;border-radius:50%;background:var(--sun);color:var(--sun-ink)}
+.hubtile.alt .hubtic{width:42px;height:42px;background:#CDE8D3;color:#27493D}
+.hubtic svg{width:22px;height:22px}
+.hubtt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.hubtt b{font:800 17px/1.2 var(--heading)}
+.hubtile.alt .hubtt b{font-size:15.5px}
+.hubtt span{font:500 13px/1.35 var(--body);color:rgba(233,247,238,.86)}
+.hubtile.alt .hubtt span{color:#5f7268}
+.hubgo{flex:none;width:20px;height:20px;opacity:.8}
+.hubshare{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:56px;margin-top:20px;border:0;border-radius:16px;background:var(--pop);color:var(--pop-ink);font:800 16.5px var(--body);cursor:pointer;box-shadow:0 14px 28px -12px rgba(150,56,28,.6)}
+.hubshare:hover{background:var(--pop-deep)}
+.hubshare:disabled{opacity:.7;cursor:progress}
+.hubshare svg{width:20px;height:20px}
+.hubsaved{display:flex;align-items:center;justify-content:center;gap:6px;margin:10px 0 0;font:600 13px var(--body);color:#3e5f4f;text-align:center}
+.hubsaved svg{width:15px;height:15px;color:#467F67}
+.hubbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.hubghost{display:flex;align-items:center;justify-content:center;gap:7px;min-height:50px;padding:0 10px;border-radius:14px;border:1.5px solid rgba(70,127,103,.35);background:#fff;color:#27493D;font:800 14px var(--body);cursor:pointer}
+.hubghost svg{width:17px;height:17px;flex:none}
+.hubghost:hover{border-color:#467F67}
+.hub button:focus-visible{outline:2px solid #467F67;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.hub.show{animation:none}}
 @media (prefers-reduced-motion:reduce){.pwtick.go{animation:pwtickrm .9s linear forwards}.cartpill.bump,.cartpill .cpn.flip,.sparkpulse{animation:none}.spark{display:none}.rdraw{transition:none}}
 @keyframes pwtickrm{0%,70%{opacity:1;transform:none}100%{opacity:0;transform:none}}
 </style>
@@ -1636,6 +1699,7 @@ body.vidmap .actsheet,body.vidmap .inapp{display:none!important}
 <div id="stage"><div id="smap"></div><div id="smapfx"></div></div>
 <div class="loading" id="loading">Warming up your map…</div>
 <div class="planbar" aria-hidden="true"></div>
+<div class="hub" id="hub" role="dialog" aria-modal="true" aria-labelledby="hubTitle" tabindex="-1"><div class="hubcard"><div id="hubHead"></div><div id="hubSugg"></div><div id="hubCart"></div><div id="hubNotes"></div><div id="hubMore"></div></div></div>
 <div class="actsheet" id="actsheet" role="dialog" aria-modal="true" aria-labelledby="actTitle">
   <div class="actcard staycard">
     <div class="acthead"><button type="button" class="actback" id="actBack" aria-label="Go back one step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Back</button><button type="button" class="actclose" id="actClose" aria-label="Close">&times;</button></div>
@@ -2294,6 +2358,50 @@ function applyPerDiem(recs,g){
     renderCost();
   });
 }
+function gasStates(){
+  var out=[];
+  function add(x){x=String(x||'').toUpperCase();if(/^[A-Z]{2}$/.test(x)&&out.indexOf(x)<0&&out.length<8)out.push(x);}
+  var pts=tripCtx.pts||[];
+  if(pts[0])add(pts[0].st);
+  (tripCtx.recs||[]).forEach(function(r){
+    if(r.st){add(r.st);return;}
+    var pl=String(r.place||'');if(pl.indexOf(', ')<0)return;
+    var b=BYNAME[pl.split(', ').pop().toLowerCase()];if(b)add(b.s);
+  });
+  pts.forEach(function(p){add(p.st);});
+  return out;
+}
+function gasApply(){if(tripCtx&&tripCtx.gas&&!budgetEdited.gas)budget.gas=tripCtx.gas.price;}
+function gasLoad(g){
+  if(!tripCtx||tripCtx.travel!=='drive')return;
+  var ctx=tripCtx;
+  Promise.all((ctx.recs||[]).map(function(r){return r.labelP||Promise.resolve(r);})).then(function(){
+    if(g!==planGen||tripCtx!==ctx)return null;
+    var sts=gasStates();
+    return bfetch('/api/gas'+(sts.length?('?st='+sts.join(',')):''),9000).then(function(x){return x.ok?x.json():null;});
+  }).catch(function(){return null;}).then(function(j){
+    if(!j||g!==planGen||tripCtx!==ctx||!(+j.price>0))return;
+    ctx.gas={price:+j.price,label:j.label||'',fallback:!!j.fallback,asof:j.asof||'',by:j.by||[]};
+    gasApply();renderCost();
+  });
+}
+function gasPlace(l){
+  var m={'U.S. average':'the U.S.','East Coast':'the East Coast','Central Atlantic':'the Central Atlantic states','Lower Atlantic':'the Lower Atlantic states','Midwest':'the Midwest','Gulf Coast':'the Gulf Coast','Rocky Mountain':'the Rocky Mountain states','West Coast':'the West Coast','West Coast less California':'the West Coast outside California'};
+  return m[l]||l;
+}
+function gasWhere(g){
+  var names=[];(g.by||[]).forEach(function(b){var l=gasPlace(b.label);if(l&&names.indexOf(l)<0)names.push(l);});
+  if(!names.length)names=[gasPlace(g.label||'U.S. average')];
+  if(names.length===1)return 'this week\'s average for '+names[0];
+  return 'this week\'s average across '+names.slice(0,-1).join(', ')+' and '+names[names.length-1];
+}
+function gasWhy(){
+  var g=tripCtx&&tripCtx.gas,src;
+  if(budgetEdited.gas)src=' (your number)';
+  else if(g&&!g.fallback&&Math.abs(g.price-(+budget.gas))<0.005)src=', '+gasWhere(g)+' (U.S. EIA)';
+  else src=' (typical)';
+  return 'Regular gas at $'+(+budget.gas).toFixed(2)+' a gallon'+src+', at '+budget.mpg+' mpg'+(budgetEdited.mpg?' (your number)':'')+'. Change either number.';
+}
 function costExplainHTML(e){
   var lines=[];
   if(pdInfo){
@@ -2302,7 +2410,7 @@ function costExplainHTML(e){
   }else{
     lines.push('<li><b>Stays '+usd(budget.nightly)+' a night</b> and <b>food '+usd(budget.foodDay)+' a day</b> until we look up typical rates for your stops.</li>');
   }
-  if(e.drive)lines.push('<li><b>Gas.</b> Your miles at '+budget.mpg+' mpg and $'+(+budget.gas).toFixed(2)+' a gallon.</li>');
+  if(e.drive)lines.push('<li><b>Gas.</b> '+esc(gasWhy())+'</li>');
   else lines.push('<li><b>Rental car '+usd(budget.rental)+' a day.</b> A starting number. Flights are not included.</li>');
   if(e.stays.length||e.extras.length)lines.push('<li><b>Your picks.</b> Stays and tickets you added use their own prices.</li>');
   return '<div class="cotexp"><div class="cotexph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>This is an estimate</div><ul>'+lines.join('')+'</ul>'+
@@ -2343,6 +2451,7 @@ function renderCost(){
     adjIn('Travelers','ppl',budget.ppl,'1')+'</div>';
   b.innerHTML=html;
   renderNext();cartPillSync();
+  if(hubOpen)renderHub();
   if(aek){var ni=b.querySelector('input[data-bk="'+aek+'"]');if(ni){ni.focus();if(aeSel!=null){try{ni.setSelectionRange(aeSel,aeSel);}catch(e2){}}}}
 }
 function addCart(kind,label,cost,pp){cart.push({id:'c'+(cartSeq++),kind:kind,label:label,cost:+cost||0,pp:!!pp});renderCost();}
@@ -2365,7 +2474,7 @@ function renderNext(){
   if(tripReady){
     step=3;title='Your trip is ready';
     body=e.pinnedN+(e.pinnedN===1?' night':' nights')+' planned'+(saved.length?(', '+saved.length+(saved.length===1?' thing':' things')+' to do saved'):'')+'. Change anything any time. Your total keeps up.';
-    btn='See my route on the map';go='map';
+    btn='Open my trip page';go='hub';
   }else if(tripStyle==='flow'){
     step=1;title='You are going with the flow';
     body=(e.openN>0?('Nothing is locked in. We set aside '+usd(budget.nightly)+' a night for '+e.openN+(e.openN===1?' night':' nights')+' so your total stays honest. '):'Nothing is locked in. ')+'Pick a place any time, or change plans on the road.';
@@ -2399,6 +2508,7 @@ document.addEventListener('click',function(e){
   if(go==='pick'){var i=nextOpenStop();if(i>-1){openStaySheet(i);return;}go='stay';}
   if(go==='dowiz'){openIdeas();return;}
   if(go==='map'){showTripMap();return;}
+  if(go==='hub'){openHub();return;}
   scrollToSec(go);
 });
 function stayBoxHTML(i){
@@ -2682,7 +2792,7 @@ function added(kind,el,quiet){
   }
 }
 document.getElementById('cartPill').addEventListener('click',function(){
-  if(tripReady&&saved.length){showTripMap();return;}
+  if(tripReady){openHub();return;}
   var pe=document.getElementById('panel'),sc=pe.querySelector('.scroll');
   var box=[].filter.call(document.querySelectorAll('#extra .mypicks'),function(b){return b.children.length>0;})[0];
   if(!box||!sc){var ph=document.getElementById('priceHero');if(ph)ph.click();return;}
@@ -2737,6 +2847,7 @@ function wizBack(){
   }
 }
 function wizRestart(){
+  closeHub();
   cart=cart.filter(function(x){return x.kind!=='stay';});
   saved=[];tripReady=false;tripStyle='plan';doSt=null;ideaProfile=null;ideaSrc='travelers';ideaView='';chatSt=null;
   renderCost();markSavedTiles();renderDoneStrip();drawPicks();cartPillSync();
@@ -2914,8 +3025,9 @@ function finishTrip(){
   doSt=null;ideaView='';tripReady=true;
   document.getElementById('actsheet').classList.remove('show');
   renderNext();renderSaveBar();tripDirty();
+  if(hubOpen){renderHub();return;}
   var n=saved.length;
-  cheer('Your trip is ready.',n?('This is going to be a good one. '+n+(n===1?' pick':' picks')+' on your map.'):'This is going to be a good one.',function(){showTripMap();},true);
+  cheer('Your trip is ready.',n?('This is going to be a good one. '+n+(n===1?' pick':' picks')+' in your trip.'):'This is going to be a good one.',function(){openHub();},true);
 }
 var pkLayer=null,pkStops=null,pkPins=null,pkZoomBound=false;
 function pickPos(x,k,n){
@@ -3047,6 +3159,7 @@ function tripDirty(){
 function renderSaveBar(){
   var el=document.getElementById('saveBar');if(!el)return;
   var mine=tripId&&tripKey;
+  if(hubOpen)renderHub();
   el.innerHTML=mine?('<span class="svok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Saved. Changes save by themselves.</span><button type="button" class="svshare" id="shareTrip">Share</button>')
     :('<button type="button" class="svsave'+(tripReady?' hot':'')+'" id="saveTripBtn">'+(tripId?'Save a copy of this trip':'Save this trip')+'</button>');
 }
@@ -3154,7 +3267,7 @@ function applyRestore(t){
   tripBase=cartSig();tripUnsaved=false;
   tripStyle=t.style==='flow'?'flow':'plan';tripReady=!!t.ready;
   renderCost();markSavedTiles();renderNext();renderSaveBar();cartPillSync();
-  if(tripReady)setTimeout(function(){if(tripCtx)showTripMap();},1900);
+  if(tripReady){if(tripKey)setTimeout(function(){if(tripCtx&&tripReady&&tripKey)openHub();},1900);else setTimeout(function(){if(tripCtx)showTripMap();},1900);}
   var seen='';try{seen=sessionStorage.getItem('voyage-seen')||'';}catch(e){}
   if(!tripKey&&tripId&&seen.indexOf(tripId)<0){
     try{sessionStorage.setItem('voyage-seen',seen+' '+tripId);}catch(e){}
@@ -3170,6 +3283,103 @@ function renderDoneStrip(){
     return '<button type="button" class="dspick" data-pk="'+i+'"><span>'+esc(x.name)+'</span><em>'+esc((r.place||'').split(',')[0])+'</em></button>';}).join('')+'</div>'):'';
   setTimeout(setPeek,0);
 }
+var hubOpen=false,hubWasOpen=false;
+function hubSvg(d,cls){return '<svg'+(cls?' class="'+cls+'"':'')+' viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d+'</svg>';}
+var HUB_IC={stay:'<path d="M3 18V8m0 6h18v4M21 18v-6a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="2"/>',pick:'<path d="M12 3l2.2 5.2L20 9l-4.3 3.9L17 19l-5-3-5 3 1.3-6.1L4 9l5.8-.8z"/>',ev:'<path d="M4 8a2 2 0 0 0 2-2h12a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H6a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2"/>',
+  play:'<path d="M8 5.5v13l11-6.5z" fill="currentColor"/>',book:'<path d="M4 5h11a3 3 0 0 1 3 3v11H7a3 3 0 0 1-3-3z"/><path d="M8 9h6M8 13h4"/>',go:'<path d="M9 6l6 6-6 6"/>',
+  share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>',ok:'<path d="M5 12l5 5 9-10"/>',
+  map:'<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>'};
+function hubCity(x){return String(x||'').split(',')[0].trim();}
+function hubRow(kind,name,sub,btn){
+  return '<div class="hubrow"><span class="hubic'+(kind==='stay'?' stay':'')+'">'+hubSvg(HUB_IC[kind]||HUB_IC.pick)+'</span><span class="hubrt"><b>'+esc(name)+'</b>'+(sub?'<span>'+esc(sub)+'</span>':'')+'</span>'+btn+'</div>';
+}
+function renderHub(){
+  var el=document.getElementById('hub');if(!el)return;
+  if(!tripCtx){closeHub();return;}
+  var e=estimate(),recs=tripCtx.recs||[],ss=stayStops(),drive=tripCtx.travel==='drive';
+  var names=stopVals().map(hubCity).filter(Boolean);
+  if(names.length<2)names=(tripCtx.pts||[]).map(function(p){return hubCity(p.city||p.label);}).filter(Boolean);
+  var D=tripCtx.dates||tripDates,dl=(D&&D.start)?(fmtDate(D.start)+(D.end?(' to '+fmtDate(D.end)):'')):'';
+  var bits=['<button type="button" class="hubcost" id="hubCost" aria-label="About '+usd(e.total)+'. Show the cost breakdown">About '+usd(e.total)+'</button>'];
+  if(e.nights>0)bits.push('<span>'+e.nights+(e.nights===1?' night':' nights')+'</span>');
+  if(tripCtx.miles)bits.push('<span>'+Math.round(tripCtx.miles).toLocaleString('en-US')+' mi</span>');
+  document.getElementById('hubHead').innerHTML='<div class="hubtop"><span class="hubchip">'+hubSvg(HUB_IC.ok)+'Trip ready</span><button type="button" class="hubx" id="hubX" aria-label="Close and see the map">&times;</button></div>'+
+    '<h2 id="hubTitle">Your trip is ready</h2><p class="hubroute">'+names.map(esc).join(' <i aria-hidden="true">\u2192</i> ')+'</p>'+
+    (dl?'<p class="hubdates">'+esc(dl)+'</p>':'')+'<p class="hubline">'+bits.join('<em aria-hidden="true">\u00b7</em>')+'</p>';
+  var order=ss.slice(),n=cartPillCount(),evs={};
+  recs.forEach(function(r,i){if(order.indexOf(i)<0&&(stopPicks(i).length||saved.some(function(x){return x.stopI===i;})))order.push(i);});
+  saved.forEach(function(x){if(x.src==='event')evs['Event: '+x.name]=1;});
+  var extras=cart.filter(function(x){return x.kind==='extra'&&!evs[x.label];});
+  var h='<section class="hubsec" aria-labelledby="hubCartH"><h3 class="hubh" id="hubCartH">Your cart'+(n?'<span>'+n+(n===1?' thing':' things')+'</span>':'')+'</h3>';
+  if(!n){
+    h+='<p class="hubempty">Nothing in the cart yet. Add a few things below.</p>'+(ss.length?'<button type="button" class="hubmore" data-k="0">+ Pick things to do</button>':'');
+  }else{
+    order.forEach(function(i){
+      var r=recs[i]||{},k=ss.indexOf(i),st=stopPicks(i),pk=saved.filter(function(x){return x.stopI===i;});
+      var sub=drive?(r.dest?'Destination':('Night '+r.night)):(k>-1?('Stop '+(k+1)):'Start');
+      h+='<div class="hubstop"><div class="hubsh"><b>'+esc(hubCity(r.place)||'Your stop')+'</b><span>'+esc(sub)+'</span></div>';
+      st.forEach(function(x){var nn=+x.nights||1,nm=x.name||String(x.label||'').replace(/^Stay: /,'');
+        h+=hubRow('stay',nm,capFirst(String(x.type||'stay'))+' \u00b7 '+nn+(nn===1?' night':' nights')+' \u00b7 '+usd(x.cost)+' a night','<button type="button" class="hubrm" data-rm="'+esc(x.id)+'" aria-label="Remove '+esc(nm)+'">&times;</button>');});
+      pk.forEach(function(x){h+=hubRow(x.src==='event'?'ev':'pick',x.name,x.note||'','<button type="button" class="mpx hubrm" data-i="'+i+'" data-name="'+esc(x.name)+'" aria-label="Remove '+esc(x.name)+'">&times;</button>');});
+      if(!st.length&&!pk.length)h+='<p class="hubnone">Nothing here yet.</p>';
+      if(k>-1)h+='<button type="button" class="hubmore" data-k="'+k+'">+ Add more here</button>';
+      h+='</div>';
+    });
+    if(extras.length){
+      h+='<div class="hubstop"><div class="hubsh"><b>Also in your cart</b></div>';
+      extras.forEach(function(x){h+=hubRow('ev',x.label,usd(x.cost)+(x.pp?' each':''),'<button type="button" class="hubrm" data-rm="'+esc(x.id)+'" aria-label="Remove '+esc(x.label)+'">&times;</button>');});
+      h+='</div>';
+    }
+  }
+  document.getElementById('hubCart').innerHTML=h+'</section>';
+  var mine=!!(tripId&&tripKey);
+  document.getElementById('hubMore').innerHTML='<section class="hubsec" aria-labelledby="hubIdeasH"><h3 class="hubh" id="hubIdeasH">Ideas from other travelers</h3>'+
+    '<button type="button" class="hubtile big" id="hubVids"><span class="hubtic">'+hubSvg(HUB_IC.play)+'</span><span class="hubtt"><b>See what other travelers did</b><span>Short videos from each of your stops</span></span>'+hubSvg(HUB_IC.go,'hubgo')+'</button>'+
+    (ss.length?('<button type="button" class="hubtile alt" id="hubRead"><span class="hubtic">'+hubSvg(HUB_IC.book)+'</span><span class="hubtt"><b>Read what travelers wrote</b><span>Travelers\' write-ups for each stop, from Wikivoyage</span></span>'+hubSvg(HUB_IC.go,'hubgo')+'</button>'):'')+'</section>'+
+    '<button type="button" class="hubshare" id="hubShare">'+hubSvg(HUB_IC.share)+'Share this trip</button>'+
+    (mine?('<p class="hubsaved">'+hubSvg(HUB_IC.ok)+'Saved. It will be here when you come back.</p>'):'')+
+    '<div class="hubbtns"><button type="button" class="hubghost" id="hubMap">'+hubSvg(HUB_IC.map)+'See it on the map</button><button type="button" class="hubghost" id="hubEdit">'+hubSvg(HUB_IC.edit)+'Edit trip</button></div>';
+}
+function openHub(){
+  var el=document.getElementById('hub');if(!el||!tripCtx)return;
+  hubWasOpen=false;
+  renderHub();
+  if(!hubOpen){el.classList.remove('show');void el.offsetWidth;el.classList.add('show');el.scrollTop=0;}
+  hubOpen=true;document.body.classList.add('hubon');
+  setTimeout(function(){if(hubOpen){try{el.focus({preventScroll:true});}catch(e){}}},60);
+}
+function closeHub(){
+  hubOpen=false;document.body.classList.remove('hubon');
+  var el=document.getElementById('hub');if(el)el.classList.remove('show');
+}
+function hubShare(btn){
+  if(tripId&&tripKey){shareSheet();return;}
+  btn.disabled=true;
+  var n=0;
+  (function go(){
+    if(tripId&&tripKey){btn.disabled=false;shareSheet();return;}
+    if(tripSaving&&n++<40){setTimeout(go,250);return;}
+    saveTrip('auto').then(function(id){btn.disabled=false;if(id)shareSheet();},function(er){btn.disabled=false;inApp.note('Not saved',er.message);});
+  })();
+}
+document.getElementById('hub').addEventListener('click',function(e){
+  var t=e.target.closest&&e.target.closest('button');if(!t)return;
+  if(t.id==='hubX'||t.id==='hubMap'){closeHub();showTripMap();return;}
+  if(t.id==='hubCost'){closeHub();var d=document.getElementById('cot');if(d)d.open=true;var ph=document.getElementById('priceHero');if(ph)ph.click();return;}
+  if(t.id==='hubEdit'){closeHub();var pe=document.getElementById('panel');pe.classList.remove('peek');var sc=pe.querySelector('.scroll');if(sc)sc.scrollTop=0;if(!document.body.classList.contains('editing'))document.getElementById('editTrip').click();return;}
+  if(t.id==='hubVids'){openTravelers();return;}
+  if(t.id==='hubRead'){if(!stayStops().length)return;ideaSrc='travelers';openDoSheet(0);return;}
+  if(t.id==='hubShare'){hubShare(t);return;}
+  if(t.classList.contains('hubmore')){if(!stayStops().length)return;openDoSheet(+t.getAttribute('data-k')||0);return;}
+  var rm=t.getAttribute('data-rm');
+  if(rm){cart=cart.filter(function(x){return x.id!==rm;});renderCost();}
+});
+window.addEventListener('keydown',function(e){
+  if(e.key!=='Escape'||!hubOpen)return;
+  var on=function(id){var x=document.getElementById(id);return !!(x&&x.classList.contains('show'));};
+  if(on('actsheet')||on('inapp')||on('shorts')||on('cheer'))return;
+  closeHub();showTripMap();
+},true);
 function showTripMap(){
   var pe=document.getElementById('panel');
   document.body.classList.remove('pktapped');
@@ -3209,6 +3419,7 @@ function markSavedTiles(){
     [].forEach.call(card.querySelectorAll('.spane[data-pane="do"] .hslide'),function(t){var n=t.querySelector('.hst');if(n)t.classList.toggle('savedtile',isSaved(i,n.textContent.trim()));});
   });
   renderPicks();cartPillSync();
+  if(hubOpen)renderHub();
 }
 (function(){
   var sh=document.getElementById('actsheet');if(!sh)return;
@@ -3564,6 +3775,7 @@ function initWPS(){
 }
 function openTravelers(){
   if(!tripCtx)return;
+  if(hubOpen){hubWasOpen=true;closeHub();}
   var recs=tripCtx.recs||[],order=[];
   for(var i=recs.length-1;i>=0&&order.length<3;i--){var r=recs[i];if(r.place&&r.place!=='this area'&&r.place!=='this stop'&&!(tripCtx.travel!=='drive'&&r.first))order.push(r);}
   var box=document.getElementById('shorts'),feed=document.getElementById('shFeed');
@@ -4141,6 +4353,7 @@ function shortSlide(x,i){
 }
 function openShorts(list,k,title){
   var box=document.getElementById('shorts'),feed=document.getElementById('shFeed');if(!box||!feed)return;
+  if(hubOpen){hubWasOpen=true;closeHub();}
   shortsSt={list:list,title:title,cur:-1,muted:false};
   feed.innerHTML=list.map(shortSlide).join('');
   document.getElementById('shWhere').textContent=title;
@@ -4178,6 +4391,7 @@ function closeShorts(){
   document.getElementById('shMore').classList.remove('show');
   ytFrame=null;shortsSt=null;
   vidClear();idRowsSync();
+  if(hubWasOpen){hubWasOpen=false;openHub();}
 }
 function shMoreShow(){
   var el=document.getElementById('shMore');if(!el)return;
@@ -4404,7 +4618,7 @@ function buildDirectRecs(pts){
     return {dest:true,direct:true,idx:i,first:i===0,last:last,place:(p.city||p.label||'this stop'),st:p.st||'',lat:p.lat,lng:p.lng,legMi:(i>0?miles(pts[i-1].lat,pts[i-1].lng,p.lat,p.lng):0)};
   });
 }
-function planTrip(pts){var g=++planGen;return travelMode==='drive'?planDrive(pts,g):planDirect(pts,g);}
+function planTrip(pts){closeHub();hubWasOpen=false;var g=++planGen;return travelMode==='drive'?planDrive(pts,g):planDirect(pts,g);}
 function planDrive(pts,g){
   syncPrefs();syncDates();
   var stops=pts.map(function(p){return p.lat+','+p.lng;}).join(';');
@@ -4437,6 +4651,7 @@ function planDrive(pts,g){
     var mid=line[Math.floor(line.length/2)]||[pts[0].lat,pts[0].lng];
     var drange=dateRangeLabel();
     renderArea({title:'Your drive',travel:'drive',meta:pts.length+' stops \u00b7 '+miles2.toFixed(0)+' mi \u00b7 '+fmtTime(mins)+(stays.length?(' \u00b7 '+stays.length+' night'+(stays.length>1?'s':'')):'')+(drange?(' \u00b7 '+drange):''),note:dnote,badge:'Real road routing \u00b7 OpenStreetMap',center:{lat:mid[0],lng:mid[1]}});
+    gasLoad(g);
     stays.forEach(function(st,si){
       st.labelP.then(function(){
         if(g!==planGen)return;
