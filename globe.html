@@ -1521,6 +1521,76 @@ body.tripdone #panel.peek .jumpbar{display:none}
 .pkpin.vid svg{margin-left:2px}
 .pkback{margin-top:6px;min-height:42px;border:1.5px solid rgba(70,127,103,.35);border-radius:12px;background:#fff;color:#27493D;font:800 13.5px var(--body);cursor:pointer}
 @media (min-width:701px){.shplayer{left:50%;right:auto;width:min(100vw,calc(100dvh * 9 / 16 + 240px));transform:translateX(-50%)}}
+.sthero{display:flex;align-items:center;gap:12px;margin:6px 0 12px;padding:12px 14px;border-radius:16px;background:#CDE8D3;color:#27493D}
+.sthic{flex:none;width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.6)}
+.sthic svg{width:24px;height:24px}
+.sthtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.sthtx b{font:800 18px/1.2 var(--heading)}
+.sthtx span{font:600 13px/1.35 var(--body);opacity:.9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sthdots{display:flex;align-items:center;gap:5px;flex:none}
+.sthdots i{width:8px;height:8px;border-radius:999px;background:currentColor;opacity:.25}
+.sthdots i.d{opacity:.6}
+.sthdots i.on{opacity:1;width:20px}
+.sthero.sv1{background:#F6E3BC;color:#4A3610}
+.sthero.sv2{background:#3B6E59;color:#fff}
+.sthero.sv2 .sthic{background:rgba(255,255,255,.18)}
+.sthero.sv3{background:#F3DDD3;color:#6E2A17}
+#actBody.stinA{animation:stinA .34s cubic-bezier(.22,.9,.24,1)}
+#actBody.stinB{animation:stinB .34s cubic-bezier(.22,.9,.24,1)}
+#actBody.stinC{animation:stinC .36s cubic-bezier(.2,1.2,.3,1)}
+@keyframes stinA{from{opacity:0;transform:translateX(46px)}to{opacity:1;transform:none}}
+@keyframes stinB{from{opacity:0;transform:translateY(34px)}to{opacity:1;transform:none}}
+@keyframes stinC{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.cheercard.cv1{background-color:#3B6E59;animation-name:cheerslide}
+.cheercard.cv2{background-color:#F3DCA8;animation-name:cheertilt}
+.cheercard.cv2 h3{color:#27493D}
+.cheercard.cv2 p{color:#3e5f4f}
+.cheercard.cv2 .cheerck{background:#27493D;color:#fff}
+@keyframes cheerslide{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
+@keyframes cheertilt{from{transform:rotate(-7deg) scale(.8);opacity:0}to{transform:none;opacity:1}}
+.idmore{position:sticky;bottom:0;z-index:2;display:none;align-items:center;gap:8px;margin-top:8px;padding:8px 8px 8px 14px;border-radius:18px;background:rgba(255,255,255,.8);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);border:1px solid rgba(70,127,103,.22);box-shadow:0 14px 30px -18px rgba(8,26,18,.5)}
+.idmore.show{display:flex;animation:idmorein .34s cubic-bezier(.2,1.2,.3,1)}
+.idmore>span{flex:1;min-width:0;font:800 13.5px/1.3 var(--body);color:#27493D}
+.idmore button{flex:none;min-height:44px;padding:0 14px;border-radius:999px;font:800 13px var(--body);cursor:pointer}
+.idkeep{border:1.5px solid rgba(70,127,103,.3);background:transparent;color:#3B6E59}
+.idcont{border:0;background:var(--pop);color:#fff}
+@keyframes idmorein{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.shmore{position:absolute;z-index:3;top:calc(66px + env(safe-area-inset-top));left:12px;right:12px;max-width:560px;margin:0 auto;display:none;align-items:center;gap:8px;padding:8px 8px 8px 16px;border-radius:999px;background:rgba(22,34,29,.3)}
+.shmore.show{display:flex;animation:idmorein .34s cubic-bezier(.2,1.2,.3,1)}
+.shmore span{flex:1;min-width:0;font:800 13.5px/1.25 var(--body);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.shmore button{flex:none;min-height:44px;padding:0 14px;border-radius:999px;font:800 13px var(--body);cursor:pointer}
+#shKeep{border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);color:#fff}
+#shCont{border:0;background:var(--pop);color:#fff}
+body.vidmap .actsheet,body.vidmap .inapp{display:none!important}
+@media (max-width:700px){body.vidmap #panel,body.vidmap .recenter,body.vidmap .maphint{visibility:hidden}}
+.vidcard{position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:44;max-width:440px;margin:0 auto;display:none;flex-direction:column;gap:4px;padding:16px;border-radius:22px;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border:1px solid rgba(70,127,103,.2);box-shadow:0 24px 50px -22px rgba(8,26,18,.6)}
+.vidcard.show{display:flex;animation:actup .28s cubic-bezier(.22,.9,.24,1)}
+.vidcard>b{font:800 17px/1.25 var(--heading);color:#27493D;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.vcgap{align-self:flex-start;margin-bottom:4px;padding:5px 12px;border-radius:999px;background:var(--sun);color:var(--sun-ink);font:700 12.5px var(--body)}
+.vcgap b{font-weight:800;font-size:15px}
+.vcwhere{font:600 13px/1.4 var(--body);color:#3B6E59}
+.vcadd{min-height:54px;margin-top:10px;border:0;border-radius:16px;background:var(--pop);color:#fff;font:800 16px var(--body);cursor:pointer;box-shadow:0 12px 26px -12px rgba(150,56,28,.6)}
+.vcback{min-height:46px;margin-top:6px;border:1.5px solid rgba(70,127,103,.35);border-radius:14px;background:#fff;color:#27493D;font:800 14px var(--body);cursor:pointer}
+.vcrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.vcrow button{margin-top:0;min-height:52px}
+.vcdone{display:flex;align-items:center;gap:12px;margin-top:10px;padding:12px;border-radius:16px;background:#CDE8D3;animation:vcpop .45s cubic-bezier(.2,1.5,.3,1)}
+.vcck{flex:none;width:44px;height:44px;border-radius:50%;background:#3B6E59;color:#fff;display:flex;align-items:center;justify-content:center}
+.vcck svg{width:24px;height:24px;stroke-dasharray:30;stroke-dashoffset:30;animation:cheerdraw .4s .2s ease forwards}
+.vctx{display:flex;flex-direction:column;gap:1px;min-width:0}
+.vctx b{font:800 16px var(--heading);color:#27493D}
+.vctx span{font:600 12.5px/1.35 var(--body);color:#3e5f4f}
+@keyframes vcpop{from{transform:scale(.8);opacity:0}to{transform:none;opacity:1}}
+.pkpin.vid.on{background:#3B6E59;animation:vidbounce .6s cubic-bezier(.2,1.6,.3,1)}
+.pkpin.vid.on svg{margin-left:0}
+.pkpin.vid.on::after{animation:none}
+@keyframes vidbounce{0%{transform:scale(.6)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+.vidburst{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none}
+.vidburst i{position:absolute;width:8px;height:8px;border-radius:2px;opacity:0;animation:cheerbit .9s ease-out forwards}
+.vidburst::before{content:"";position:absolute;left:-22px;top:-22px;width:44px;height:44px;border-radius:50%;border:3px solid var(--sun);animation:vidring .7s ease-out forwards}
+@keyframes vidring{from{transform:scale(.6);opacity:.9}to{transform:scale(3.2);opacity:0}}
+.vidlink{animation:viddash 1.2s linear infinite}
+@keyframes viddash{to{stroke-dashoffset:-24}}
+@media (prefers-reduced-motion:reduce){#actBody.stinA,#actBody.stinB,#actBody.stinC,.idmore.show,.shmore.show,.vidcard.show,.vcdone,.pkpin.vid.on,.vidlink{animation:none}.vcck svg{animation:none;stroke-dashoffset:0}.vidburst{display:none}}
 @media (prefers-reduced-motion:reduce){.shhint{animation:none}.shglass.open .shopts{animation:none}}
 </style>
 </head>
@@ -1547,8 +1617,10 @@ body.tripdone #panel.peek .jumpbar{display:none}
     <button type="button" class="glass shmute" id="shMute" aria-label="Turn sound off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="snd" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/><path class="mut" d="M17 9l5 6M22 9l-5 6"/></svg></button>
   </div>
   <div class="glass shstart" aria-live="polite">Tap the video to start it</div>
+  <div class="glass shmore" id="shMore"><span id="shMoreT"></span><button type="button" id="shKeep">Keep watching</button><button type="button" id="shCont">Continue</button></div>
   <div class="shhint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-6 6 6"/><path d="M6 20l6-6 6 6" opacity=".5"/></svg>Swipe up to see more</div>
 </div>
+<div class="vidcard" id="vidCard" aria-live="polite"></div>
 <div class="maphint" id="mapHint" aria-hidden="true"><i></i>Tap a stop to see your picks</div>
 <div class="cheer" id="cheer" role="status" aria-live="polite">
   <div class="cheercard">
@@ -2427,8 +2499,9 @@ function openStaySheet(i,editId){
   var sh=document.getElementById('actsheet'),r=(tripCtx.recs||[])[i];if(!sh||!r)return;
   doSt=null;chatSt=null;ideaView='';
   var old=editId?cart.filter(function(x){return x.id===editId;})[0]:null;
-  staySt={i:i,type:(old&&old.type)||'hotel',price:old?old.cost:(r.pd?r.pd.lodging:(+budget.nightly||0)),nights:old?(+old.nights||1):stayDefaultNights(i),list:null,editId:editId||null};
-  document.getElementById('actTitle').textContent='Where will you sleep?';
+  staySt={i:i,type:(old&&old.type)||'hotel',price:old?old.cost:(r.pd?r.pd.lodging:(+budget.nightly||0)),nights:old?(+old.nights||1):stayDefaultNights(i),list:null,editId:editId||null,fresh:true};
+  var ssx=stayStops(),kx=ssx.indexOf(i);
+  document.getElementById('actTitle').textContent=(editId||kx<=0)?'Where will you sleep?':(kx===ssx.length-1?'Last one. Where will you sleep?':['Next night. Where to?','And the night after?','Keep going. Where to?'][(kx-1)%3]);
   stayRender();
   sh.classList.add('show');
   if(r._stayList){staySt.list=r._stayList;stayRender();}
@@ -2436,7 +2509,11 @@ function openStaySheet(i,editId){
     r._stayList=l||[];if(staySt&&staySt.i===i){staySt.list=r._stayList;stayRender();}
   });
 }
-function closeStaySheet(){var sh=document.getElementById('actsheet');if(sh)sh.classList.remove('show');staySt=null;doSt=null;chatSt=null;ideaView='';}
+var ST_IC=['<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v7"/><path d="M3 15h18M7 9V7a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v2"/></svg>',
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/></svg>',
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4L3 20h18z"/><path d="M12 4v16M9 20l3-6 3 6"/></svg>'];
+function closeStaySheet(){var sh=document.getElementById('actsheet');if(sh)sh.classList.remove('show');var ab=document.getElementById('actBody');if(ab)ab.className='';staySt=null;doSt=null;chatSt=null;ideaView='';}
 function stayRender(){
   var st=staySt;if(!st)return;
   var r=tripCtx.recs[st.i],b=document.getElementById('actBody');
@@ -2455,7 +2532,10 @@ function stayRender(){
       return '<button type="button" class="strow" data-name="'+esc(x.name)+'"><span class="strt"><b>'+esc(x.name)+'</b><span>'+(x.addr?esc(x.addr)+' \u00b7 ':'')+x.mi+' mi from your stop</span></span><span class="strpick">Pick</span></button>';
     }).join(''):'<p class="stnote">No '+tname+'s are listed on the map near this stop. You can still pick "Any '+tname+' here".</p>');
   }
-  b.innerHTML='<p class="actsub">'+esc(stopLabel(st.i).replace(/^./,function(c){return c.toUpperCase();}))+'</p>'+
+  var ssx=stayStops(),kx=Math.max(0,ssx.indexOf(st.i));
+  var big=tripCtx.travel==='drive'?(r.dest?'Your destination':('Night '+r.night)):('Stop '+(kx+1)+' of '+ssx.length);
+  var dots=(ssx.length>1&&ssx.length<=8)?('<span class="sthdots">'+ssx.map(function(q,d){return '<i class="'+(d<kx?'d':(d===kx?'on':''))+'"></i>';}).join('')+'</span>'):'';
+  b.innerHTML='<div class="sthero sv'+(kx%4)+'"><span class="sthic">'+ST_IC[kx%4]+'</span><span class="sthtx"><b>'+esc(big)+'</b><span>'+esc(capFirst(r.place||'this stop'))+'</span></span>'+dots+'</div>'+
     '<div class="stseg" role="group" aria-label="Kind of place">'+TYPES.map(function(t){return '<button type="button" data-type="'+t[0]+'" class="'+(st.type===t[0]?'on':'')+'">'+t[1]+'</button>';}).join('')+'</div>'+
     '<div class="stctl"><label class="stprice"><span>Price a night</span><span class="stin">$<input id="stPrice" type="text" inputmode="decimal" autocomplete="off" value="'+esc(String(st.price))+'"></span></label>'+
     '<div class="stnights"><span>Nights here</span><div class="stepper"><button type="button" id="stMinus" aria-label="One night less">&minus;</button><b id="stN">'+st.nights+'</b><button type="button" id="stPlus" aria-label="One night more">+</button></div></div></div>'+
@@ -2463,6 +2543,7 @@ function stayRender(){
     '<div class="stlist">'+rows+'</div>'+
     '<button type="button" class="actbtn actx" id="stFlow">Skip this. I will go with the flow.</button>'+wizFoot();
   wizProg(1);wizBackShown(stayStops().indexOf(st.i)>0);
+  if(st.fresh){st.fresh=false;b.className='';void b.offsetWidth;b.className=['stinA','stinB','stinC'][kx%3];}
 }
 function stayDone(name){
   var st=staySt,r=tripCtx.recs[st.i];
@@ -2476,6 +2557,7 @@ function stayDone(name){
   var e=estimate(),nx=nextOpenStop(),lbl=stopLabel(st.i),more=(e.openN>0&&nx>-1);
   staySt=null;
   document.getElementById('actsheet').classList.remove('show');
+  document.getElementById('actBody').className='';
   cheer(more?pickLine(lbl):'Every night has a place.',
         more?(usd(e.total)+' so far. Next up: '+stopLabel(nx)+'.'):('This trip is taking shape. '+usd(e.total)+' so far.'),
         function(){if(more)openStaySheet(nx);else openIdeas();});
@@ -2498,9 +2580,10 @@ function chime(big){
     });
   }catch(e1){}
 }
-var cheerTimer=null;
+var cheerTimer=null,cheerV=0;
 function cheer(title,sub,then,big){
   var el=document.getElementById('cheer');if(!el){if(then)then();return;}
+  var cc=el.querySelector('.cheercard');if(cc)cc.className='cheercard cv'+(big?0:((cheerV++)%3));
   document.getElementById('cheerT').textContent=title;document.getElementById('cheerS').textContent=sub||'';
   var fx=document.getElementById('cheerFx'),cols=['#EEC584','#86C5A4','#CDE8D3','#467F67','#FFFFFF'],h='';
   if(!RM.matches){for(var i=0;i<(big?26:16);i++){var a=(360/(big?26:16))*i,d=70+Math.round(Math.random()*70);
@@ -2625,10 +2708,23 @@ function doRender(){
   var ss=stayStops(),last=st.k===ss.length-1;
   document.getElementById('actBody').innerHTML='<p class="actsub">'+esc(capFirst(stopLabel(st.i)))+' · stop '+(st.k+1)+' of '+ss.length+'</p>'+
     '<div class="idseg" role="tablist">'+['travelers','trending','you'].map(function(k){return '<button type="button" role="tab" data-src="'+k+'" class="'+(ideaSrc===k?'on':'')+'">'+IDEA_IC[k]+'<span>'+IDEA_NAME[k]+'</span></button>';}).join('')+'</div>'+
-    '<div id="idList"><p class="stnote">Loading...</p></div>'+
+    '<div id="idList"><p class="stnote">Loading...</p></div><div class="idmore" id="idMore"></div>'+
     '<button type="button" class="actbtn actadd" id="doNext">'+(last?'Finish my trip':'Next stop →')+'</button>'+wizFoot();
   wizProg(2);wizBackShown(true);
   loadIdeas(st);
+  idMoreSync();
+}
+function idMoreSync(){
+  var el=document.getElementById('idMore'),st=doSt;if(!el||!st)return;
+  var n=saved.filter(function(x){return x.stopI===st.i;}).length,last=st.k===stayStops().length-1;
+  if(!n||st.keep){el.className='idmore';el.innerHTML='';return;}
+  el.innerHTML='<span>✓ '+n+' saved</span><button type="button" class="idkeep" id="idKeep">Keep adding</button><button type="button" class="idcont" id="idCont">'+(last?'Finish':'Continue')+' →</button>';
+  if(!el.classList.contains('show'))el.className='idmore show';
+}
+function idRowsSync(){
+  var st=doSt;if(!st||!document.getElementById('idList'))return;
+  [].forEach.call(document.querySelectorAll('#idList .idrow'),function(rw){var on=isSaved(st.i,rw.getAttribute('data-name'));rw.classList.toggle('on',on);var sb=rw.querySelector('.idsave');if(sb)sb.textContent=on?'✓ Saved':'Save';});
+  st.keep=false;idMoreSync();
 }
 function ideaRow(st,x){
   var on=isSaved(st.i,x.name);
@@ -2988,17 +3084,19 @@ function markSavedTiles(){
       else chatAnswer([v]);
       return;}
     if(e.target.closest('#chatDone')&&chatSt){chatAnswer(chatSt.multi.slice());return;}
+    if(e.target.closest('#idKeep')&&doSt){doSt.keep=true;idMoreSync();return;}
+    if(e.target.closest('#idCont')&&doSt){openDoSheet(doSt.k+1);return;}
     var sv=e.target.closest('.idsave');
     if(sv&&doSt){var rw=sv.closest('.idrow'),nm=rw.getAttribute('data-name');
       if(isSaved(doSt.i,nm)){saved=saved.filter(function(x){return !(x.stopI===doSt.i&&x.name===nm);});rw.classList.remove('on');sv.textContent='Save';}
       else{var it=(doSt.byName&&doSt.byName[nm])||{};
         saved.push({stopI:doSt.i,name:nm,src:ideaSrc,note:it.note||'',lat:it.lat,lng:it.lng,wp:it.wp||null,short:it.short||null});
-        rw.classList.add('on');sv.textContent='✓ Saved';chime();}
-      markSavedTiles();return;}
+        rw.classList.add('on');sv.textContent='✓ Saved';chime();doSt.keep=false;}
+      markSavedTiles();idMoreSync();return;}
     var im=e.target.closest('.idmain');
     if(im&&doSt){
       var nm2=im.closest('.idrow').getAttribute('data-name');
-      if(im.hasAttribute('data-v')&&doSt.shorts){openShorts(doSt.shorts,+im.getAttribute('data-v'),tripCtx.recs[doSt.i].place||'');return;}
+      if(im.hasAttribute('data-v')&&doSt.shorts){var dsi=doSt.i,dpl=tripCtx.recs[dsi].place||'';openShorts(doSt.shorts.map(function(v){return Object.assign({place:dpl,stopI:dsi},v);}),+im.getAttribute('data-v'),dpl);return;}
       var wp=im.getAttribute('data-wp');
       if(wp){inApp.wiki(wpLang(wp),wpTitle(wp));return;}
       inApp.note(nm2,im.getAttribute('data-note')||'No description for this one yet.');return;}
@@ -3202,10 +3300,21 @@ form.addEventListener('submit',function(e){
   if(vals.length<2){hint.textContent=travelMode==='fly'?'Add at least a departure and destination city.':(travelMode==='boat'?'Add at least a departure and destination port.':'Add at least a start and a destination.');hint.classList.add('err');return;}
   hint.textContent=travelMode==='drive'?'Planning your route, stops, and stays...':'Planning your trip...';
   planBusy(true);
-  var pts=[],chain=Promise.resolve(null);
-  vals.forEach(function(v){chain=chain.then(function(prev){return resolveLocation(v,prev?prev.lat+','+prev.lng:undefined,travelMode==='drive').then(function(r){pts.push(r);return r;});});});
-  chain.then(function(){return GLOBE_READY;}).then(function(){planTrip(pts);hint.textContent='';})
-    .catch(function(er){planBusy(false);pendingRestore=null;if(er==='cancel'){hint.textContent='';}else if(er&&er.kind){hint.textContent=netErrMsg(er);hint.classList.add('err');}else{hint.textContent='We could not find one of those stops. Add a city or state.';hint.classList.add('err');}});
+  var pts=[],memo={},chain=Promise.resolve(null);
+  vals.forEach(function(v){chain=chain.then(function(prev){var mk=v.toLowerCase();return (memo[mk]?Promise.resolve(memo[mk]):resolveLocation(v,prev?prev.lat+','+prev.lng:undefined,travelMode==='drive')).then(function(r){memo[mk]=r;pts.push(r);return r;});});});
+  chain.then(function(){
+    if(pts.length>1&&pts.every(function(q){return miles(pts[0].lat,pts[0].lng,q.lat,q.lng)<0.3;}))throw {same:1};
+    return GLOBE_READY;
+  }).then(function(){planTrip(pts);hint.textContent='';})
+    .catch(function(er){planBusy(false);pendingRestore=null;
+      if(er==='cancel'){hint.textContent='';return;}
+      var msg='We could not find one of those stops. Add a city or state.',where=false;
+      if(er&&er.kind)msg=netErrMsg(er);
+      else if(er&&er.abroad){msg='Voyage plans trips inside the United States for now. “'+er.abroad+'” is outside it.';where=true;}
+      else if(er&&er.miss){msg='We could not find “'+er.miss+'”. Check the spelling, or add the city and state.';where=true;}
+      else if(er&&er.same){msg='Your start and your destination are the same place. Pick somewhere to go.';where=true;}
+      if(where)pwShow(0);
+      hint.textContent=msg;hint.classList.add('err');});
 });
 
 document.getElementById('reset').addEventListener('click',function(){
@@ -3395,8 +3504,8 @@ function geoFetch(url,attempt){
       throw e;
     });
 }
-function geocodeMulti(qq,near,geom){
-  return geoFetch('/api/geocode?limit=10'+(near?'&near='+encodeURIComponent(near):'')+(geom?'&geom=1':'')+'&q='+encodeURIComponent(qq)).then(function(j){
+function geocodeMulti(qq,near,geom,fuzzy){
+  return geoFetch('/api/geocode?limit=10'+(fuzzy?'&fuzzy=1':'')+(near?'&near='+encodeURIComponent(near):'')+(geom?'&geom=1':'')+'&q='+encodeURIComponent(qq)).then(function(j){
       if(!j||!j.length||j.error)return [];
       var seen={},out=[];
       j.forEach(function(hit){
@@ -3404,7 +3513,7 @@ function geocodeMulti(qq,near,geom){
         var k=((ad.road||'')+'|'+city+'|'+county+'|'+stN).toLowerCase();if(seen[k])return;seen[k]=1;
         var parts=hit.display_name.split(',').map(function(s){return s.trim();});
         var sub=[city,county,stN].filter(Boolean).filter(function(v,i,a){return a.indexOf(v)===i;}).join(' · ');
-        out.push({lat:parseFloat(hit.lat),lng:parseFloat(hit.lon),label:parts[0],sub:sub||parts.slice(1,3).join(', '),st:st?st.s:'',road:(ad.road||''),city:city,county:county,geojson:(hit.geojson||null)});
+        out.push({lat:parseFloat(hit.lat),lng:parseFloat(hit.lon),label:parts[0],sub:sub||parts.slice(1,3).join(', '),st:st?st.s:'',road:(ad.road||''),city:city,county:county,geojson:(hit.geojson||null),rank:(+hit.place_rank||30),imp:(+hit.importance||0),settle:((+hit.place_rank||30)<=20&&/^(boundary|place)$/.test(hit.category||hit['class']||''))});
       });
       return out;
     });
@@ -3468,22 +3577,57 @@ function askCity(query,st,options,onPick,onCancel){
   document.getElementById('chooser').classList.add('show');
   setTimeout(function(){fi.focus();},80);
 }
+var FOREIGN=/[,\s](canada|mexico|united kingdom|uk|england|scotland|wales|ireland|france|germany|italy|spain|portugal|netherlands|belgium|switzerland|austria|greece|turkey|japan|china|india|thailand|vietnam|australia|new zealand|brazil|argentina|colombia|peru|chile|bahamas|jamaica|cuba|dominican republic|costa rica|panama|iceland|norway|sweden|denmark|egypt|morocco|south africa|uae|singapore|south korea|philippines|indonesia)\s*$/i;
+function isAbroad(q){
+  var t=q.trim();
+  if(hasStateToken(t)||/^(little canada|new england)$/i.test(t))return false;
+  return FOREIGN.test(t);
+}
+function lev(a,b){
+  var m=a.length,n=b.length,row=[],i,j,prev,tmp;
+  for(j=0;j<=n;j++)row[j]=j;
+  for(i=1;i<=m;i++){
+    prev=row[0];row[0]=i;
+    for(j=1;j<=n;j++){tmp=row[j];row[j]=Math.min(row[j]+1,row[j-1]+1,prev+(a.charAt(i-1)===b.charAt(j-1)?0:1));prev=tmp;}
+  }
+  return row[n];
+}
 function resolveLocation(query,near,geom){
   var k=query.toLowerCase();
   if(BYNAME[k])return Promise.resolve({lat:BYNAME[k].lat,lng:BYNAME[k].lng,label:BYNAME[k].n,st:BYNAME[k].s,state:BYNAME[k]});
   if(BYABBR[k])return Promise.resolve({lat:BYABBR[k].lat,lng:BYABBR[k].lng,label:BYABBR[k].n,st:BYABBR[k].s,state:BYABBR[k]});
-  return geocodeMulti(query,near,geom).then(function(list){
+  if(isAbroad(query))return Promise.reject({abroad:query.trim()});
+  var addr=/\d/.test(query),typo='';
+  return geocodeMulti(query,addr?near:undefined,geom).then(function(list){
+    if(addr)return list;
+    var towns=list.filter(function(c){return c.settle;});
+    if(towns.length){
+      var hd=query.split(',')[0].trim().toLowerCase(),same=towns.filter(function(c){return (c.label||'').toLowerCase()===hd;});
+      if(same.length)towns=same;
+      towns.sort(function(a,b){return (b.imp-a.imp)||(a.rank-b.rank);});return towns;
+    }
+    return geocodeMulti(query,undefined,false,true).catch(function(){return [];}).then(function(fz){
+      var head=query.split(',')[0].trim().toLowerCase();
+      var close=fz.filter(function(c){var d=lev(head,(c.label||'').toLowerCase());return d>0&&d<=2;});
+      if(!close.length)return list;
+      if(!list.length&&close.length===1)return close;
+      typo=close[0].label;
+      return close.concat(list);
+    });
+  }).then(function(list){
     if(list.length===1)return list[0];
     if(list.length>1){
       var bare=!hasStateToken(query);
-      return new Promise(function(resolve,reject){ showChooser(list,resolve,reject,bare?('Which '+query.trim()+' did you mean?'):undefined,bare?'The most likely one is first. Tap the one you mean.':undefined); });
+      return new Promise(function(resolve,reject){ showChooser(list,resolve,reject,
+        typo?('Did you mean '+typo+'?'):(bare?('Which '+query.trim()+' did you mean?'):undefined),
+        typo?('We could not find “'+query.trim()+'” spelled that way. Tap the one you mean.'):(bare?'The most likely one is first. Tap the one you mean. Voyage covers the United States for now.':undefined)); });
     }
-    if(!list.length&&hasStateToken(query))return Promise.reject('notfound');
+    if(!addr||hasStateToken(query))return Promise.reject({miss:query.trim()});
     return new Promise(function(resolve,reject){
       function finish(l3,where){
         if(l3.length===1)return resolve(l3[0]);
         if(l3.length>1)return showChooser(l3,resolve,reject,'Which one in '+where+'?','County shown on every option so you can pick the exact one');
-        reject('notfound');
+        reject({miss:query.trim()});
       }
       askState(query,function(st){
         geocodeMulti(query+', '+st.n,near,geom).then(function(l2){
@@ -3844,7 +3988,19 @@ function closeShorts(){
   box.className='shorts';
   document.getElementById('shFeed').innerHTML='';
   document.getElementById('shPlayer').innerHTML='';
+  document.getElementById('shMore').classList.remove('show');
   ytFrame=null;shortsSt=null;
+  vidClear();idRowsSync();
+}
+function shMoreShow(){
+  var el=document.getElementById('shMore');if(!el)return;
+  document.getElementById('shMoreT').textContent='✓ '+saved.length+' added';
+  el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
+}
+function feedContinue(){
+  var d=doSt,inWiz=!!(d&&ideaView==='stop'&&document.getElementById('actsheet').classList.contains('show'));
+  closeShorts();
+  if(inWiz)openDoSheet(d.k+1);
 }
 function shortAdd(x){
   var nm=deent(x.title),si=isFinite(x.stopI)?x.stopI:((tripCtx.recs||[]).length-1);
@@ -3853,49 +4009,82 @@ function shortAdd(x){
   chime();markSavedTiles();renderNext();renderDoneStrip();drawPicks();
   return true;
 }
-function routeGap(lat,lng){
-  var line=(tripCtx&&tripCtx.line)||[],best=Infinity,step=Math.max(1,Math.floor(line.length/600));
-  for(var i=0;i<line.length;i+=step){var d=miles(lat,lng,line[i][0],line[i][1]);if(d<best)best=d;}
-  return best;
+function routeNear(lat,lng){
+  var line=(tripCtx&&tripCtx.line)||[],best=Infinity,bp=null,step=Math.max(1,Math.floor(line.length/600));
+  for(var i=0;i<line.length;i+=step){var d=miles(lat,lng,line[i][0],line[i][1]);if(d<best){best=d;bp=line[i];}}
+  return {d:best,pt:bp};
 }
+function routeGap(lat,lng){return routeNear(lat,lng).d;}
 function cleanTitle(t){
   return deent(t).replace(/#[^\s#]+/g,' ').replace(/\([^)]*\)/g,' ').split(/[|:\u2013\u2014!?]| - /)[0].replace(/[^A-Za-z0-9'&. -]/g,' ').replace(/\s+/g,' ').trim().split(' ').slice(0,7).join(' ');
 }
+var vidSt=null;
+function vidClear(){
+  document.body.classList.remove('vidmap');
+  var c=document.getElementById('vidCard');if(c){c.className='vidcard';c.innerHTML='';}
+  if(vidLayer)vidLayer.clearLayers();
+  vidSt=null;
+}
+function vidCardRender(){
+  var v=vidSt,c=document.getElementById('vidCard');if(!v||!c)return;
+  var x=v.x,on=isSaved(v.si,deent(x.title)),n=saved.length;
+  c.innerHTML=(v.gap?'<span class="vcgap">'+v.gap+'</span>':'')+'<b>'+esc(deent(x.title))+'</b><span class="vcwhere">'+esc(v.where)+'</span>'+
+    (on?('<div class="vcdone"><span class="vcck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="vctx"><b>Added to your trip</b><span>'+n+(n===1?' idea':' ideas')+' on your map so far.</span></span></div>'+
+        '<div class="vcrow"><button type="button" class="vcback" id="vidBack">Keep adding</button><button type="button" class="vcadd" id="vidCont">Continue →</button></div>')
+       :('<button type="button" class="vcadd" id="vidAdd" data-i="'+v.i+'">Add it to my trip</button><button type="button" class="vcback" id="vidBack">Back to the videos</button>'));
+}
+function vidAdded(){
+  var v=vidSt;if(!v)return;
+  var el=v.m&&v.m.getElement&&v.m.getElement(),pin=el&&el.querySelector('.pkpin');
+  if(pin){
+    var bits='',cols=['#EEC584','#86C5A4','#CDE8D3','#BF4E30','#FFFFFF'];
+    if(!RM.matches){for(var k=0;k<14;k++)bits+='<i style="--a:'+Math.round(360/14*k)+'deg;--d:'+(46+Math.round(Math.random()*40))+'px;background:'+cols[k%cols.length]+'"></i>';}
+    pin.className='pkpin vid on';
+    pin.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg><span class="vidburst">'+bits+'</span>';
+  }
+  if(navigator.vibrate){try{navigator.vibrate([16,30,24]);}catch(e){}}
+  vidCardRender();
+}
 function mapVideo(i){
   var st=shortsSt,x=st&&st.list[i];if(!x||!tripCtx||!stageMap)return;
-  var r=(tripCtx.recs||[])[isFinite(x.stopI)?x.stopI:((tripCtx.recs||[]).length-1)]||{};
+  var si=isFinite(x.stopI)?x.stopI:((tripCtx.recs||[]).length-1),r=(tripCtx.recs||[])[si]||{};
   ytCmd('pauseVideo');
   document.getElementById('shorts').classList.add('away');
+  document.body.classList.add('vidmap');
   document.getElementById('panel').classList.add('peek');
   if(!vidLayer)vidLayer=L.layerGroup().addTo(stageMap);
   vidLayer.clearLayers();
+  var phone=window.matchMedia('(max-width:700px)').matches,card=document.getElementById('vidCard');
+  card.className='vidcard show';
+  card.innerHTML='<b>'+esc(deent(x.title))+'</b><span class="vcwhere">Finding it on your map...</span>';
+  vidSt=null;
   function show(lat,lng,exact){
-    var gap=routeGap(lat,lng),city=(r.place||'your stop').split(',')[0];
-    var where=exact?((gap<1?'Right on your route':('About '+(gap<10?gap.toFixed(1):Math.round(gap))+' mi from your route'))+', near '+city+'.')
+    if(!shortsSt||!document.body.classList.contains('vidmap'))return;
+    var near=routeNear(lat,lng),gap=near.d,city=(r.place||'your stop').split(',')[0];
+    var has=!!(exact&&isFinite(gap)&&near.pt),num=gap<10?gap.toFixed(1):String(Math.round(gap));
+    var where=exact?(has?((gap<1?'Right on your route':('About '+num+' mi from your route'))+', near '+city+'.'):('Near '+city+'.'))
       :('Filmed around '+city+'. The exact spot is not listed, so the pin sits at your stop.');
-    var m=L.marker([lat,lng],{icon:L.divIcon({className:'pkwrap',iconSize:[44,44],iconAnchor:[22,22],html:'<span class="pkpin vid"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>'})}).addTo(vidLayer);
-    m.bindPopup('<div class="pkcard"><b>'+esc(deent(x.title))+'</b><span class="pkwhere">'+esc(where)+'</span>'+
-      '<button type="button" class="pkmore" id="vidAdd" data-i="'+i+'">'+(isSaved(x.stopI,deent(x.title))?'✓ Added to your trip':'Add it to my trip')+'</button>'+
-      '<button type="button" class="pkback" id="vidBack">Back to the videos</button></div>',{maxWidth:260,minWidth:210,closeButton:false,autoPanPaddingTopLeft:[20,120],autoPanPaddingBottomRight:[20,peekH()+20],className:'pkpop'});
+    var m=L.marker([lat,lng],{zIndexOffset:900,icon:L.divIcon({className:'pkwrap',iconSize:[44,44],iconAnchor:[22,22],html:'<span class="pkpin vid"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>'})}).addTo(vidLayer);
+    if(has&&gap>=0.3)L.polyline([[lat,lng],[near.pt[0],near.pt[1]]],{color:'#BF4E30',weight:3,dashArray:'3 9',lineCap:'round',className:'vidlink',interactive:false}).addTo(vidLayer);
     x.lat=exact?lat:undefined;x.lng=exact?lng:undefined;
-    var pts=[[lat,lng]];if(isFinite(r.lat))pts.push([r.lat,r.lng]);
-    stageMap.fitBounds(L.latLngBounds(pts).pad(0.6),{paddingTopLeft:[30,130],paddingBottomRight:[30,peekH()+40],maxZoom:exact?12:10});
-    setTimeout(function(){m.openPopup();},500);
+    vidSt={i:i,x:x,si:si,m:m,where:where,gap:has?(gap<1?'<b>On your route</b>':('<b>'+num+' mi</b> off your route')):''};
+    vidCardRender();
+    var pts=[[lat,lng]];if(has&&gap<300)pts.push([near.pt[0],near.pt[1]]);if(isFinite(r.lat))pts.push([r.lat,r.lng]);
+    stageMap.fitBounds(L.latLngBounds(pts).pad(0.5),{paddingTopLeft:[30,110],paddingBottomRight:[30,(phone?card.offsetHeight+40:60)],maxZoom:exact?13:10});
   }
   var q=cleanTitle(x.title);
   if(q.length<4||!isFinite(r.lat)){show(r.lat,r.lng,false);return;}
   bfetch('/api/geocode?limit=1&near='+r.lat+','+r.lng+'&q='+encodeURIComponent(q+', '+(r.place||'')),9000).then(function(z){return z.ok?z.json():[];}).catch(function(){return [];}).then(function(l){
-    if(!shortsSt)return;
     var h=l&&l[0],la=h?parseFloat(h.lat):NaN,lo=h?parseFloat(h.lon):NaN;
-    var named=h&&/^(tourism|leisure|amenity|historic|natural|shop|building|man_made|craft|aeroway|railway)$/.test(h.category||h.class||'');
+    var named=h&&/^(tourism|leisure|amenity|historic|natural|shop|building|man_made|craft|aeroway|railway)$/.test(h.category||h['class']||'');
     if(isFinite(la)&&isFinite(lo)&&named&&miles(la,lo,r.lat,r.lng)<80)show(la,lo,true);else show(r.lat,r.lng,false);
   });
 }
 function backToVideos(){
   var box=document.getElementById('shorts');
-  if(vidLayer)vidLayer.clearLayers();
-  if(!shortsSt){box.classList.remove('away');return;}
-  box.classList.remove('away');ytCmd('playVideo');
+  vidClear();
+  box.classList.remove('away');
+  if(shortsSt)ytCmd('playVideo');
 }
 (function(){
   var box=document.getElementById('shorts'),feed=document.getElementById('shFeed');if(!box||!feed)return;
@@ -3913,20 +4102,23 @@ function backToVideos(){
     if(!shortsSt)return;
     if(e.target.closest('#shMute')){shortsSt.muted=!shortsSt.muted;ytCmd(shortsSt.muted?'mute':'unMute');box.classList.toggle('muted',shortsSt.muted);
       document.getElementById('shMute').setAttribute('aria-label',shortsSt.muted?'Turn sound on':'Turn sound off');return;}
+    if(e.target.closest('#shKeep')){document.getElementById('shMore').classList.remove('show');return;}
+    if(e.target.closest('#shCont')){feedContinue();return;}
     var mi=e.target.closest('.shmapit');
     if(mi){mi.closest('.shglass').classList.toggle('open');return;}
     var ad=e.target.closest('.shadd');
-    if(ad){var x=shortsSt.list[+ad.getAttribute('data-i')];if(x){shortAdd(x);ad.classList.add('on');ad.querySelector('b').textContent='✓ Added to your trip';}return;}
+    if(ad){var x=shortsSt.list[+ad.getAttribute('data-i')];if(x){if(shortAdd(x))shMoreShow();ad.classList.add('on');ad.querySelector('b').textContent='✓ Added to your trip';}return;}
     var se=e.target.closest('.shsee');
     if(se){mapVideo(+se.getAttribute('data-i'));return;}
-    if(e.target.closest('.shglass,.shbar'))return;
+    if(e.target.closest('.shglass,.shbar,.shmore'))return;
     if(ytState===1)ytCmd('pauseVideo');else ytCmd('playVideo');
   });
   document.addEventListener('click',function(e){
-    var a=e.target.closest&&e.target.closest('#vidAdd,#vidBack');if(!a)return;
+    var a=e.target.closest&&e.target.closest('#vidAdd,#vidBack,#vidCont');if(!a)return;
     if(a.id==='vidBack'){backToVideos();return;}
+    if(a.id==='vidCont'){feedContinue();return;}
     var x=shortsSt&&shortsSt.list[+a.getAttribute('data-i')];if(!x)return;
-    shortAdd(x);a.textContent='✓ Added to your trip';
+    shortAdd(x);vidAdded();
     var sl=feed.querySelector('.shadd[data-i="'+a.getAttribute('data-i')+'"]');if(sl){sl.classList.add('on');sl.querySelector('b').textContent='✓ Added to your trip';}
   });
   document.addEventListener('keydown',function(e){
@@ -4031,6 +4223,7 @@ function planDrive(pts,g){
   var stops=pts.map(function(p){return p.lat+','+p.lng;}).join(';');
   bfetch('/api/route?costing=auto&stops='+encodeURIComponent(stops),30000).then(function(r){if(r.status>=500)throw {kind:'upstream'};return r.json();},tagNetErr).then(function(j){
     if(g!==planGen)return;
+    if(j&&j.error==='noroad')throw {noroad:1};
     var t=j.trip;if(!t||!t.legs)throw 0;
     var line=[];t.legs.forEach(function(lg){line=line.concat(decode(lg.shape,6));});
     var miles2=t.summary.length,mins=(t.summary.time||0)/60;
@@ -4056,7 +4249,7 @@ function planDrive(pts,g){
       });
     });
   }).catch(function(er){if(g!==planGen)return;planBusy(false);pendingRestore=null;var hn=document.getElementById('hint');
-    hn.textContent=(er&&er.kind)?netErrMsg(er):'We could not map that drive. Check the stops and try again.';
+    hn.textContent=(er&&er.kind)?netErrMsg(er):((er&&er.noroad)?'No road connects those places. Try Fly or Boat for this trip.':'We could not map that drive. Check the stops and try again.');
     hn.classList.add('err');});
 }
 function planDirect(pts,g){

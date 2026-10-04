@@ -338,7 +338,21 @@ async function photon(q, limit, near){
     const line = [p.name, ((p.housenumber ? p.housenumber + ' ' : '') + (p.street || '')).trim(), p.city || p.county, p.state, 'USA']
       .filter(Boolean).filter((v, i, a) => a.indexOf(v) === i);
     return { lat: String(c[1]), lon: String(c[0]), display_name: line.join(', '),
+      category: p.osm_key || '', type: p.osm_value || '', place_rank: PHOTON_RANK[p.type] || 30, importance: 0,
       address: { state: p.state || '', city: p.city || p.town || '', town: p.town || '', county: p.county || '', village: p.district || '' } };
+  });
+}
+const PHOTON_RANK = { country: 4, state: 8, county: 12, city: 16, district: 20, locality: 20, street: 26, house: 30 };
+async function photonCities(q){
+  const url = 'https://photon.komoot.io/api/?lang=en&limit=8&osm_tag=place:city&osm_tag=place:town&bbox=-180,17,-64,72&q=' + encodeURIComponent(q);
+  const up = await upstream(url);
+  if (up.status !== 200) return null;
+  let j; try { j = JSON.parse(up.body); } catch(e){ return null; }
+  return (j.features || []).filter(f => f.properties && f.properties.countrycode === 'US' && f.properties.name).map(f => {
+    const p = f.properties, c = (f.geometry && f.geometry.coordinates) || [0, 0];
+    return { lat: String(c[1]), lon: String(c[0]), display_name: [p.name, p.county, p.state, 'USA'].filter(Boolean).join(', '),
+      category: 'place', type: p.osm_value || 'city', place_rank: 16, importance: p.osm_value === 'city' ? 0.5 : 0.3,
+      address: { city: p.name, county: p.county || '', state: p.state || '' } };
   });
 }
 
@@ -391,6 +405,16 @@ async function handleGeocode(reqUrl, res){
   const near = parseNear(reqUrl.searchParams.get('near'));
   const wantGeom = reqUrl.searchParams.get('geom') === '1';
   const eq = expandAliases(q);
+  if (reqUrl.searchParams.get('fuzzy') === '1'){
+    const fk = 'gz:' + q.toLowerCase();
+    const fh = cget(fk);
+    if (fh) return json(res, 200, fh, true);
+    let list = null;
+    try { list = await photonCities(q); } catch (e){}
+    if (list === null) return json(res, 502, { error: 'geocoder unavailable' });
+    cset(fk, list, 24 * 3600 * 1000);
+    return json(res, 200, list);
+  }
   const key = 'g:' + (wantGeom ? 'G:' : '') + limit + ':' + (near ? near.lat.toFixed(2)+','+near.lon.toFixed(2)+':' : '') + eq.toLowerCase();
   const hit = cget(key);
   if (hit){ return json(res, 200, hit, true); }
@@ -1185,7 +1209,10 @@ async function handleRoute(reqUrl, res){
     const data = await routeAnyDistance(locations, costing);
     cset(key, data, 7 * 24 * 3600 * 1000);
     json(res, 200, data);
-  } catch (e){ json(res, 502, { error: 'router unavailable' }); }
+  } catch (e){
+    if (e && e.status === 400 && (e.code === 170 || e.code === 442 || e.code === 171)) return json(res, 422, { error: 'noroad' });
+    json(res, 502, { error: 'router unavailable' });
+  }
 }
 
 function gcMiles(a, b){ return milesLL(a.lat, a.lon, b.lat, b.lon); }
@@ -1224,7 +1251,22 @@ async function valhallaOnce(locs, costing, alternates){
   }
   return JSON.parse(up.body);
 }
-const NUDGES = [0, 0.8, -0.8, 1.6, -1.6, 2.4, -2.4, 3.5, -3.5];
+const NUDGES = [2.4, 1.6, 3.5];
+const SNAP_M = 600000;
+function shapeEnd(trip){
+  const legs = (trip && trip.legs) || [], s = legs.length ? legs[legs.length - 1].shape : '';
+  if (!s) return null;
+  let i = 0, lat = 0, lon = 0;
+  while (i < s.length){
+    for (let k = 0; k < 2; k++){
+      let shift = 0, r = 0, c;
+      do { c = s.charCodeAt(i++) - 63; r |= (c & 0x1f) << shift; shift += 5; } while (c >= 0x20 && i < s.length);
+      const d = (r & 1) ? ~(r >> 1) : (r >> 1);
+      if (k === 0) lat += d; else lon += d;
+    }
+  }
+  return { lat: lat / 1e6, lon: lon / 1e6 };
+}
 async function routeVia(a, b, costing, depth, st){
   if (gcMiles(a, b) <= LEG_CAP_MI){
     if (++st.calls > 28) throw new Error('too many legs');
@@ -1232,24 +1274,35 @@ async function routeVia(a, b, costing, depth, st){
       const part = await valhallaOnce([a, b], costing, 0);
       if (!part.trip || !part.trip.legs) throw new Error('leg missing');
       return [part.trip];
-    } catch (e){ if (e.status !== 400 || depth >= 3 || (depth > 0 && e.code !== 154)) throw e; }
+    } catch (e){ if (e.status !== 400 || e.code === 170 || depth >= 3 || (depth > 0 && e.code !== 154)) throw e; }
   }
   if (depth >= 4){ const e = new Error('route too deep'); e.status = 400; throw e; }
   const mid = { lat: (a.lat + b.lat) / 2, lon: (a.lon + b.lon) / 2 };
   const k = Math.cos(mid.lat * Math.PI / 180) || 1;
   const vy = b.lat - a.lat, vx = (b.lon - a.lon) * k, vl = Math.sqrt(vy * vy + vx * vx) || 1;
   const py = -vx / vl, px = vy / vl / k;
-  let last = null, best = null, found = 0;
   const miles = parts => parts.reduce((t, x) => t + ((x.summary && x.summary.length) || 0), 0);
-  for (const n of NUDGES){
-    const c = { lat: mid.lat + py * n, lon: mid.lon + px * n };
+  let last = null, best = null, sign = 0;
+  const via = async n => {
+    const c = { lat: mid.lat + py * n, lon: mid.lon + px * n, search_cutoff: SNAP_M };
+    const left = await routeVia(a, c, costing, depth + 1, st);
+    const end = shapeEnd(left[left.length - 1]);
+    const right = await routeVia(c, b, costing, depth + 1, st);
+    const land = !end || gcMiles(c, end) < 15;
+    if (n === 0 && end && !land) sign = ((end.lat - c.lat) * py + (end.lon - c.lon) * k * px * k) >= 0 ? 1 : -1;
+    return { parts: left.concat(right), land };
+  };
+  try {
+    const r0 = await via(0);
+    if (r0.land || depth > 0) return r0.parts;
+    best = r0.parts;
+  } catch (e){ last = e; if (e.status !== 400) throw e; }
+  const order = sign ? NUDGES.map(n => n * sign) : NUDGES.reduce((o, n) => o.concat([n, -n]), []);
+  for (const n of order){
+    if (st.calls > 18) break;
     try {
-      const left = await routeVia(a, c, costing, depth + 1, st);
-      const right = await routeVia(c, b, costing, depth + 1, st);
-      const parts = left.concat(right);
-      if (n === 0) return parts;
-      if (!best || miles(parts) < miles(best)) best = parts;
-      if (++found >= 3 || st.calls > 20) break;
+      const r = await via(n);
+      if (!best || miles(r.parts) < miles(best)) best = r.parts;
     } catch (e){ last = e; if (e.status !== 400) throw e; }
   }
   if (best) return best;
