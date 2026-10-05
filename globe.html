@@ -1769,6 +1769,75 @@ textarea.gsin{min-height:128px;padding:12px 14px;resize:vertical;line-height:1.4
 .actsub .gsto{color:#BF4E30;font-weight:800}
 body.guest #editTrip,body.guest .sprm,body.guest .spchg,body.guest .mpx,body.guest .hsadd,body.guest .cotx,body.guest .cotadjh,body.guest .cotadj,body.guest .wizfoot,body.guest #wizProg,body.guest #stFlow{display:none!important}
 @media (prefers-reduced-motion:reduce){.gscard{animation:none}.ibcard{transition:none}}
+.ngsub{font:500 13.5px/1.45 var(--body);color:#3e5f4f;margin:4px 0 10px}
+.ngprog{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.ngprog b{flex:none;font:800 13px var(--body);color:#27493D;font-variant-numeric:lining-nums tabular-nums}
+.ngbar{flex:1;height:6px;border-radius:999px;background:#E3ECE6;overflow:hidden}
+.ngbar i{display:block;height:100%;border-radius:999px;background:#467F67}
+.ngrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:16px 6px 10px 4px}
+.ngrid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ntile{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;min-height:100px;padding:11px 9px 9px;border-radius:16px;border:1.5px solid rgba(70,127,103,.36);background:#fff;color:#27493D;text-align:left;cursor:pointer;box-shadow:0 2px 0 rgba(39,73,61,.16),0 12px 20px -12px rgba(39,73,61,.55);transition:transform .16s cubic-bezier(.22,.9,.24,1),box-shadow .16s}
+.ntile::before{content:"";position:absolute;inset:4px;border-radius:11px;border:1.5px dashed rgba(70,127,103,.42);pointer-events:none}
+.ntile.done{background:#CDE8D3;border-color:#467F67}
+.ntile.done::before{display:none}
+@media (hover:hover){.ntile:hover{transform:translateY(-2px);box-shadow:0 4px 0 rgba(39,73,61,.18),0 18px 26px -12px rgba(39,73,61,.7)}}
+.ntile:active{transform:scale(.97);box-shadow:0 1px 0 rgba(39,73,61,.14),0 6px 12px -10px rgba(39,73,61,.5)}
+.ntile:focus-visible{outline:3px solid #27493D;outline-offset:3px}
+.ntdate{margin-bottom:2px;padding:0 7px;border-radius:999px;background:#EEF0E6;color:#3B6E59;font:800 10px/1.6 var(--body);letter-spacing:.04em;text-transform:uppercase;font-variant-numeric:lining-nums}
+.ntile.done .ntdate{background:rgba(255,255,255,.7)}
+.ntn{font:800 16px/1.2 var(--heading);color:#27493D;font-variant-numeric:lining-nums}
+.ntp,.nts{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ntp{font:600 12.5px/1.3 var(--body);color:#3e5f4f}
+.nts{font:800 11.5px/1.3 var(--body);color:#27493D}
+.ntst{display:flex;align-items:center;gap:3px;margin-top:auto;padding-top:5px;font:800 11.5px/1.25 var(--body);color:#467F67;font-variant-numeric:lining-nums}
+.ntile.done .ntst{color:#27493D}
+.ntst svg{flex:none;width:13px;height:13px}
+.nttag{position:absolute;top:-11px;left:8px;z-index:1;padding:1px 9px;border-radius:999px;background:var(--sun);color:var(--sun-ink);font:800 10.5px/1.6 var(--body);box-shadow:0 4px 10px -6px rgba(160,110,10,.8)}
+.ntck{position:absolute;top:-9px;right:-6px;z-index:1;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#467F67;color:#fff;border:2px solid #fff}
+.ntck svg{width:13px;height:13px;stroke-width:3.4}
+.ntile.first{border-color:var(--sun-deep)}
+.ntile.first::after{content:"";position:absolute;inset:-5px;border-radius:20px;border:2px solid var(--sun-deep);opacity:0;animation:ntpulse 2.6s ease-out infinite;pointer-events:none}
+@keyframes ntpulse{0%{opacity:.9;transform:scale(.96)}70%,100%{opacity:0;transform:scale(1.07)}}
+.ntile.pop .ntck{animation:cheerpop .5s cubic-bezier(.2,1.6,.3,1) both}
+.ngrest{font:500 12.5px/1.4 var(--body);color:#5f7268;text-align:center;margin:8px 0 0}
+.nstay{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;min-height:52px;margin-bottom:10px;padding:4px 4px 4px 10px;border-radius:14px;background:#EEF0E6;border:1px solid rgba(70,127,103,.28)}
+.nsic{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#fff;color:#3B6E59}
+.nsic svg{width:19px;height:19px}
+.nstx{flex:1;min-width:0;display:flex;flex-direction:column}
+.nstx b{font:800 14px/1.25 var(--heading);color:#27493D;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nstx span{font:600 12px/1.3 var(--body);color:#5f7268;font-variant-numeric:lining-nums}
+.nschg{flex:none;min-height:44px;padding:0 12px;border:0;background:none;color:#27493D;font:800 13px var(--body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.idseg.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.idseg.four button{flex-direction:column;gap:3px;min-height:56px;padding:0 2px;font-size:12px}
+.idtag{align-self:flex-start;margin:2px 0 1px;padding:0 8px;border-radius:999px;background:var(--sun);color:var(--sun-ink);font:800 10.5px/1.7 var(--body);font-style:normal}
+.iddist{font:700 12px/1.35 var(--body);font-style:normal;color:#3B6E59;font-variant-numeric:lining-nums}
+.idthumb.sq{width:54px;height:54px;align-self:center;background-size:cover}
+.ndtop{display:flex;align-items:center;gap:12px;margin:8px 0 12px}
+.ndck{flex:none;display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:var(--sun);color:var(--sun-ink);animation:cheerpop .45s cubic-bezier(.2,1.6,.3,1) both}
+.ndck svg{width:28px;height:28px;stroke-width:3;stroke-dasharray:30;stroke-dashoffset:30;animation:cheerdraw .4s .22s ease forwards}
+.ndtt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.ndtt b{font:800 19px/1.2 var(--heading);color:#27493D;font-variant-numeric:lining-nums}
+.ndtt span{font:600 13px/1.35 var(--body);color:#5f7268;font-variant-numeric:lining-nums}
+.ndcard{padding:2px 14px 12px;border-radius:16px;background:#F8F6F0;border:1px solid rgba(70,127,103,.2)}
+.ndlbl{display:block;margin:12px 0 4px;font:800 11px var(--body);letter-spacing:.1em;text-transform:uppercase;color:#3B6E59}
+.ndrow{display:flex;align-items:center;gap:10px;padding:6px 0}
+.ndrow+.ndrow{border-top:1px solid rgba(70,127,103,.12)}
+.ndic{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:#CDE8D3;color:#27493D}
+.ndic.stay{background:var(--sun);color:var(--sun-ink)}
+.ndic svg{width:17px;height:17px}
+.ndrt{flex:1;min-width:0;display:flex;flex-direction:column}
+.ndrt b{font:800 14.5px/1.25 var(--heading);color:#27493D}
+.ndrt span{font:500 12.5px/1.35 var(--body);color:#5f7268;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:lining-nums}
+.ndnone{font:500 13px/1.4 var(--body);color:#5f7268;margin:2px 0}
+.ndline{margin:12px 0 0;padding-top:10px;border-top:1px dashed rgba(70,127,103,.3);font:700 13.5px/1.4 var(--body);color:#27493D;font-variant-numeric:lining-nums}
+.ndghost{border:1.5px solid rgba(70,127,103,.35);background:#fff;color:#27493D}
+.ndghost:hover{border-color:#467F67}
+.hubbtns .hubwide{grid-column:1/-1}
+.strkeep{background:#CDE8D3;border-color:#467F67}
+.idmore.night{gap:6px;padding-left:12px}
+.idmore.night>span{white-space:nowrap;font-size:12.5px}
+.idmore.night button{padding:0 11px;font-size:12.5px}
+@media (prefers-reduced-motion:reduce){.ntile{transition:none}.ntile.first::after,.ntile.pop .ntck,.ndck{animation:none}.ndck svg{animation:none;stroke-dashoffset:0}}
 </style>
 </head>
 <body>
@@ -2561,18 +2630,22 @@ function renderNext(){
     step=3;title='Your trip is ready';
     body=e.pinnedN+(e.pinnedN===1?' night':' nights')+' planned'+(saved.length?(', '+saved.length+(saved.length===1?' thing':' things')+' to do saved'):'')+'. Change anything any time. Your total keeps up.';
     btn='Open my trip page';go='hub';
-  }else if(tripStyle==='flow'){
-    step=1;title='You are going with the flow';
-    body=(e.openN>0?('Nothing is locked in. We set aside '+usd(budget.nightly)+' a night for '+e.openN+(e.openN===1?' night':' nights')+' so your total stays honest. '):'Nothing is locked in. ')+'Pick a place any time, or change plans on the road.';
-    btn='Pick things to do';go='dowiz';
-  }else if(e.openN>0&&nextOpenStop()>-1){
-    step=1;title=e.pinnedN?'Now pick your next night':'First, pick where you will sleep';
-    body='You have '+e.nights+(e.nights===1?' night':' nights')+' on this trip'+(e.pinnedN?(', '+e.openN+' still open'):'')+'. Tap the button and choose a place.';
-    btn='Pick a place to stay';go='pick';
   }else{
-    step=2;title='Now pick things to do';
-    body='We go stop by stop. Tap what sounds good and it is saved to your trip.';
-    btn='Pick things to do';go='dowiz';
+    var ssn=stayStops(),pn=ssn.filter(nightPlanned).length,nw=nightWord();
+    btn='Plan my '+nw+'s';go='nights';
+    if(tripStyle==='flow'){
+      step=1;title='You are going with the flow';
+      body=(e.openN>0?('Nothing is locked in. We set aside '+usd(budget.nightly)+' a night for '+e.openN+(e.openN===1?' night':' nights')+' so your total stays honest. '):'Nothing is locked in. ')+'Pick a place any time, or change plans on the road.';
+    }else if(!pn){
+      step=1;title='Plan one '+nw+' at a time';
+      body='You have '+e.nights+(e.nights===1?' night':' nights')+' on this trip. Tap a '+nw+', pick where you sleep, then what to do near it.';
+    }else if(pn>=ssn.length){
+      step=2;title='Every '+nw+' is planned';
+      body='Open your '+nw+'s to change anything, then tap Finish my trip.';
+    }else{
+      step=2;title=pn+' of '+ssn.length+' planned';
+      body='Pick up where you left off, in any order. Finish when it feels right.';
+    }
   }
   el.innerHTML=seg+'<div class="nxtop"><span class="nxstep">Step '+step+'</span><span class="nxtot">Trip so far: <b>'+usd(e.total)+'</b></span></div>'+
     '<h3>'+esc(title)+'</h3><p>'+esc(body)+'</p><button type="button" class="nxbtn" data-jumpto="'+go+'">'+esc(btn)+'</button>'+
@@ -2591,8 +2664,7 @@ document.addEventListener('click',function(e){
   if(sb){tripStyle=sb.getAttribute('data-style');renderNext();return;}
   var b=e.target.closest&&e.target.closest('.nxbtn');if(!b)return;
   var go=b.getAttribute('data-jumpto');
-  if(go==='pick'){var i=nextOpenStop();if(i>-1){openStaySheet(i);return;}go='stay';}
-  if(go==='dowiz'){openIdeas();return;}
+  if(go==='nights'){startNights();return;}
   if(go==='map'){showTripMap();return;}
   if(go==='hub'){openHub();return;}
   if(go==='guest'){openGuest();return;}
@@ -2618,7 +2690,7 @@ function refreshStayBoxes(){
 }
 document.addEventListener('click',function(e){
   var t=e.target.closest&&e.target.closest('.staygo,.spchg');
-  if(t){openStaySheet(+t.getAttribute('data-i'),t.getAttribute('data-id'));return;}
+  if(t){if(isGuest())openStaySheet(+t.getAttribute('data-i'),t.getAttribute('data-id'));else openNight(+t.getAttribute('data-i'),1);return;}
   var rm=e.target.closest&&e.target.closest('.sprm');
   if(rm){var id=rm.getAttribute('data-id');cart=cart.filter(function(x){return x.id!==id;});renderCost();}
 });
@@ -2748,71 +2820,79 @@ function stayDefaultNights(i){
 function openStaySheet(i,editId){
   var sh=document.getElementById('actsheet'),r=(tripCtx.recs||[])[i];if(!sh||!r)return;
   doSt=null;chatSt=null;ideaView='';
+  nightSt=isGuest()?null:{i:i,step:1};
   var old=editId?cart.filter(function(x){return x.id===editId;})[0]:null;
   staySt={i:i,type:(old&&old.type)||'hotel',price:old?old.cost:(r.pd?r.pd.lodging:(+budget.nightly||0)),nights:old?(+old.nights||1):stayDefaultNights(i),list:null,editId:editId||null,fresh:true};
-  var ssx=stayStops(),kx=ssx.indexOf(i);
-  document.getElementById('actTitle').textContent=(editId||kx<=0)?'Where will you sleep?':(kx===ssx.length-1?'Last one. Where will you sleep?':['Next night. Where to?','And the night after?','Keep going. Where to?'][(kx-1)%3]);
+  document.getElementById('actTitle').textContent='Where will you sleep?';
   if(isGuest())document.getElementById('actTitle').textContent='Where should '+(tripOwner||'they')+' sleep?';
   stayRender();
   sh.classList.add('show');
   if(r._stayList){staySt.list=r._stayList;stayRender();}
-  else bfetch('/api/stays/osm?lat='+r.lat+'&lng='+r.lng,20000).then(function(x){return x.ok?x.json():[];}).catch(function(){return [];}).then(function(l){
-    r._stayList=l||[];if(staySt&&staySt.i===i){staySt.list=r._stayList;stayRender();}
+  else bfetch('/api/stays/osm?lat='+r.lat+'&lng='+r.lng,20000).then(function(x){return x.ok?x.json():null;}).catch(function(){return null;}).then(function(l){
+    if(l)r._stayList=l;
+    if(staySt&&staySt.i===i){staySt.list=l||[];staySt.fail=!l;stayRender();}
   });
 }
 var ST_IC=['<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v7"/><path d="M3 15h18M7 9V7a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v2"/></svg>',
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/></svg>',
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4L3 20h18z"/><path d="M12 4v16M9 20l3-6 3 6"/></svg>'];
-function closeStaySheet(){var sh=document.getElementById('actsheet');if(sh)sh.classList.remove('show');var ab=document.getElementById('actBody');if(ab)ab.className='';staySt=null;doSt=null;chatSt=null;ideaView='';}
+function closeStaySheet(){var sh=document.getElementById('actsheet');if(sh)sh.classList.remove('show');var ab=document.getElementById('actBody');if(ab)ab.className='';staySt=null;doSt=null;chatSt=null;nightSt=null;ideaView='';}
 function stayRender(){
   var st=staySt;if(!st)return;
-  var r=tripCtx.recs[st.i],b=document.getElementById('actBody');
+  var r=tripCtx.recs[st.i],b=document.getElementById('actBody'),guest=isGuest();
   var TYPES=[['hotel','Hotels'],['motel','Motels'],['rental','Home rental']];
   var tname=st.type==='motel'?'motel':(st.type==='rental'?'home rental':'hotel');
-  var rows='',pk=isGuest()?'Suggest':'Pick';
-  var generic='<button type="button" class="strow strany" data-name=""><span class="strt"><b>Any '+tname+' here</b><span>'+(isGuest()?'They choose the exact one later':'I will choose the exact one later')+'</span></span><span class="strpick">'+pk+'</span></button>';
+  var rows='',pk=guest?'Suggest':'Pick';
+  var old=(!guest&&st.editId)?cart.filter(function(x){return x.id===st.editId;})[0]:null;
+  var keep=old?('<button type="button" class="strow strkeep" data-keep="1" data-name=""><span class="strt"><b>Keep '+esc(stayShort(old))+'</b><span>Your pick for this '+nightWord()+'</span></span><span class="strpick">Keep</span></button>'):'';
+  var generic=keep+'<button type="button" class="strow strany" data-name=""><span class="strt"><b>Any '+tname+' here</b><span>'+(guest?'They choose the exact one later':'I will choose the exact one later')+'</span></span><span class="strpick">'+pk+'</span></button>';
   if(st.type==='rental'){
     rows=generic+'<p class="stnote">Home rentals (Airbnb, Vrbo) do not share their listings with other apps, so Voyage cannot show them. Pick this to save the nights and your price.</p>';
   }else if(st.list===null){
     rows=generic+'<p class="stnote">Finding real '+tname+'s near this stop...</p>';
   }else{
     var want=st.type==='motel'?['motel']:['hotel','guest_house','hostel'];
-    var l=st.list.filter(function(x){return want.indexOf(x.kind)>-1;}).slice(0,14);
+    var l=st.list.filter(function(x){return want.indexOf(x.kind)>-1&&!(old&&x.name===old.name);}).slice(0,14);
     rows=generic+(l.length?l.map(function(x){
       return '<button type="button" class="strow" data-name="'+esc(x.name)+'"><span class="strt"><b>'+esc(x.name)+'</b><span>'+(x.addr?esc(x.addr)+' \u00b7 ':'')+x.mi+' mi from your stop</span></span><span class="strpick">'+pk+'</span></button>';
-    }).join(''):'<p class="stnote">No '+tname+'s are listed on the map near this stop. You can still pick "Any '+tname+' here".</p>');
+    }).join(''):(st.fail?('<p class="stnote">The list of '+tname+'s did not load right now. You can still pick "Any '+tname+' here", or close this and try again in a bit.</p>'):((old&&st.list.filter(function(x){return want.indexOf(x.kind)>-1;}).length)?'':('<p class="stnote">No '+tname+'s are listed on the map near this stop. You can still pick "Any '+tname+' here".</p>'))));
   }
   var ssx=stayStops(),kx=Math.max(0,ssx.indexOf(st.i));
-  var big=tripCtx.travel==='drive'?(r.dest?'Your destination':('Night '+r.night)):('Stop '+(kx+1)+' of '+ssx.length);
-  var dots=(ssx.length>1&&ssx.length<=8)?('<span class="sthdots">'+ssx.map(function(q,d){return '<i class="'+(d<kx?'d':(d===kx?'on':''))+'"></i>';}).join('')+'</span>'):'';
-  b.innerHTML='<div class="sthero sv'+(kx%4)+'"><span class="sthic">'+ST_IC[kx%4]+'</span><span class="sthtx"><b>'+esc(big)+'</b><span>'+esc(capFirst(r.place||'this stop'))+'</span></span>'+dots+'</div>'+
+  var dots=(guest&&ssx.length>1&&ssx.length<=8)?('<span class="sthdots">'+ssx.map(function(q,d){return '<i class="'+(d<kx?'d':(d===kx?'on':''))+'"></i>';}).join('')+'</span>'):'';
+  b.innerHTML=nightHero(st.i,dots,guest)+
     '<div class="stseg" role="group" aria-label="Kind of place">'+TYPES.map(function(t){return '<button type="button" data-type="'+t[0]+'" class="'+(st.type===t[0]?'on':'')+'">'+t[1]+'</button>';}).join('')+'</div>'+
     '<div class="stctl"><label class="stprice"><span>Price a night</span><span class="stin">$<input id="stPrice" type="text" inputmode="decimal" autocomplete="off" value="'+esc(String(st.price))+'"></span></label>'+
     '<div class="stnights"><span>Nights here</span><div class="stepper"><button type="button" id="stMinus" aria-label="One night less">&minus;</button><b id="stN">'+st.nights+'</b><button type="button" id="stPlus" aria-label="One night more">+</button></div></div></div>'+
     '<p class="stnote">'+(r.pd?('The price starts at a typical hotel night for '+esc(r.pd.area)+' in '+r.pd.month+' (federal per diem rate). Change it to what you plan to pay.'):'Change the price to what you plan to pay.')+'</p>'+
     '<div class="stlist">'+rows+'</div>'+
-    '<button type="button" class="actbtn actx" id="stFlow">Skip this. I will go with the flow.</button>'+wizFoot();
-  wizProg(1);wizBackShown(isGuest()||stayStops().indexOf(st.i)>0);
-  if(st.fresh){st.fresh=false;b.className='';void b.offsetWidth;b.className=['stinA','stinB','stinC'][kx%3];}
+    (guest?'<button type="button" class="actbtn actx" id="stFlow">Skip this. I will go with the flow.</button>':'<button type="button" class="actbtn actx" id="stNone">No stay needed here</button>')+wizFoot();
+  if(guest){wizProg(1);wizBackShown(true);}
+  else{wizProg(1,NIGHT_STEPS);wizBackShown(ssx.length>1);}
+  if(st.fresh){st.fresh=false;b.scrollTop=0;b.className='';void b.offsetWidth;b.className=['stinA','stinB','stinC'][kx%3];}
 }
-function stayDone(name,row){
+function stayDone(name,row,keep){
   var st=staySt,r=tripCtx.recs[st.i];
   var pv=parseFloat(document.getElementById('stPrice').value);st.price=isFinite(pv)&&pv>=0?pv:st.price;
   var tl=st.type==='motel'?'motel':(st.type==='rental'?'home rental':'hotel');
   var nm=name||('A '+tl+' near '+(r.place||'this stop'));
   if(isGuest()){suggest('stay',{stopI:st.i,name:nm,type:st.type,cost:st.price,nights:st.nights},row,function(){openGuest();},closeStaySheet);return;}
-  if(st.editId)cart=cart.filter(function(x){return x.id!==st.editId;});
-  cart.push({id:'c'+(cartSeq++),kind:'stay',label:'Stay: '+nm,name:nm,type:st.type,cost:st.price,nights:st.nights,stopI:st.i,pp:false});
+  if(st.done)return;st.done=true;
+  var old=st.editId?cart.filter(function(x){return x.id===st.editId;})[0]:null;
+  if(keep&&old){old.cost=st.price;old.nights=st.nights;}
+  else{
+    var hit=name?(st.list||[]).filter(function(x){return x.name===name;})[0]:null;
+    if(st.editId)cart=cart.filter(function(x){return x.id!==st.editId;});
+    var it={id:'c'+(cartSeq++),kind:'stay',label:'Stay: '+nm,name:nm,type:st.type,cost:st.price,nights:st.nights,stopI:st.i,pp:false};
+    if(!name)it.any=true;
+    if(hit&&numOk(hit.lat)&&numOk(hit.lng)){it.lat=hit.lat;it.lng=hit.lng;}
+    cart.push(it);
+  }
   if(tripStyle==='flow')tripStyle='plan';
-  renderCost();added('stay',row,true);
-  var e=estimate(),nx=nextOpenStop(),lbl=stopLabel(st.i),more=(e.openN>0&&nx>-1);
-  staySt=null;
-  document.getElementById('actsheet').classList.remove('show');
-  document.getElementById('actBody').className='';
-  cheer(more?pickLine(lbl):'Every night has a place.',
-        more?(usd(e.total)+' so far. Next up: '+stopLabel(nx)+'.'):('This trip is taking shape. '+usd(e.total)+' so far.'),
-        function(){if(more)openStaySheet(nx);else openIdeas();});
+  renderCost();
+  if(keep&&old)spark(row,false,true);else added('stay',row);
+  var si=st.i;
+  setTimeout(function(){if(staySt===st&&nightSt&&nightSt.i===si)openNight(si,2);},dur(280));
 }
 var CHEER_LINES=['sorted.','locked in.','handled.','done. One less thing to figure out.'];
 var cheerN=0;
@@ -2916,42 +2996,258 @@ function cheer(title,sub,then,big){
   b.addEventListener('click',function(){soundOn=!soundOn;try{localStorage.setItem('voyage-sound',soundOn?'on':'off');}catch(e3){}paint();if(soundOn)chime();});
 })();
 
-function wizProg(step){
+function wizProg(step,names){
   var el=document.getElementById('wizProg');if(!el)return;
-  var names=['Where you sleep','Things to do','Trip ready'];
+  if(!step){el.innerHTML='';el.style.display='none';return;}
+  el.style.display='';
+  names=names||['Where you sleep','Things to do','Trip ready'];
   el.innerHTML=names.map(function(n,i){var k=i+1;return '<span class="wp'+(k<step?' done':(k===step?' on':''))+'"><i>'+(k<step?'\u2713':k)+'</i>'+n+'</span>';}).join('<em></em>');
+}
+var nightSt=null,nightDone={},ideaPrev='travelers';
+var NIGHT_STEPS=['Stay','Things to do','Done'];
+var NT_GO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+function numOk(v){return typeof v==='number'&&isFinite(v);}
+var NEAR_MAX=75;
+function farFrom(r,x){return !!(r&&x&&numOk(r.lat)&&numOk(r.lng)&&numOk(x.lat)&&numOk(x.lng)&&miles(r.lat,r.lng,x.lat,x.lng)>NEAR_MAX);}
+function guideNear(r,g){
+  if(!g)return null;
+  if(g._near)return g._near;
+  var K=['see','do','eat','drink'],near=0,far=0,out={};
+  K.forEach(function(k){(g[k]||[]).forEach(function(x){if(numOk(x.lat)&&numOk(x.lng)){if(farFrom(r,x))far++;else near++;}});});
+  out.far=far;out.wrong=far>0&&near===0;
+  K.forEach(function(k){out[k]=out.wrong?[]:(g[k]||[]).filter(function(x){return !farFrom(r,x);});});
+  g._near=out;
+  return out;
+}
+function nightWord(){return (tripCtx&&tripCtx.travel==='drive')?'night':'stop';}
+function nightRec(i){return ((tripCtx&&tripCtx.recs)||[])[i]||{};}
+function nightName(i){
+  var r=nightRec(i);
+  if(tripCtx.travel==='drive')return r.dest?'Arrive':('Night '+r.night);
+  return 'Stop '+(stayStops().indexOf(i)+1);
+}
+function nightCity(i){return hubCity(capFirst(nightRec(i).place||''));}
+function nightHead(i){
+  var r=nightRec(i),c=nightCity(i);
+  if(tripCtx.travel==='drive'){
+    if(r.dest)return c?('Arriving in '+c):'Your destination';
+    return 'Night '+r.night+(c?(' in '+c):'');
+  }
+  if(stayStops().length<2)return c||'Your stop';
+  return nightName(i)+(c?(' in '+c):'');
+}
+function nightGoName(i){var r=nightRec(i);return (tripCtx.travel==='drive'&&r.dest)?(nightCity(i)||'your destination'):nightName(i);}
+function nightSetLine(i){var r=nightRec(i);return ((tripCtx.travel==='drive'&&!r.dest)?('Night '+r.night):(nightCity(i)||'This stop'))+' is set';}
+function nightIso(i,end){
+  var r=nightRec(i);
+  if(!r.ci||!(tripCtx.travel==='drive'||stayStops().length<2))return '';
+  return end?(r.co||''):r.ci;
+}
+function nightDate(i){var d=nightIso(i);return d?fmtDayLong(d):'';}
+function nightSpan(i){
+  var a=nightIso(i),z=nightIso(i,true);if(!a||!z)return 1;
+  return Math.max(1,Math.round((new Date(z+'T00:00:00')-new Date(a+'T00:00:00'))/864e5));
+}
+function dayIn(i,iso){
+  var a=nightIso(i),z=nightIso(i,true);if(!a||!iso)return false;
+  iso=String(iso).slice(0,10);
+  return iso===a||!!(z&&iso>a&&iso<z);
+}
+function evOnNight(x,i){
+  var a=nightIso(i);if(!a||!x||x.src!=='event')return false;
+  if(x.date)return dayIn(i,x.date);
+  var n=Math.min(30,nightSpan(i)),t=String(x.note||'');
+  for(var d=0;d<n;d++){if(t.indexOf(fmtDayLong(addDaysISO(a,d)))===0)return true;}
+  return false;
+}
+function nightStay(i){var p=stopPicks(i);return p.length?p[p.length-1]:null;}
+function stayAny(x){return !!(x&&(x.any||/^A (hotel|motel|home rental) near /.test(x.name||'')));}
+function stayKind(x){return x.type==='motel'?'motel':(x.type==='rental'?'home rental':'hotel');}
+function stayShort(x){
+  if(!x)return '';
+  if(stayAny(x))return 'Any '+stayKind(x);
+  return x.name||String(x.label||'').replace(/^Stay: /,'');
+}
+function stayPos(i){
+  var x=nightStay(i);if(!x||stayAny(x))return null;
+  if(numOk(x.lat)&&numOk(x.lng))return [x.lat,x.lng];
+  var h=(nightRec(i)._stayList||[]).filter(function(q){return q.name===x.name;})[0];
+  if(h&&numOk(h.lat)&&numOk(h.lng)){x.lat=h.lat;x.lng=h.lng;return [h.lat,h.lng];}
+  return null;
+}
+function nightOrigin(i){
+  var p=stayPos(i);if(p)return {lat:p[0],lng:p[1],w:'from your stay',stay:true};
+  var r=nightRec(i);
+  return (numOk(r.lat)&&numOk(r.lng))?{lat:r.lat,lng:r.lng,w:'from your stop',stay:false}:null;
+}
+function distOf(o,x){return (o&&x&&numOk(x.lat)&&numOk(x.lng))?miles(o.lat,o.lng,x.lat,x.lng):null;}
+function miTxt(d){return d<0.1?'Under 0.1 mi':((d<10?(Math.round(d*10)/10):Math.round(d))+' mi');}
+function distTxt(o,d){return d==null?'':(miTxt(d)+' '+o.w);}
+function nearSort(o,l){
+  return l.map(function(x,k){return {x:x,k:k,d:distOf(o,x)};}).sort(function(a,b){
+    if(a.d==null&&b.d==null)return a.k-b.k;
+    if(a.d==null)return 1;
+    if(b.d==null)return -1;
+    return (a.d-b.d)||(a.k-b.k);
+  }).map(function(q){return q.x;});
+}
+function nightDress(st,items,keep){
+  var o=nightOrigin(st.i);if(!o)return items;
+  var out=[],grp=[];
+  function flush(){
+    (keep?grp:nearSort(o,grp)).forEach(function(x){
+      var d=distOf(o,x);
+      out.push(d==null?x:Object.assign({},x,{dist:distTxt(o,d),note:String(x.note||'').replace(/(^| \u00b7 )[\d.]+ mi from your stop$/,'')}));
+    });
+    grp=[];
+  }
+  items.forEach(function(x){if(x.h){flush();out.push(x);}else grp.push(x);});
+  flush();
+  return out;
+}
+function nightPlanned(i){return !!(stopPicks(i).length||nightDone[i]||saved.some(function(x){return x.stopI===i;}));}
+function nightCount(i){
+  var p=saved.filter(function(x){return x.stopI===i;}),e=p.filter(function(x){return x.src==='event';}).length,t=p.length-e,b=[];
+  if(t)b.push(t+(t===1?' thing':' things'));
+  if(e)b.push(e+(e===1?' event':' events'));
+  return b.join(', ');
+}
+function nightNext(i){var ss=stayStops();for(var k=0;k<ss.length;k++){if(ss[k]!==i&&!nightPlanned(ss[k]))return ss[k];}return -1;}
+function nightHero(i,dots,plain){
+  var r=nightRec(i),ssx=stayStops(),kx=Math.max(0,ssx.indexOf(i));
+  var big=tripCtx.travel==='drive'?(r.dest?'Your destination':('Night '+r.night)):('Stop '+(kx+1)+' of '+ssx.length);
+  var pl=capFirst(r.place||'this stop'),dt=plain?'':nightDate(i);
+  if(dt&&(pl.length+dt.length)>36)pl=hubCity(pl)||pl;
+  return '<div class="sthero sv'+(kx%4)+'"><span class="sthic">'+ST_IC[kx%4]+'</span><span class="sthtx"><b>'+esc(big)+'</b><span>'+esc(pl)+(dt?(' \u00b7 '+esc(dt)):'')+'</span></span>'+(dots||'')+'</div>';
+}
+function nightStayRow(i){
+  var x=nightStay(i);
+  if(!x)return '<div class="nstay none" id="nStay"><span class="nsic">'+hubSvg(HUB_IC.stay)+'</span><span class="nstx"><b>No stay for this '+nightWord()+'</b></span><button type="button" class="nschg" id="nsChange">Add one</button></div>';
+  var nn=+x.nights||1;
+  return '<div class="nstay" id="nStay"><span class="nsic">'+hubSvg(HUB_IC.stay)+'</span><span class="nstx"><b>'+esc(stayShort(x))+'</b><span>'+usd(x.cost)+' a night'+(nn>1?(' \u00b7 '+nn+' nights'):'')+'</span></span><button type="button" class="nschg" id="nsChange" aria-label="Change the stay for this '+nightWord()+'">Change</button></div>';
+}
+function nightPicture(i){
+  var pk=saved.filter(function(x){return x.stopI===i;}),o=nightOrigin(i),things=0,near=0,far=0,ev=0,bits=[];
+  pk.forEach(function(x){
+    if(x.src==='event'){if(evOnNight(x,i))ev++;return;}
+    things++;
+    var d=distOf(o,x);if(d!=null&&d<=NEAR_MAX){near++;if(d>far)far=d;}
+  });
+  if(o&&o.stay&&near){var m=Math.max(1,Math.ceil(far));bits.push((near===things?near:(near+' of '+things))+(things===1?' thing':' things')+' within '+m+(m===1?' mile':' miles')+' of your stay.');}
+  if(ev)bits.push(ev+(ev===1?' event':' events')+(nightSpan(i)>1?' while you are there.':' that night.'));
+  return bits.join(' ');
+}
+function ndRow(kind,name,sub){
+  return '<div class="ndrow"><span class="ndic'+(kind==='stay'?' stay':'')+'">'+hubSvg(HUB_IC[kind]||HUB_IC.pick)+'</span><span class="ndrt"><b>'+esc(name)+'</b>'+(sub?'<span>'+esc(sub)+'</span>':'')+'</span></div>';
+}
+function startNights(){
+  if(!tripCtx||isGuest())return;
+  if(!stayStops().length){finishTrip();return;}
+  openNights(-1);
+}
+function openNights(freshI){
+  var ss=stayStops();
+  if(!tripCtx||isGuest()||!ss.length)return;
+  if(ss.length===1){openNight(ss[0],1);return;}
+  nightSt=null;doSt=null;staySt=null;chatSt=null;ideaView='nights';
+  var w=nightWord(),done=0,first=-1;
+  ss.forEach(function(i){if(nightPlanned(i))done++;else if(first<0)first=i;});
+  var any=done>0||cart.length>0||saved.length>0,part=done>0&&done<ss.length;
+  document.getElementById('actTitle').textContent='Plan your '+w+'s';
+  var tiles=ss.map(function(i){
+    var pl=nightPlanned(i),sx=nightStay(i),cnt=nightCount(i),di=nightIso(i),dt=di?fmtDate(di):'',city=nightCity(i)||'Your stop';
+    var stx=pl?(cnt||(sx?'Stay picked':'Nothing needed')):'Tap to plan';
+    var lbl=nightName(i)+', '+city+(dt?(', '+dt):'')+'. '+(pl?('Planned. '+[sx?stayShort(sx):'',cnt].filter(Boolean).join(', ')+((sx||cnt)?'. ':'')+'Tap to edit.'):'Not planned yet. Tap to plan.');
+    return '<button type="button" class="ntile'+(pl?' done':'')+(i===first?' first':'')+'" data-i="'+i+'" aria-label="'+esc(lbl)+'">'+
+      (i===first?'<span class="nttag">Start here</span>':'')+
+      (pl?'<span class="ntck">'+hubSvg(HUB_IC.ok)+'</span>':'')+
+      (dt?'<span class="ntdate">'+esc(dt)+'</span>':'')+
+      '<b class="ntn">'+esc(nightName(i))+'</b><span class="ntp">'+esc(city)+'</span>'+
+      ((pl&&sx)?'<span class="nts">'+esc(stayShort(sx))+'</span>':'')+
+      '<span class="ntst"><span>'+esc(stx)+'</span>'+NT_GO+'</span></button>';
+  }).join('');
+  var h='<p class="ngsub">Tap a '+w+' to plan it. Any order.</p>'+
+    '<div class="ngprog"><b id="ngCount">'+done+' of '+ss.length+' planned</b><span class="ngbar" aria-hidden="true"><i style="width:'+Math.round(done/ss.length*100)+'%"></i></span></div>'+
+    '<div class="ngrid'+(ss.length<3?' two':'')+'" id="nGrid">'+tiles+'</div>';
+  if(any)h+='<button type="button" class="actbtn actadd" id="ngFinish">'+(part?('Finish with '+done+' planned'):'Finish my trip')+'</button>'+(part?'<p class="ngrest">You can plan the rest later.</p>':'');
+  else h+='<button type="button" class="actbtn actx" id="ngFlow">Skip planning. I will go with the flow.</button>';
+  var b=document.getElementById('actBody');
+  b.innerHTML=h+wizFoot();
+  b.className='';void b.offsetWidth;b.className='stinB';
+  wizProg(0);wizBackShown(false);sheetShow();
+  if(freshI>-1)setTimeout(function(){
+    var t=document.querySelector('#nGrid .ntile[data-i="'+freshI+'"]');
+    if(t&&ideaView==='nights'&&t.classList.contains('done')){t.classList.add('pop');spark(t,false,true);}
+  },dur(160));
+}
+function openNight(i,step){
+  var ss=stayStops(),k=ss.indexOf(i);
+  if(!tripCtx||isGuest()||k<0)return;
+  if(step===3){nightShow3(i,true);return;}
+  if(step===2){openDoSheet(k);return;}
+  openStaySheet(i,lastPickFor(i));
+}
+function nightShow3(i,first){
+  var ss=stayStops();if(ss.indexOf(i)<0||isGuest())return;
+  nightSt={i:i,step:3};doSt=null;staySt=null;chatSt=null;ideaView='ndone';nightDone[i]=1;
+  var sx=nightStay(i),pk=saved.filter(function(x){return x.stopI===i;}),o=nightOrigin(i),nx=nightNext(i),one=ss.length<2,dt=nightDate(i),w=nightWord();
+  document.getElementById('actTitle').textContent=nightSetLine(i);
+  var h='<div class="ndtop"><span class="ndck" id="ndCk">'+hubSvg(HUB_IC.ok)+'</span><span class="ndtt"><b id="ndHead">'+esc(nightHead(i))+'</b>'+(dt?'<span>'+esc(dt)+'</span>':'')+'</span></div>'+
+    '<div class="ndcard" id="ndCard"><span class="ndlbl">Sleep</span>';
+  if(sx){var nn=+sx.nights||1;h+=ndRow('stay',stayShort(sx),capFirst(stayKind(sx))+' \u00b7 '+usd(sx.cost)+' a night'+(nn>1?(' \u00b7 '+nn+' nights'):''));}
+  else h+='<p class="ndnone">No stay picked for this '+w+'.</p>';
+  h+='<span class="ndlbl">Do</span>';
+  if(pk.length)pk.forEach(function(x){var d=distOf(o,x);h+=ndRow(x.src==='event'?'ev':'pick',x.name,x.src==='event'?(x.note||''):(d!=null?distTxt(o,d):(x.note||'')));});
+  else h+='<p class="ndnone">Nothing saved to do yet.</p>';
+  var pic=nightPicture(i);
+  if(pic)h+='<p class="ndline" id="ndLine">'+esc(pic)+'</p>';
+  h+='</div><button type="button" class="actbtn actadd" id="ndNext" data-i="'+nx+'">'+(nx>-1?('Continue to '+esc(nightGoName(nx))):'Finish my trip')+'</button>'+
+    '<button type="button" class="actbtn ndghost" id="ndGrid">'+(one?'Back':('Back to all '+w+'s'))+'</button>'+wizFoot();
+  var b=document.getElementById('actBody');
+  b.innerHTML=h;b.className='';
+  wizProg(3,NIGHT_STEPS);wizBackShown(true);sheetShow();
+  renderNext();
+  if(first){chime(true);var ck=document.getElementById('ndCk');setTimeout(function(){if(ck.isConnected)spark(ck,true,true);},dur(180));}
 }
 function wizFoot(){return '<div class="wizfoot" id="wizFoot"><button type="button" class="wizrestart" id="wizRestart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Start over</button></div>';}
 function wizBackShown(on){var b=document.getElementById('actBack');if(b)b.style.visibility=on?'visible':'hidden';}
 function lastPickFor(i){var pk=stopPicks(i);return pk.length?pk[pk.length-1].id:null;}
 function wizBack(){
   var ss=stayStops();
+  if(!isGuest()){
+    if(ideaView==='chat'&&chatSt){
+      var bi=nightSt?nightSt.i:ss[chatSt.ret||0];
+      ideaSrc=(ideaPrev==='you'&&!ideaProfile)?'travelers':ideaPrev;
+      openNight(bi,2);return;
+    }
+    if(ideaView==='ndone'&&nightSt){openNight(nightSt.i,2);return;}
+    if(ideaView==='stop'&&doSt){openNight(doSt.i,1);return;}
+    if(staySt||ideaView==='choose'){if(ss.length>1)openNights(-1);return;}
+    return;
+  }
   if(ideaView==='chat'){openIdeas();return;}
-  if(ideaView==='stop'&&doSt){if(doSt.k>0)openDoSheet(doSt.k-1);else if(isGuest()){closeStaySheet();openGuest();}else openIdeas();return;}
+  if(ideaView==='stop'&&doSt){if(doSt.k>0)openDoSheet(doSt.k-1);else{closeStaySheet();openGuest();}return;}
   if(ideaView==='choose'){
     ideaView='';var li=ss[ss.length-1];
     for(var k=ss.length-1;k>=0;k--){if(stopPicks(ss[k]).length){li=ss[k];break;}}
     openStaySheet(li,lastPickFor(li));return;
   }
-  if(staySt&&isGuest()){closeStaySheet();gsOpenView('stops');return;}
-  if(staySt){
-    var idx=ss.indexOf(staySt.i);
-    if(idx>0){var pi=ss[idx-1];openStaySheet(pi,lastPickFor(pi));}
-  }
+  if(staySt){closeStaySheet();gsOpenView('stops');return;}
 }
 function wizRestart(){
   closeHub();
-  cart=cart.filter(function(x){return x.kind!=='stay';});
-  saved=[];tripReady=false;tripStyle='plan';doSt=null;ideaProfile=null;ideaSrc='travelers';ideaView='';chatSt=null;
+  var evl={};saved.forEach(function(x){if(x.src==='event')evl['Event: '+x.name]=1;});
+  cart=cart.filter(function(x){return x.kind!=='stay'&&!(x.kind==='extra'&&evl[x.label]);});
+  saved=[];tripReady=false;tripStyle='plan';doSt=null;staySt=null;nightSt=null;nightDone={};ideaProfile=null;ideaSrc='travelers';ideaPrev='travelers';ideaView='';chatSt=null;
   renderCost();markSavedTiles();renderDoneStrip();drawPicks();cartPillSync();
   var ss=stayStops();
-  if(ss.length)openStaySheet(ss[0]);else closeStaySheet();
+  if(ss.length&&!isGuest())openNights(-1);else closeStaySheet();
 }
 
 var saved=[],tripReady=false,doSt=null;
 var ideaSrc='travelers',ideaProfile=null,ideaView='',chatSt=null;
-var IDEA_IC={travelers:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11a3 3 0 0 1 3 3v11H7a3 3 0 0 1-3-3z"/><path d="M8 9h6M8 13h4"/></svg>',trending:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>',you:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 5.2L20 9l-4.3 3.9L17 19l-5-3-5 3 1.3-6.1L4 9l5.8-.8z"/></svg>'};
-var IDEA_NAME={travelers:'Travelers',trending:'Trending',you:'For you'};
+var IDEA_IC={events:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 0 0 2-2h12a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H6a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg>',travelers:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11a3 3 0 0 1 3 3v11H7a3 3 0 0 1-3-3z"/><path d="M8 9h6M8 13h4"/></svg>',trending:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>',you:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 5.2L20 9l-4.3 3.9L17 19l-5-3-5 3 1.3-6.1L4 9l5.8-.8z"/></svg>'};
+var IDEA_NAME={travelers:'Travelers',trending:'Trending',you:'For you',events:'Events'};
 var CAT_NAME={food:'Food',nature:'Outdoors',history:'History and culture',nightlife:'Nightlife',family:'Family fun',music:'Music and shows',sights:'Sights'};
 var CHAT=[
   {k:'who',q:'Who is coming with you?',a:[['solo','Just me'],['couple','My partner'],['friends','Friends'],['family','Family with kids']]},
@@ -2981,7 +3277,7 @@ function openChat(){
   var ret=doSt?doSt.k:0;
   doSt=null;staySt=null;ideaView='chat';chatSt={i:0,ans:{},log:[],multi:[],ret:ret};
   document.getElementById('actTitle').textContent='Let us make it yours';
-  chatRender();wizProg(2);wizBackShown(true);sheetShow();
+  chatRender();if(isGuest())wizProg(2);else wizProg(2,NIGHT_STEPS);wizBackShown(true);sheetShow();
 }
 function chatRender(){
   var st=chatSt;if(!st)return;
@@ -3015,26 +3311,47 @@ function openDoSheet(k){
   var ss=stayStops();
   if(k>=ss.length){if(isGuest()){closeStaySheet();openGuest();return;}finishTrip();return;}
   doSt={k:k,i:ss[k]};staySt=null;chatSt=null;ideaView='stop';
+  nightSt=isGuest()?null:{i:ss[k],step:2};
   document.getElementById('actTitle').textContent='Things to do';
   doRender();sheetShow();
 }
 function doRender(){
   var st=doSt;if(!st)return;
-  var ss=stayStops(),last=st.k===ss.length-1;
-  document.getElementById('actBody').innerHTML='<p class="actsub">'+(isGuest()?('<b class="gsto">Suggesting to '+esc(ownerWho())+'</b> · '):'')+esc(capFirst(stopLabel(st.i)))+' · stop '+(st.k+1)+' of '+ss.length+'</p>'+
-    '<div class="idseg" role="tablist">'+['travelers','trending','you'].map(function(k){return '<button type="button" role="tab" data-src="'+k+'" class="'+(ideaSrc===k?'on':'')+'">'+IDEA_IC[k]+'<span>'+IDEA_NAME[k]+'</span></button>';}).join('')+'</div>'+
+  var ss=stayStops(),last=st.k===ss.length-1,nm=!!nightSt&&!isGuest(),top;
+  if(!nm&&ideaSrc==='events')ideaSrc='travelers';
+  if(nm){
+    var sx=nightStay(st.i);
+    document.getElementById('actTitle').textContent=(sx&&!stayAny(sx))?('Near '+stayShort(sx)):('Around '+(nightCity(st.i)||'this stop'));
+    top=nightHero(st.i,'',false)+nightStayRow(st.i);
+  }else top='<p class="actsub">'+(isGuest()?('<b class="gsto">Suggesting to '+esc(ownerWho())+'</b> · '):'')+esc(capFirst(stopLabel(st.i)))+' · stop '+(st.k+1)+' of '+ss.length+'</p>';
+  document.getElementById('actBody').innerHTML=top+
+    '<div class="idseg'+(nm?' four':'')+'" role="tablist">'+(nm?['travelers','trending','you','events']:['travelers','trending','you']).map(function(k){return '<button type="button" role="tab" data-src="'+k+'" aria-selected="'+(ideaSrc===k?'true':'false')+'" class="'+(ideaSrc===k?'on':'')+'">'+IDEA_IC[k]+'<span>'+IDEA_NAME[k]+'</span></button>';}).join('')+'</div>'+
     '<div id="idList"><p class="stnote">Loading...</p></div><div class="idmore" id="idMore"></div>'+
-    '<button type="button" class="actbtn actadd" id="doNext">'+(last?(isGuest()?'Done':'Finish my trip'):'Next stop →')+'</button>'+wizFoot();
-  wizProg(2);wizBackShown(true);
+    '<button type="button" class="actbtn actadd" id="doNext">'+(nm?('Done with this '+nightWord()):(last?(isGuest()?'Done':'Finish my trip'):'Next stop →'))+'</button>'+wizFoot();
+  if(nm){wizProg(2,NIGHT_STEPS);document.getElementById('actBody').className='';nightStayFind(st);}
+  else wizProg(2);
+  wizBackShown(true);
   loadIdeas(st);
   idMoreSync();
 }
+function nightStayFind(st){
+  var r=nightRec(st.i),x=nightStay(st.i);
+  if(!x||stayAny(x)||stayPos(st.i)||r._stayList||r._stayAsk)return;
+  r._stayAsk=true;
+  bfetch('/api/stays/osm?lat='+r.lat+'&lng='+r.lng,20000).then(function(q){return q.ok?q.json():null;}).catch(function(){return null;}).then(function(l){
+    r._stayAsk=false;
+    if(!l||!l.length)return;
+    r._stayList=l;
+    if(doSt===st&&nightSt&&stayPos(st.i)&&(ideaSrc!=='you'||ideaProfile))loadIdeas(st);
+  });
+}
 function idMoreSync(){
   var el=document.getElementById('idMore'),st=doSt;if(!el||!st)return;
-  var n=saved.filter(function(x){return x.stopI===st.i;}).length,last=st.k===stayStops().length-1;
+  var n=saved.filter(function(x){return x.stopI===st.i;}).length,last=st.k===stayStops().length-1,nm=!!nightSt&&!isGuest();
   if(!n||st.keep||isGuest()){el.className='idmore';el.innerHTML='';return;}
-  el.innerHTML='<span>✓ '+n+' saved</span><button type="button" class="idkeep" id="idKeep">Keep adding</button><button type="button" class="idcont" id="idCont">'+(last?'Finish':'Continue')+' →</button>';
-  if(!el.classList.contains('show'))el.className='idmore show';
+  el.classList.toggle('night',nm);
+  el.innerHTML='<span>✓ '+n+' saved</span><button type="button" class="idkeep" id="idKeep">Keep adding</button><button type="button" class="idcont" id="idCont">'+(nm?('Done with this '+nightWord()):((last?'Finish':'Continue')+' →'))+'</button>';
+  if(!el.classList.contains('show'))el.className='idmore show'+(nm?' night':'');
 }
 function idRowsSync(){
   var st=doSt;if(!st||!document.getElementById('idList'))return;
@@ -3043,14 +3360,15 @@ function idRowsSync(){
 }
 function ideaRow(st,x){
   var sl=saveLbl(st.i,x.name),on=sl[0];
-  return '<div class="idrow'+(on?' on':'')+'" data-name="'+esc(x.name)+'">'+
+  return '<div class="idrow'+(on?' on':'')+'" data-name="'+esc(x.name)+'"'+(x.ev!=null?' data-ev="'+x.ev+'"':'')+'>'+
     '<button type="button" class="idmain"'+(x.v!=null?' data-v="'+x.v+'"':'')+(x.wp?' data-wp="'+esc(x.wp)+'"':'')+' data-note="'+esc(x.note||'')+'">'+
-    (x.thumb?'<span class="idthumb" style="background-image:url('+esc(urlOk(x.thumb))+')"></span>':'')+
-    '<span class="strt"><b>'+esc(x.name)+'</b>'+(x.note?'<span>'+esc(x.note)+'</span>':'')+'</span></button>'+
+    (x.thumb?'<span class="idthumb'+(x.ev!=null?' sq':'')+'" style="background-image:url('+esc(urlOk(x.thumb))+')"></span>':'')+
+    '<span class="strt"><b>'+esc(x.name)+'</b>'+(x.tag?'<em class="idtag">'+esc(x.tag)+'</em>':'')+(x.note?'<span>'+esc(x.note)+'</span>':'')+(x.dist?'<i class="iddist">'+esc(x.dist)+'</i>':'')+'</span></button>'+
     '<button type="button" class="idsave">'+sl[1]+'</button></div>';
 }
-function ideaList(st,items,head,foot){
+function ideaList(st,items,head,foot,keep){
   var el=document.getElementById('idList');if(!el||doSt!==st)return;
+  if(nightSt&&!isGuest())items=nightDress(st,items,keep);
   st.byName={};items.forEach(function(x){if(!x.h)st.byName[x.name]=x;});
   el.innerHTML=(head||'')+(items.length?'<div class="stlist">'+items.map(function(x){return x.h?('<div class="idhead">'+esc(x.h)+'</div>'):ideaRow(st,x);}).join('')+'</div>':'')+(foot||'');
 }
@@ -3058,13 +3376,42 @@ function loadIdeas(st){
   var r=tripCtx.recs[st.i],src=ideaSrc;
   function fresh(){return doSt===st&&ideaSrc===src;}
   if(src==='you'&&!ideaProfile){openChat();return;}
+  if(src==='events'){
+    var showE=function(l){
+      if(!fresh())return;
+      if(l===null){ideaList(st,[],'<p class="stnote">Events did not load right now. Try again in a bit.</p>');return;}
+      if(!l.length){ideaList(st,[],'<p class="stnote">No listed events '+(r.ci?'for your dates':'coming up')+' near this stop. Try Travelers or Trending.</p>');return;}
+      var o=nightOrigin(st.i),span=nightSpan(st.i);
+      var rows=l.map(function(x,k){return {x:x,k:k,on:dayIn(st.i,x.date),d:distOf(o,x)};});
+      rows.sort(function(a,b){
+        if(a.on!==b.on)return a.on?-1:1;
+        if(a.d!=null&&b.d!=null&&a.d!==b.d)return a.d-b.d;
+        if(a.d!=null&&b.d==null)return -1;
+        if(a.d==null&&b.d!=null)return 1;
+        return a.k-b.k;
+      });
+      ideaList(st,rows.map(function(q){var x=q.x;
+        return {name:x.name,ev:q.k,tag:q.on?(span>1?'While you are there':'That night'):'',note:[x.date?fmtDayLong(x.date):'Date not listed',x.venue||'',x.price?('from '+usd(x.price)):''].filter(Boolean).join(' \u00b7 '),lat:x.lat,lng:x.lng,thumb:x.img||''};
+      }),'<p class="stnote">Listed events near this stop'+(nightIso(st.i)?' for your dates':'')+'. Tap one for the details.</p>','<p class="stnote">Event listings come from Ticketmaster. Not every local event is listed there.</p>',true);
+    };
+    getStatus().then(function(ps){
+      if(!fresh())return;
+      if(!ps||!ps.events){ideaList(st,[],'<p class="stnote">Event listings are not connected yet. They are on the way.</p>');return;}
+      if(r._events){showE(r._events);return;}
+      bfetch('/api/events?lat='+r.lat+'&lng='+r.lng+(r.ci?('&start='+r.ci+(r.co?('&end='+r.co):'')):'')).then(function(x){return x.ok?x.json():null;}).catch(function(){return null;}).then(function(ev){
+        if(ev&&ev.length)r._events=ev.slice(0,20);
+        showE(ev?(r._events||[]):null);
+      });
+    });
+    return;
+  }
   if(src==='trending'){
     var showS=function(vs){
       if(!fresh())return;
       if(vs&&vs.limited){ideaList(st,[],'<p class="stnote">Trending videos have hit today\'s limit. They come back tomorrow. Try Travelers or For you for this stop.</p>');return;}
       if(!vs||!vs.length){ideaList(st,[],'<p class="stnote">No short videos turned up for this stop yet. Try Travelers or For you.</p>');return;}
       st.shorts=vs;
-      ideaList(st,vs.map(function(x,k){return {name:deent(x.title),note:fmtViews(x.views)+' views · '+x.channel,thumb:'https://i.ytimg.com/vi/'+x.id+'/hqdefault.jpg',v:k,short:x};}),'<p class="stnote">Tap a video to watch it here. Save the ones that give you ideas.</p>');
+      ideaList(st,vs.map(function(x,k){return {name:deent(x.title),note:fmtViews(x.views)+' views · '+x.channel,thumb:'https://i.ytimg.com/vi/'+x.id+'/hqdefault.jpg',v:k,short:x,lat:x.lat,lng:x.lng};}),'<p class="stnote">Tap a video to watch it here. Save the ones that give you ideas.</p>','',true);
     };
     if(r._shorts){showS(r._shorts);return;}
     bfetch('/api/social/shorts?place='+encodeURIComponent(placeQ(r)),15000).then(function(x){return x.ok?x.json():(x.status===429?{limited:true}:null);}).catch(function(){return null;}).then(function(vs){if(vs&&!vs.limited&&vs.length)r._shorts=vs;showS(vs);});
@@ -3074,13 +3421,13 @@ function loadIdeas(st){
   if(src==='travelers'){
     guideP.then(function(g){
       if(!fresh())return;
-      var items=[];
+      var items=[],gn=guideNear(r,g),far=gn?gn.far:0;
       [['see','Places to see'],['do','Things to do'],['eat','Where to eat'],['drink','Where to drink']].forEach(function(sx){
-        var l=(g&&g[sx[0]])||[];if(!l.length)return;items.push({h:sx[1]});l.forEach(function(x){items.push({name:x.name,note:x.note,lat:x.lat,lng:x.lng});});
+        var l=(gn&&gn[sx[0]])||[];if(!l.length)return;items.push({h:sx[1]});l.forEach(function(x){items.push({name:x.name,note:x.note,lat:x.lat,lng:x.lng});});
       });
       if(items.length){ideaList(st,items,'<p class="stnote">What other travelers wrote up for this stop. Save the ones you like.</p>','<p class="stnote">From Wikivoyage, the free travel guide written by travelers (CC BY-SA).</p>');return;}
       var osm=doItems(st.i);
-      ideaList(st,osm.slice(0,12),'<p class="stnote">'+(osm.length?'No traveler guide is written for this stop yet. These are the sights on the map nearby.':'Nothing is written up for this stop yet. Try Trending or For you.')+'</p>');
+      ideaList(st,osm.slice(0,12),'<p class="stnote">'+(far?('The traveler guide found under this name covers a place far from this stop, so it is not shown. '+(osm.length?'These are the sights on the map nearby.':'Try Trending or For you.')):(osm.length?'No traveler guide is written for this stop yet. These are the sights on the map nearby.':'Nothing is written up for this stop yet. Try Trending or For you.'))+'</p>');
     });
     return;
   }
@@ -3096,7 +3443,7 @@ function loadIdeas(st){
   }
   function renderYou(){
     if(!fresh())return;
-    var g=r._guide||{},pools=[];
+    var g=guideNear(r,r._guide)||{},pools=[];
     pf.likes.forEach(function(c){
       var l=[];
       if(c==='food')l=(g.eat||[]).map(function(x){return {name:x.name,note:x.note||'Recommended by travelers',lat:x.lat,lng:x.lng};});
@@ -3115,7 +3462,7 @@ function loadIdeas(st){
   guideP.then(renderYou);
 }
 function finishTrip(){
-  doSt=null;ideaView='';tripReady=true;
+  doSt=null;staySt=null;chatSt=null;nightSt=null;ideaView='';tripReady=true;
   document.getElementById('actsheet').classList.remove('show');
   renderNext();renderSaveBar();tripDirty();
   if(hubOpen){renderHub();return;}
@@ -3346,7 +3693,7 @@ function loadTrip(id){
     setTimeout(function(){restoring=false;},60);
     if(t.pts&&t.pts.length===t.stops.length){
       hint.classList.remove('err');hint.textContent='';
-      cart=[];saved=[];tripReady=false;tripStyle='plan';ideaProfile=null;ideaSrc='travelers';
+      cart=[];saved=[];nightDone={};nightSt=null;tripReady=false;tripStyle='plan';ideaProfile=null;ideaSrc='travelers';
       document.body.classList.remove('tripdone','pktapped');if(pkLayer)pkLayer.clearLayers();closeEdit();
       var pts=t.pts.map(function(p,i){return {lat:p.lat,lng:p.lng,label:p.label||t.stops[i],city:p.city||'',st:p.st||''};});
       GLOBE_READY.then(function(){planTrip(pts);});
@@ -3361,6 +3708,7 @@ function applyRestore(t){
   cart=(t.stays||[]).filter(function(x){return x.stopI<n;}).map(function(x){return {id:'c'+(cartSeq++),kind:'stay',label:'Stay: '+x.name,name:x.name,type:x.type,cost:x.cost,nights:x.nights,stopI:x.stopI,pp:false};});
   (t.extras||[]).forEach(function(x){cart.push({id:'c'+(cartSeq++),kind:'extra',label:x.label,cost:+x.cost||0,pp:!!x.pp});});
   saved=(t.picks||[]).filter(function(x){return x.stopI<n;});
+  nightDone={};nightSt=null;
   tripBase=cartSig();tripUnsaved=false;
   tripStyle=t.style==='flow'?'flow':'plan';tripReady=!!t.ready;
   renderCost();markSavedTiles();renderNext();renderSaveBar();cartPillSync();
@@ -3683,12 +4031,12 @@ function renderHub(){
   var extras=cart.filter(function(x){return x.kind==='extra'&&!evs[x.label];});
   var h='<section class="hubsec" aria-labelledby="hubCartH"><h3 class="hubh" id="hubCartH">Your cart'+(n?'<span>'+n+(n===1?' thing':' things')+'</span>':'')+'</h3>';
   if(!n){
-    h+='<p class="hubempty">Nothing in the cart yet. Add a few things below.</p>'+(ss.length?'<button type="button" class="hubmore" data-k="0">+ Pick things to do</button>':'');
+    h+='<p class="hubempty">Nothing in the cart yet. Add a few things below.</p>'+(ss.length?'<button type="button" class="hubmore" data-grid="1" data-k="0">+ Plan my '+nightWord()+'s</button>':'');
   }else{
     order.forEach(function(i){
       var r=recs[i]||{},k=ss.indexOf(i),st=stopPicks(i),pk=saved.filter(function(x){return x.stopI===i;});
-      var sub=drive?(r.dest?'Destination':('Night '+r.night)):(k>-1?('Stop '+(k+1)):'Start');
-      h+='<div class="hubstop"><div class="hubsh"><b>'+esc(hubCity(r.place)||'Your stop')+'</b><span>'+esc(sub)+'</span></div>';
+      var hdt=k>-1?nightDate(i):'',sub=k>-1?(hdt?('\u00b7 '+hdt):''):'Start';
+      h+='<div class="hubstop"><div class="hubsh"><b>'+esc(k>-1?nightHead(i):(hubCity(r.place)||'Your stop'))+'</b>'+(sub?'<span>'+esc(sub)+'</span>':'')+'</div>';
       st.forEach(function(x){var nn=+x.nights||1,nm=x.name||String(x.label||'').replace(/^Stay: /,'');
         h+=hubRow('stay',nm,capFirst(String(x.type||'stay'))+' \u00b7 '+nn+(nn===1?' night':' nights')+' \u00b7 '+usd(x.cost)+' a night','<button type="button" class="hubrm" data-rm="'+esc(x.id)+'" aria-label="Remove '+esc(nm)+'">&times;</button>',friendOf('stay',x));});
       pk.forEach(function(x){h+=hubRow(x.src==='event'?'ev':'pick',x.name,x.note||'','<button type="button" class="mpx hubrm" data-i="'+i+'" data-name="'+esc(x.name)+'" aria-label="Remove '+esc(x.name)+'">&times;</button>',friendOf('pick',x));});
@@ -3709,7 +4057,7 @@ function renderHub(){
     (ss.length?('<button type="button" class="hubtile alt" id="hubRead"><span class="hubtic">'+hubSvg(HUB_IC.book)+'</span><span class="hubtt"><b>Read what travelers wrote</b><span>Travelers\' write-ups for each stop, from Wikivoyage</span></span>'+hubSvg(HUB_IC.go,'hubgo')+'</button>'):'')+'</section>'+
     '<button type="button" class="hubshare" id="hubShare">'+hubSvg(HUB_IC.share)+'Share this trip</button>'+
     (mine?('<p class="hubsaved">'+hubSvg(HUB_IC.ok)+'Saved. It will be here when you come back.</p>'):'')+
-    '<div class="hubbtns"><button type="button" class="hubghost" id="hubMap">'+hubSvg(HUB_IC.map)+'See it on the map</button><button type="button" class="hubghost" id="hubEdit">'+hubSvg(HUB_IC.edit)+'Edit trip</button></div>';
+    '<div class="hubbtns"><button type="button" class="hubghost hubwide" id="hubMap">'+hubSvg(HUB_IC.map)+'See it on the map</button>'+((ss.length&&!isGuest())?('<button type="button" class="hubghost" id="hubNights">'+hubSvg(HUB_IC.stay)+'Edit '+nightWord()+'s</button>'):'')+'<button type="button" class="hubghost'+((ss.length&&!isGuest())?'':' hubwide')+'" id="hubEdit">'+hubSvg(HUB_IC.edit)+'Edit trip</button></div>';
   renderHubSugg();
 }
 function openHub(){
@@ -3740,9 +4088,15 @@ document.getElementById('hub').addEventListener('click',function(e){
   if(t.id==='hubCost'){closeHub();var d=document.getElementById('cot');if(d)d.open=true;var ph=document.getElementById('priceHero');if(ph)ph.click();return;}
   if(t.id==='hubEdit'){closeHub();var pe=document.getElementById('panel');pe.classList.remove('peek');var sc=pe.querySelector('.scroll');if(sc)sc.scrollTop=0;if(!document.body.classList.contains('editing'))document.getElementById('editTrip').click();return;}
   if(t.id==='hubVids'){openTravelers();return;}
-  if(t.id==='hubRead'){if(!stayStops().length)return;ideaSrc='travelers';openDoSheet(0);return;}
+  if(t.id==='hubRead'){if(!stayStops().length)return;ideaSrc='travelers';if(isGuest())openDoSheet(0);else openNight(stayStops()[0],2);return;}
+  if(t.id==='hubNights'){startNights();return;}
   if(t.id==='hubShare'){hubShare(t);return;}
-  if(t.classList.contains('hubmore')){if(!stayStops().length)return;openDoSheet(+t.getAttribute('data-k')||0);return;}
+  if(t.classList.contains('hubmore')){
+    var hss=stayStops(),hk=+t.getAttribute('data-k')||0;if(!hss.length)return;
+    if(isGuest()){openDoSheet(hk);return;}
+    if(t.getAttribute('data-grid')){startNights();return;}
+    openNight(hss[hk],2);return;
+  }
   var rm=t.getAttribute('data-rm');
   if(rm){cart=cart.filter(function(x){return x.id!==rm;});renderCost();}
 });
@@ -3802,6 +4156,19 @@ function markSavedTiles(){
     if(e.target.closest('#stMinus')&&staySt){staySt.nights=Math.max(1,staySt.nights-1);document.getElementById('stN').textContent=staySt.nights;return;}
     if(e.target.closest('#stPlus')&&staySt){staySt.nights=Math.min(30,staySt.nights+1);document.getElementById('stN').textContent=staySt.nights;return;}
     if(e.target.closest('#actBack')){wizBack();return;}
+    var nt=e.target.closest('.ntile');
+    if(nt){openNight(+nt.getAttribute('data-i'),1);return;}
+    if(e.target.closest('#ngFinish')){finishTrip();return;}
+    if(e.target.closest('#ngFlow')){tripStyle='flow';finishTrip();return;}
+    if(e.target.closest('#nsChange')&&doSt){openNight(doSt.i,1);return;}
+    if(e.target.closest('#stNone')&&staySt&&nightSt){
+      var nsi=staySt.i;
+      if(stopPicks(nsi).length){cart=cart.filter(function(x){return !(x.kind==='stay'&&x.stopI===nsi);});renderCost();toast('Stay removed from this '+nightWord()+'.');}
+      openNight(nsi,2);return;
+    }
+    var nn=e.target.closest('#ndNext');
+    if(nn&&nightSt){var nni=+nn.getAttribute('data-i');if(nni>-1)openNight(nni,1);else finishTrip();return;}
+    if(e.target.closest('#ndGrid')&&nightSt){if(stayStops().length>1)openNights(nightSt.i);else openNight(nightSt.i,2);return;}
     if(e.target.closest('#wizRestart')){
       document.getElementById('wizFoot').innerHTML='<div class="wizconfirm"><b>Start over?</b><span>This clears the places and things you picked. Your route and dates stay.</span><div><button type="button" id="wizYes">Yes, start over</button><button type="button" id="wizNo">Keep going</button></div></div>';
       document.getElementById('wizFoot').scrollIntoView({block:'nearest'});return;}
@@ -3810,8 +4177,8 @@ function markSavedTiles(){
     var op=e.target.closest('.idopt');
     if(op){ideaSrc=op.getAttribute('data-src');if(ideaSrc==='you'&&!ideaProfile)openChat();else openDoSheet(0);return;}
     var sg=e.target.closest('.idseg button');
-    if(sg&&doSt){ideaSrc=sg.getAttribute('data-src');doRender();return;}
-    if(e.target.closest('#chatRedo')){openChat();return;}
+    if(sg&&doSt){ideaPrev=ideaSrc;ideaSrc=sg.getAttribute('data-src');doRender();return;}
+    if(e.target.closest('#chatRedo')){ideaPrev='you';openChat();return;}
     var co=e.target.closest('.chopt2');
     if(co&&chatSt){var q=CHAT[chatSt.i],v=co.getAttribute('data-v');
       if(q.multi){var ix=chatSt.multi.indexOf(v);if(ix>-1)chatSt.multi.splice(ix,1);else chatSt.multi.push(v);co.classList.toggle('on');}
@@ -3819,9 +4186,18 @@ function markSavedTiles(){
       return;}
     if(e.target.closest('#chatDone')&&chatSt){chatAnswer(chatSt.multi.slice());return;}
     if(e.target.closest('#idKeep')&&doSt){doSt.keep=true;idMoreSync();return;}
-    if(e.target.closest('#idCont')&&doSt){openDoSheet(doSt.k+1);return;}
+    if(e.target.closest('#idCont')&&doSt){if(nightSt&&!isGuest())nightShow3(doSt.i,true);else openDoSheet(doSt.k+1);return;}
     var sv=e.target.closest('.idsave');
     if(sv&&doSt){var rw=sv.closest('.idrow'),nm=rw.getAttribute('data-name');
+      if(rw.hasAttribute('data-ev')&&!isGuest()){
+        var esi=doSt.i;
+        if(isSaved(esi,nm)){
+          saved=saved.filter(function(x){return !(x.stopI===esi&&x.name===nm);});
+          cart=cart.filter(function(x){return !(x.kind==='extra'&&x.label==='Event: '+nm);});
+          renderCost();markSavedTiles();renderDoneStrip();drawPicks();idRowsSync();
+        }else evAdd(esi,+rw.getAttribute('data-ev'),sv);
+        return;
+      }
       if(isGuest()){if(!rw.classList.contains('on')){var gi=(doSt.byName&&doSt.byName[nm])||{};suggest('pick',{stopI:doSt.i,name:nm,src:ideaSrc,note:gi.note||'',lat:gi.lat,lng:gi.lng,wp:gi.wp||null,short:gi.short||null},sv);}return;}
       if(isSaved(doSt.i,nm)){saved=saved.filter(function(x){return !(x.stopI===doSt.i&&x.name===nm);});rw.classList.remove('on');sv.textContent='Save';}
       else{var it=(doSt.byName&&doSt.byName[nm])||{};
@@ -3831,14 +4207,15 @@ function markSavedTiles(){
     var im=e.target.closest('.idmain');
     if(im&&doSt){
       var nm2=im.closest('.idrow').getAttribute('data-name');
+      if(im.closest('.idrow').hasAttribute('data-ev')){evShow(doSt.i,+im.closest('.idrow').getAttribute('data-ev'));return;}
       if(im.hasAttribute('data-v')&&doSt.shorts){var dsi=doSt.i,dpl=tripCtx.recs[dsi].place||'';openShorts(doSt.shorts.map(function(v){return Object.assign({place:dpl,stopI:dsi},v);}),+im.getAttribute('data-v'),dpl);return;}
       var wp=im.getAttribute('data-wp');
       if(wp){inApp.wiki(wpLang(wp),wpTitle(wp));return;}
       inApp.note(nm2,im.getAttribute('data-note')||'No description for this one yet.');return;}
-    if(e.target.closest('#doNext')&&doSt){openDoSheet(doSt.k+1);return;}
+    if(e.target.closest('#doNext')&&doSt){if(nightSt&&!isGuest())nightShow3(doSt.i,true);else openDoSheet(doSt.k+1);return;}
     var row=e.target.closest('.strow');
-    if(row&&staySt){stayDone(row.getAttribute('data-name'),row);return;}
-    if(e.target.closest('#stFlow')){tripStyle='flow';renderNext();openIdeas();return;}
+    if(row&&staySt){stayDone(row.getAttribute('data-name'),row,row.hasAttribute('data-keep'));return;}
+    if(e.target.closest('#stFlow')){tripStyle='flow';renderNext();if(isGuest())openIdeas();else startNights();return;}
   });
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&sh.classList.contains('show'))closeStaySheet();});
 })();
@@ -4032,7 +4409,7 @@ function netErrMsg(e){
 form.addEventListener('submit',function(e){
   e.preventDefault();
   if(!pendingRestore){tripId='';tripKey='';tripBase='';tripUnsaved=false;tripSugg=[];tripOwner='';}
-  pushURL();hint.classList.remove('err');cart=[];saved=[];tripReady=false;tripStyle='plan';ideaProfile=null;ideaSrc='travelers';document.body.classList.remove('tripdone','pktapped');if(pkLayer)pkLayer.clearLayers();closeEdit();
+  pushURL();hint.classList.remove('err');cart=[];saved=[];nightDone={};nightSt=null;tripReady=false;tripStyle='plan';ideaProfile=null;ideaSrc='travelers';document.body.classList.remove('tripdone','pktapped');if(pkLayer)pkLayer.clearLayers();closeEdit();
   var vals=[].map.call(document.querySelectorAll('#stops .stopin'),function(i){return i.value.trim();}).filter(Boolean);
   if(vals.length<2){hint.textContent=travelMode==='fly'?'Add at least a departure and destination city.':(travelMode==='boat'?'Add at least a departure and destination port.':'Add at least a start and a destination.');hint.classList.add('err');return;}
   hint.textContent=travelMode==='drive'?'Planning your route, stops, and stays...':'Planning your trip...';
@@ -4648,11 +5025,12 @@ function evShow(i,k){
 function evAdd(i,k,btn){
   var r=(tripCtx&&tripCtx.recs||[])[i],x=r&&r._events&&r._events[k];if(!x||isSaved(i,x.name))return;
   if(isGuest()){if(!guestHas(i,x.name))suggest('pick',{stopI:i,name:x.name,src:'event',note:[x.date?fmtDayLong(x.date):'',x.venue||''].filter(Boolean).join(' · '),lat:x.lat,lng:x.lng,url:x.url||null},btn);return;}
-  saved.push({stopI:i,name:x.name,src:'event',note:[x.date?fmtDayLong(x.date):'',x.venue||''].filter(Boolean).join(' · '),lat:x.lat,lng:x.lng,url:x.url||null});
+  saved.push({stopI:i,name:x.name,src:'event',note:[x.date?fmtDayLong(x.date):'',x.venue||''].filter(Boolean).join(' · '),lat:x.lat,lng:x.lng,url:x.url||null,date:x.date||''});
   if(x.price)addCart('extra','Event: '+x.name,x.price,true);
   markSavedTiles();renderNext();renderDoneStrip();drawPicks();
   if(btn){btn.classList.add('on');btn.textContent='✓ Added to your trip';}
   added('event',btn);
+  idRowsSync();
 }
 document.addEventListener('click',function(e){
   var t=e.target.closest&&e.target.closest('.evtile');
@@ -4670,9 +5048,9 @@ function fillEvents(el,s){
     }
     bfetch('/api/events?lat='+s.lat+'&lng='+s.lng+(s.ci?('&start='+s.ci+(s.co?('&end='+s.co):'')):'')).then(function(r){return r.ok?r.json():[];}).catch(function(){return null;}).then(function(ev){
       if(ev===null){el.innerHTML=hsTile('Didn’t load right now.')+hsMore(eb,'Eventbrite');return;}
-      s._events=(ev||[]).slice(0,8);
+      s._events=(ev||[]).slice(0,20);
       var si=+el.getAttribute('data-i');
-      var h=s._events.map(function(x,k){
+      var h=s._events.slice(0,8).map(function(x,k){
         return '<a class="hslide evtile" href="#" role="button" data-i="'+si+'" data-k="'+k+'"><span class="hsimg" style="'+(x.img?'background-image:url('+esc(urlOk(x.img))+')':'')+'"></span><span class="hst">'+esc(x.name)+'</span><span class="hsm">'+esc(x.date?fmtDayLong(x.date):'')+(x.venue?' · '+esc(x.venue):'')+(x.price?(' · from $'+esc(String(Math.round(x.price)))):'')+'</span></a>';
       }).join('');
       el.innerHTML=(h||hsTile('No listed events right now'))+hsMore(eb,'Eventbrite');
@@ -4775,7 +5153,7 @@ function shMoreShow(){
 function feedContinue(){
   var d=doSt,inWiz=!!(d&&ideaView==='stop'&&document.getElementById('actsheet').classList.contains('show'));
   closeShorts();
-  if(inWiz)openDoSheet(d.k+1);
+  if(inWiz){if(nightSt&&!isGuest())nightShow3(d.i,true);else openDoSheet(d.k+1);}
 }
 function shortAdd(x,el){
   var nm=deent(x.title),si=isFinite(x.stopI)?x.stopI:((tripCtx.recs||[]).length-1);

@@ -1292,7 +1292,7 @@ async function handleEvents(reqUrl, res){
       img: (((e.images || []).filter(i => i.ratio === '16_9' && (i.width || 0) >= 500).sort((a, b) => (a.width || 0) - (b.width || 0))[0]) || (e.images || []).sort((a, b) => (b.width || 0) - (a.width || 0))[0] || {}).url || '',
       price: ((e.priceRanges || [])[0] || {}).min || null,
     }));
-    cset(key, out, 6 * 3600 * 1000);
+    cset(key, out, out.length ? 6 * 3600 * 1000 : 10 * 60 * 1000);
     json(res, 200, out);
   } catch (e){ json(res, 502, { error: 'events unavailable' }); }
 }
